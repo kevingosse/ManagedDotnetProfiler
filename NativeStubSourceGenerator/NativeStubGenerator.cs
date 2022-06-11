@@ -11,19 +11,19 @@ namespace NativeStubSourceGenerator
 
         public static void Log(string text)
         {
-            const string logFile = @"E:\log\log.txt";
+            //const string logFile = @"E:\log\log.txt";
 
-            if (_start)
-            {
-                if (File.Exists(logFile))
-                {
-                    File.Delete(logFile);
-                }
+            //if (_start)
+            //{
+            //    if (File.Exists(logFile))
+            //    {
+            //        File.Delete(logFile);
+            //    }
 
-                _start = false;
-            }
+            //    _start = false;
+            //}
 
-            File.AppendAllText(logFile, text + Environment.NewLine);
+            //File.AppendAllText(logFile, text + Environment.NewLine);
         }
 
         public void Execute(GeneratorExecutionContext context)
