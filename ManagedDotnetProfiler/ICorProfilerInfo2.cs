@@ -25,7 +25,7 @@ public unsafe interface ICorProfilerInfo2 : ICorProfilerInfo
      */
     HResult DoStackSnapshot(
                 ThreadId thread,
-                void* callback,
+                delegate* unmanaged[Stdcall]<FunctionId, nint, COR_PRF_FRAME_INFO, uint, byte*, void*, HResult> callback,
                 uint infoFlags,
                 void* clientData,
                 byte* context,
