@@ -1,4 +1,5 @@
 ﻿using System;
+using ULONG32 = System.UInt32;
 
 namespace ManagedDotnetProfiler;
 
@@ -32,9 +33,34 @@ public readonly struct FunctionId
     public readonly nint Value;
 }
 
-public readonly struct ThreadId
+public readonly struct ThreadId : IEquatable<ThreadId>
 {
     public readonly nint Value;
+
+    public bool Equals(ThreadId other)
+    {
+        return Value.Equals(other.Value);
+    }
+
+    public override bool Equals(object obj)
+    {
+        return obj is ThreadId other && Equals(other);
+    }
+
+    public override int GetHashCode()
+    {
+        return Value.GetHashCode();
+    }
+
+    public static bool operator ==(ThreadId left, ThreadId right)
+    {
+        return left.Equals(right);
+    }
+
+    public static bool operator !=(ThreadId left, ThreadId right)
+    {
+        return !left.Equals(right);
+    }
 }
 
 public readonly struct ProcessId
@@ -49,6 +75,11 @@ public readonly struct ContextId
 
 public readonly struct MdToken
 {
+    public MdToken(int value)
+    {
+        Value = value;
+    }
+
     public readonly int Value;
 }
 
@@ -61,6 +92,7 @@ public readonly struct MdTypeDef
 {
     public readonly int Value;
 }
+
 public readonly struct MdMethodDef
 {
     public MdMethodDef(MdToken token)
@@ -134,6 +166,21 @@ public readonly struct MdString
 public readonly struct MdCustomAttribute
 {
     public readonly int Value;
+}
+
+public readonly struct MdGenericParam
+{
+    public readonly nint Value;
+}
+
+public readonly struct MdGenericParamConstraint
+{
+    public readonly nint Value;
+}
+
+public readonly struct MdMethodSpec
+{
+    public readonly nint Value;
 }
 
 public readonly struct CorElementType
@@ -332,6 +379,7 @@ public static class KnownGuids
     public static Guid IMetaDataImport = Guid.Parse("7DAC8207-D3AE-4c75-9B67-92801A497D44");
     public static Guid IMetaDataImport2 = Guid.Parse("FCE5EFA0-8BBA-4f8e-A036-8F2022B08466");
     public static Guid ICorProfilerInfo3 = Guid.Parse("B555ED4F-452A-4E54-8B39-B5360BAD32A0");
+    public static Guid ICorProfilerInfo4 = Guid.Parse("0d8fdcaa-6257-47bf-b1bf-94dac88466ee");
     public static Guid ClassFactoryGuid = Guid.Parse("00000001-0000-0000-C000-000000000046");
 }
 
@@ -382,5 +430,52 @@ public enum COR_PRF_RUNTIME_TYPE
 {
     COR_PRF_DESKTOP_CLR = 0x1,
     COR_PRF_CORE_CLR = 0x2,
+}
+
+public enum COR_PRF_SNAPSHOT_INFO : uint
+{
+    COR_PRF_SNAPSHOT_DEFAULT = 0x0,
+    COR_PRF_SNAPSHOT_REGISTER_CONTEXT = 0x1,
+    COR_PRF_SNAPSHOT_X86_OPTIMIZED = 0X2
+}
+
+public readonly struct ReJITID
+{
+    public readonly nint Value;
+}
+
+public struct COR_DEBUG_IL_TO_NATIVE_MAP
+{
+    public ULONG32 ilOffset;
+    public ULONG32 nativeStartOffset;
+    public ULONG32 nativeEndOffset;
+}
+
+public enum COR_PRF_GC_REASON
+{
+    COR_PRF_GC_INDUCED = 1,     // Induced by GC.Collect
+    COR_PRF_GC_OTHER = 0        // Anything else
+}
+
+public enum COR_PRF_GC_ROOT_KIND
+{
+    COR_PRF_GC_ROOT_STACK = 1,        // Variables on the stack
+    COR_PRF_GC_ROOT_FINALIZER = 2,    // Entry in the finalizer queue
+    COR_PRF_GC_ROOT_HANDLE = 3,        // GC Handle
+    COR_PRF_GC_ROOT_OTHER = 0        //Misc. roots
+}
+
+public enum COR_PRF_GC_ROOT_FLAGS
+{
+COR_PRF_GC_ROOT_PINNING = 0x1,    // Prevents GC from moving the object
+COR_PRF_GC_ROOT_WEAKREF = 0x2,    // Does not prevent collection
+COR_PRF_GC_ROOT_INTERIOR = 0x4,   // Refers to a field of the object rather than the object itself
+COR_PRF_GC_ROOT_REFCOUNTED = 0x8, // Whether it prevents collection depends on a refcount - if not,
+// COR_PRF_GC_ROOT_WEAKREF will be set also
+}
+
+public readonly struct GCHandleID
+{
+    public readonly nint Value;
 }
 

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace ManagedDotnetProfiler
@@ -9,7 +11,15 @@ namespace ManagedDotnetProfiler
         private static readonly Guid ICorProfilerCallback2Guid = Guid.Parse("8a8cc829-ccf2-49fe-bbae-0f022228071a");
 
         private readonly NativeStubs.ICorProfilerCallback2Stub _corProfilerCallback2;
-        private ICorProfilerInfo3 _corProfilerInfo;
+        private ICorProfilerInfo4 _corProfilerInfo;
+        private ManagedThreadList _managedThreadList;
+        private StackSamplerLoopManager _stackSamplerLoopManager;
+        private ThreadsCpuManager _threadsCpuManager;
+        private StackFramesCollector _stackFramesCollector;
+        private FrameStore _frameStore;
+        private WallTimeProvider _wallTimeProvider;
+        private PprofExporter _exporter;
+        private SamplesAggregator _samplesAggregator;
 
         public CorProfilerCallback2()
         {
@@ -27,17 +37,31 @@ namespace ManagedDotnetProfiler
         {
             var impl = NativeStubs.IUnknownStub.Wrap(pICorProfilerInfoUnk);
 
-            var result = impl.QueryInterface(KnownGuids.ICorProfilerInfo3, out IntPtr ptr);
+            var result = impl.QueryInterface(KnownGuids.ICorProfilerInfo4, out IntPtr ptr);
 
-            Console.WriteLine("[Profiler] Fetched ICorProfilerInfo3: " + result);
+            Console.WriteLine("[Profiler] Fetched ICorProfilerInfo4: " + result);
 
-            _corProfilerInfo = NativeStubs.ICorProfilerInfo3Stub.Wrap(ptr);
+            _corProfilerInfo = NativeStubs.ICorProfilerInfo4Stub.Wrap(ptr);
 
-            var eventMask = CorPrfMonitor.COR_PRF_MONITOR_EXCEPTIONS | CorPrfMonitor.COR_PRF_MONITOR_JIT_COMPILATION;
+            var eventMask = CorPrfMonitor.COR_PRF_MONITOR_EXCEPTIONS | CorPrfMonitor.COR_PRF_MONITOR_THREADS | CorPrfMonitor.COR_PRF_ENABLE_STACK_SNAPSHOT;
 
             result = _corProfilerInfo.SetEventMask(eventMask);
 
             Console.WriteLine("[Profiler] Setting event mask to " + eventMask);
+
+            _managedThreadList = new ManagedThreadList();
+            _threadsCpuManager = new ThreadsCpuManager();
+            _stackFramesCollector = new StackFramesCollector(_corProfilerInfo);
+            _frameStore = new FrameStore(_corProfilerInfo);
+            _wallTimeProvider = new WallTimeProvider(_frameStore);
+            _stackSamplerLoopManager = new StackSamplerLoopManager(_corProfilerInfo, _threadsCpuManager, _managedThreadList, _stackFramesCollector, _wallTimeProvider);
+            _exporter = new PprofExporter();
+            _samplesAggregator = new SamplesAggregator(_exporter);
+            _samplesAggregator.Register(_wallTimeProvider);
+
+            _stackSamplerLoopManager.Start();
+            _wallTimeProvider.Start();
+            _samplesAggregator.Start();
 
             return HResult.S_OK;
         }
@@ -219,17 +243,45 @@ namespace ManagedDotnetProfiler
 
         public HResult ThreadCreated(ThreadId threadId)
         {
-            throw new NotImplementedException();
+            _managedThreadList.GetOrCreate(threadId);
+            return HResult.S_OK;
         }
 
         public HResult ThreadDestroyed(ThreadId threadId)
         {
-            throw new NotImplementedException();
+            if (_managedThreadList.UnregisterThread(threadId, out var threadInfo))
+            {
+                threadInfo.IsDestroyed = true;
+            }
+
+            return HResult.S_OK;
         }
 
         public HResult ThreadAssignedToOSThread(ThreadId managedThreadId, int osThreadId)
         {
-            throw new NotImplementedException();
+            var hr = _corProfilerInfo.GetHandleFromThread(managedThreadId, out var handle);
+
+            if (!hr.IsOK)
+            {
+                Console.WriteLine("GetHandleFromThread failed: " + hr);
+                return hr;
+            }
+
+            var process = Process.GetCurrentProcess().Handle;
+
+            const uint THREAD_ALL_ACCESS = 0x000F0000 | 0x00100000 | 0xFFFF;
+
+            var success = OpSysTools.DuplicateHandle(process, handle, process, out var dupHandle, THREAD_ALL_ACCESS, false, 0);
+
+            if (!success)
+            {
+                Console.WriteLine("DuplicateHandle failed");
+                return HResult.E_FAIL;
+            }
+
+            _managedThreadList.SetThreadOsInfo(managedThreadId, osThreadId, dupHandle);
+
+            return HResult.S_OK;
         }
 
         public HResult RemotingClientInvocationStarted()
@@ -309,12 +361,12 @@ namespace ManagedDotnetProfiler
 
         public HResult RuntimeThreadSuspended(ThreadId threadId)
         {
-            throw new NotImplementedException();
+            return HResult.S_OK;
         }
 
         public HResult RuntimeThreadResumed(ThreadId threadId)
         {
-            throw new NotImplementedException();
+            return HResult.S_OK;
         }
 
         public HResult MovedReferences(uint cMovedObjectIDRanges, ObjectId* oldObjectIDRangeStart, ObjectId* newObjectIDRangeStart, uint* cObjectIDRangeLength)
@@ -396,7 +448,29 @@ namespace ManagedDotnetProfiler
 
             Console.WriteLine("[Profiler] An exception was thrown: " + new string(buffer));
 
+            WalkStack();
+
             return HResult.S_OK;
+        }
+
+        private void WalkStack()
+        {
+            _corProfilerInfo.GetCurrentThreadId(out var threadId);
+
+            var buffer = new StackSnapshotBuffer();
+
+            var result = _corProfilerInfo.DoStackSnapshot(threadId, &StackSnapshotCallback, COR_PRF_SNAPSHOT_INFO.COR_PRF_SNAPSHOT_DEFAULT, Unsafe.AsPointer(ref buffer), null, 0);
+
+            Console.WriteLine("WalkStack result: " + result);
+            Console.WriteLine(buffer);
+        }
+
+        [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
+        private static HResult StackSnapshotCallback(FunctionId functionId, nint ip, COR_PRF_FRAME_INFO frameInfo, uint contextSize, byte* context, void* clientData)
+        {
+            ref var buffer = ref Unsafe.AsRef<StackSnapshotBuffer>(clientData);
+
+            return buffer.Add(ip) ? HResult.S_OK : HResult.E_FAIL;
         }
 
         public HResult ExceptionSearchFunctionEnter(FunctionId functionId)
@@ -523,6 +597,51 @@ namespace ManagedDotnetProfiler
         }
 
         public HResult ExceptionCLRCatcherExecute()
+        {
+            throw new NotImplementedException();
+        }
+
+        public HResult ThreadNameChanged(ThreadId threadId, uint cchName, char* name)
+        {
+            var threadName = new string(name, 0, (int)cchName);
+
+            _corProfilerInfo.GetThreadInfo(threadId, out var osThreadId);
+            _managedThreadList.SetThreadName(threadId, threadName);
+
+            return HResult.S_OK;
+        }
+
+        public HResult GarbageCollectionStarted(int cGenerations, bool* generationCollected, COR_PRF_GC_REASON reason)
+        {
+            throw new NotImplementedException();
+        }
+
+        public HResult SurvivingReferences(uint cSurvivingObjectIDRanges, ObjectId* objectIDRangeStart, uint* cObjectIDRangeLength)
+        {
+            throw new NotImplementedException();
+        }
+
+        public HResult GarbageCollectionFinished()
+        {
+            throw new NotImplementedException();
+        }
+
+        public HResult FinalizeableObjectQueued(int finalizerFlags, ObjectId objectID)
+        {
+            throw new NotImplementedException();
+        }
+
+        public HResult RootReferences2(uint cRootRefs, ObjectId* rootRefIds, COR_PRF_GC_ROOT_KIND* rootKinds, COR_PRF_GC_ROOT_FLAGS* rootFlags, uint* rootIds)
+        {
+            throw new NotImplementedException();
+        }
+
+        public HResult HandleCreated(GCHandleID handleId, ObjectId initialObjectId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public HResult HandleDestroyed(GCHandleID handleId)
         {
             throw new NotImplementedException();
         }

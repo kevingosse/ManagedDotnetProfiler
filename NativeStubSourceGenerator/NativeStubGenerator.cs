@@ -45,12 +45,15 @@ namespace NativeStubSourceGenerator
 
             var sourceBuilder = new StringBuilder(@"
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 namespace NativeStubs
 {
     internal unsafe class {typeName}
     {
+        private List<object> _delegates = new();
+
 {delegates}
         private {typeName}({interfaceName} implementation)
         {
@@ -178,7 +181,9 @@ namespace NativeStubs
                         destinationArgsList.Append($"a{i}");
                     }
 
-                    functionPointers.AppendLine($"            *vtable++ = Marshal.GetFunctionPointerForDelegate(new {method.Name}(({sourceArgsList}) => implementation.{method.Name}({destinationArgsList})));");
+                    functionPointers.AppendLine($"            var d{delegateCount} = new {method.Name}(({sourceArgsList}) => implementation.{method.Name}({destinationArgsList}));");
+                    functionPointers.AppendLine($"            _delegates.Add(d{delegateCount});");
+                    functionPointers.AppendLine($"            *vtable++ = Marshal.GetFunctionPointerForDelegate(d{delegateCount});");
 
                     invokerFunctions.Append($"            public {method.ReturnType} {method.Name}(");
 

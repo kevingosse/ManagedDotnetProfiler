@@ -52,7 +52,7 @@ public unsafe interface ICorProfilerInfo : IUnknown
      * in managed code to a FunctionId.
      */
     HResult GetFunctionFromIP(
-                byte ip,
+                nint ip,
                 out FunctionId pFunctionId);
 
     /*
@@ -74,7 +74,7 @@ public unsafe interface ICorProfilerInfo : IUnknown
      */
     HResult GetHandleFromThread(
                 ThreadId ThreadId,
-                out nint phThread);
+                out IntPtr phThread);
 
     /*
      * The code profiler calls GetObjectSize to obtain the size of an object.
@@ -193,7 +193,7 @@ public unsafe interface ICorProfilerInfo : IUnknown
      */
     HResult GetTokenAndMetaDataFromFunction(
                 FunctionId FunctionId,
-                out Guid riid,
+                in Guid riid,
                 out void* ppImport,
                 out MdToken pToken);
 
@@ -294,7 +294,7 @@ public unsafe interface ICorProfilerInfo : IUnknown
                 AssemblyId assemblyId,
                 uint cchName,
                 out uint pcchName,
-                out char* szName,
+                char* szName,
                 out AppDomainId pAppDomainId,
                 out ModuleId pModuleId);
 

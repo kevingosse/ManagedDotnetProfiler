@@ -26,7 +26,7 @@ public unsafe interface ICorProfilerInfo2 : ICorProfilerInfo
     HResult DoStackSnapshot(
                 ThreadId thread,
                 delegate* unmanaged[Stdcall]<FunctionId, nint, COR_PRF_FRAME_INFO, uint, byte*, void*, HResult> callback,
-                uint infoFlags,
+                COR_PRF_SNAPSHOT_INFO infoFlags,
                 void* clientData,
                 byte* context,
                 uint contextSize);
@@ -74,7 +74,7 @@ public unsafe interface ICorProfilerInfo2 : ICorProfilerInfo
                 out MdToken pToken,
                 uint cTypeArgs,
                 out uint pcTypeArgs,
-                out ClassId* typeArgs);
+                ClassId* typeArgs);
 
     /*
      * GetStringLayout returns detailed information about how string objects are stored.
@@ -126,7 +126,7 @@ public unsafe interface ICorProfilerInfo2 : ICorProfilerInfo
                 out ClassId pParentClassId,
                 uint cNumTypeArgs,
                 out uint pcNumTypeArgs,
-                out ClassId* typeArgs);
+                ClassId* typeArgs);
 
     /*
      * GetCodeInfo2 returns the extents of native code associated with the
