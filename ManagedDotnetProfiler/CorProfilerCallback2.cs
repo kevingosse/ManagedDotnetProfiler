@@ -8,12 +8,12 @@ namespace ManagedDotnetProfiler
     {
         private static readonly Guid ICorProfilerCallback2Guid = Guid.Parse("8a8cc829-ccf2-49fe-bbae-0f022228071a");
 
-        private readonly NativeStubs.ICorProfilerCallback2Stub _corProfilerCallback2;
+        private readonly NativeObjects.ICorProfilerCallback2 _corProfilerCallback2;
         private ICorProfilerInfo3 _corProfilerInfo;
 
         public CorProfilerCallback2()
         {
-            _corProfilerCallback2 = NativeStubs.ICorProfilerCallback2Stub.Wrap(this);
+            _corProfilerCallback2 = NativeObjects.ICorProfilerCallback2.Wrap(this);
         }
 
         public IntPtr ICorProfilerCallback2Object => _corProfilerCallback2;
@@ -25,13 +25,13 @@ namespace ManagedDotnetProfiler
 
         public HResult Initialize(IntPtr pICorProfilerInfoUnk)
         {
-            var impl = NativeStubs.IUnknownStub.Wrap(pICorProfilerInfoUnk);
+            var impl = NativeObjects.IUnknown.Wrap(pICorProfilerInfoUnk);
 
             var result = impl.QueryInterface(KnownGuids.ICorProfilerInfo3, out IntPtr ptr);
 
             Console.WriteLine("[Profiler] Fetched ICorProfilerInfo3: " + result);
 
-            _corProfilerInfo = NativeStubs.ICorProfilerInfo3Stub.Wrap(ptr);
+            _corProfilerInfo = NativeObjects.ICorProfilerInfo3.Wrap(ptr);
 
             var eventMask = CorPrfMonitor.COR_PRF_MONITOR_EXCEPTIONS | CorPrfMonitor.COR_PRF_MONITOR_JIT_COMPILATION;
 
@@ -161,7 +161,7 @@ namespace ManagedDotnetProfiler
 
             _corProfilerInfo.GetModuleMetaData(moduleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport, out var ppOut);
 
-            IMetaDataImport metaDataImport = NativeStubs.IMetaDataImportStub.Wrap((IntPtr)ppOut);
+            IMetaDataImport metaDataImport = NativeObjects.IMetaDataImport.Wrap((IntPtr)ppOut);
 
             metaDataImport.GetMethodProps(new MdMethodDef(mdToken), out var typeDef, null, 0, out var size, out _, out _, out _, out _, out _);
 
@@ -348,7 +348,7 @@ namespace ManagedDotnetProfiler
 
             _corProfilerInfo.EnumModules(out void* enumerator);
 
-            ICorProfilerModuleEnum moduleEnumerator = NativeStubs.ICorProfilerModuleEnumStub.Wrap((IntPtr)enumerator);
+            ICorProfilerModuleEnum moduleEnumerator = NativeObjects.ICorProfilerModuleEnum.Wrap((IntPtr)enumerator);
 
             moduleEnumerator.GetCount(out var modulesCount);
 
@@ -383,7 +383,7 @@ namespace ManagedDotnetProfiler
             _corProfilerInfo.GetClassIdInfo(classId, out var moduleId, out var typeDef);
             _corProfilerInfo.GetModuleMetaData(moduleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport, out void* ppOut);
 
-            var metaDataImport = NativeStubs.IMetaDataImportStub.Wrap((IntPtr)ppOut);
+            var metaDataImport = NativeObjects.IMetaDataImport.Wrap((IntPtr)ppOut);
 
             metaDataImport.GetTypeDefProps(typeDef, null, 0, out var nameCharCount, out _, out _);
 
@@ -429,7 +429,7 @@ namespace ManagedDotnetProfiler
 
             _corProfilerInfo.GetModuleMetaData(moduleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport, out var ppOut);
 
-            IMetaDataImport metaDataImport = NativeStubs.IMetaDataImportStub.Wrap((IntPtr)ppOut);
+            IMetaDataImport metaDataImport = NativeObjects.IMetaDataImport.Wrap((IntPtr)ppOut);
 
             metaDataImport.GetMethodProps(new MdMethodDef(mdToken), out _, null, 0, out var size, out _, out _, out _, out _, out _);
 

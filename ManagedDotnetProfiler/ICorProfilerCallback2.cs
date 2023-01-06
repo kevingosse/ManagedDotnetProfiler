@@ -1,6 +1,6 @@
 ﻿namespace ManagedDotnetProfiler;
 
-[GenerateNativeStub]
+[NativeObject]
 internal interface ICorProfilerCallback2 : ICorProfilerCallback
 {
 }

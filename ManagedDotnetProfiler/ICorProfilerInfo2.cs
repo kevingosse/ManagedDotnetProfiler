@@ -1,6 +1,6 @@
 ﻿namespace ManagedDotnetProfiler;
 
-[GenerateNativeStub]
+[NativeObject]
 public unsafe interface ICorProfilerInfo2 : ICorProfilerInfo
 {
     /*

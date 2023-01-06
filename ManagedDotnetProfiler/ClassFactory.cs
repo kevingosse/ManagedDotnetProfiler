@@ -4,13 +4,13 @@ namespace ManagedDotnetProfiler;
 
 public unsafe class ClassFactory : IClassFactory
 {
-    private NativeStubs.IClassFactoryStub _classFactory;
+    private NativeObjects.IClassFactory _classFactory;
 
     private CorProfilerCallback2 _callback = new();
 
     public ClassFactory()
     {
-        _classFactory = NativeStubs.IClassFactoryStub.Wrap(this);
+        _classFactory = NativeObjects.IClassFactory.Wrap(this);
     }
 
     public IntPtr IClassFactory => _classFactory;

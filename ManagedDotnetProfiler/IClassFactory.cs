@@ -2,7 +2,7 @@
 
 namespace ManagedDotnetProfiler;
 
-[GenerateNativeStub]
+[NativeObject]
 internal interface IClassFactory : IUnknown
 {
     HResult CreateInstance(IntPtr outer, in Guid guid, out IntPtr instance);

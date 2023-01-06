@@ -2,7 +2,7 @@
 
 namespace ManagedDotnetProfiler;
 
-[GenerateNativeStub]
+[NativeObject]
 internal unsafe interface IMetaDataImport : IUnknown
 {
     void CloseEnum(HCORENUM hEnum);
