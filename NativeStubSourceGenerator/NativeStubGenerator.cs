@@ -55,12 +55,22 @@ namespace NativeObjects
 
         public static {interfaceName} Wrap(IntPtr obj) => new {invokerName}(obj);
 
+        ~{typeName}()
+        {
+            Dispose();
+        }
+
         public void Dispose()
         {
-            var target = (void**)Object;
-            NativeMemory.Free(*target);
-            NativeMemory.Free(target);
-            Object = IntPtr.Zero;
+            if (Object != IntPtr.Zero)
+            {
+                var target = (void**)Object;
+                NativeMemory.Free(*target);
+                NativeMemory.Free(target);
+                Object = IntPtr.Zero;
+            }
+
+            GC.SuppressFinalize(this);
         }
 
         private static class Exports
