@@ -1,29 +1,25 @@
-﻿using System.Diagnostics;
-using System.Text;
+﻿using System.Text;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace NativeStubSourceGenerator;
 
 [Generator]
-public class NativeObjectGenerator : ISourceGenerator
+public class NativeObjectGenerator : IIncrementalGenerator
 {
-    public void Execute(GeneratorExecutionContext context)
+    public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        if (!(context.SyntaxContextReceiver is SyntaxReceiver receiver))
+        var provider = context.SyntaxProvider.ForAttributeWithMetadataName("NativeObjectAttribute", static (_, _) => true, Transform);
+        context.RegisterSourceOutput(provider, static (ctx, result) => ctx.AddSource($"{result.Name}.g.cs", result.Source));
+        context.RegisterPostInitializationOutput(static ctx =>
         {
-            return;
-        }
+            ctx.AddSource("NativeObjectAttribute.g.cs", @"using System;
 
-        // Debugger.Launch();
-
-        foreach (var symbol in receiver.Interfaces)
-        {
-            EmitStubForInterface(context, symbol);
-        }
+[AttributeUsage(AttributeTargets.Interface, Inherited = false, AllowMultiple = false)]
+internal class NativeObjectAttribute : Attribute { }");
+        });
     }
 
-    public void EmitStubForInterface(GeneratorExecutionContext context, INamedTypeSymbol symbol)
+    private static (string Name, string Source) Transform(GeneratorAttributeSyntaxContext context, CancellationToken cancellationToken)
     {
         var sourceBuilder = new StringBuilder(@"
 using System;
@@ -100,6 +96,7 @@ namespace NativeObjects
 }
 ");
 
+        var symbol = (INamedTypeSymbol)context.TargetSymbol;
         var interfaceName = symbol.ToString();
         var typeName = $"{symbol.Name}";
         var invokerName = $"{symbol.Name}Invoker";
@@ -374,42 +371,6 @@ namespace NativeObjects
         sourceBuilder.Replace("{invokerFunctions}", invokerFunctions.ToString());
         sourceBuilder.Replace("{invokerName}", invokerName);
 
-        context.AddSource($"{symbol.ContainingNamespace?.Name ?? "_"}.{symbol.Name}.g.cs", sourceBuilder.ToString());
-    }
-
-    public void Initialize(GeneratorInitializationContext context)
-    {
-        context.RegisterForPostInitialization(EmitAttribute);
-
-        context.RegisterForSyntaxNotifications(() => new SyntaxReceiver());
-    }
-
-    private void EmitAttribute(GeneratorPostInitializationContext context)
-    {
-        context.AddSource("NativeObjectAttribute.g.cs", @"
-using System;
-
-[AttributeUsage(AttributeTargets.Interface, Inherited = false, AllowMultiple = false)]
-internal class NativeObjectAttribute : Attribute { }
-");
-    }
-}
-
-public class SyntaxReceiver : ISyntaxContextReceiver
-{
-    public List<INamedTypeSymbol> Interfaces { get; } = new();
-
-    public void OnVisitSyntaxNode(GeneratorSyntaxContext context)
-    {
-        if (context.Node is InterfaceDeclarationSyntax classDeclarationSyntax
-            && classDeclarationSyntax.AttributeLists.Count > 0)
-        {
-            var symbol = (INamedTypeSymbol)context.SemanticModel.GetDeclaredSymbol(classDeclarationSyntax);
-
-            if (symbol.GetAttributes().Any(a => a.AttributeClass.ToDisplayString() == "NativeObjectAttribute"))
-            {
-                Interfaces.Add(symbol);
-            }
-        }
+        return ($"{symbol.ContainingNamespace?.Name ?? "_"}.{symbol.Name}", sourceBuilder.ToString());
     }
 }
