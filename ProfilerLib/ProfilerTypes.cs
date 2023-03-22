@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ManagedDotnetProfiler;
+﻿namespace ProfilerLib;
 
 public readonly struct ModuleId
 {
@@ -8,6 +6,11 @@ public readonly struct ModuleId
 }
 
 public readonly struct ObjectId
+{
+    public readonly nint Value;
+}
+
+public readonly struct GCHandleId
 {
     public readonly nint Value;
 }
@@ -28,6 +31,11 @@ public readonly struct ClassId
 }
 
 public readonly struct FunctionId
+{
+    public readonly nint Value;
+}
+
+public readonly struct ReJITId
 {
     public readonly nint Value;
 }
@@ -332,6 +340,7 @@ public static class KnownGuids
     public static Guid IMetaDataImport = Guid.Parse("7DAC8207-D3AE-4c75-9B67-92801A497D44");
     public static Guid IMetaDataImport2 = Guid.Parse("FCE5EFA0-8BBA-4f8e-A036-8F2022B08466");
     public static Guid ICorProfilerInfo3 = Guid.Parse("B555ED4F-452A-4E54-8B39-B5360BAD32A0");
+    public static Guid ICorProfilerInfo11 = Guid.Parse("06398876-8987-4154-B621-40A00D6E4D04");
     public static Guid ClassFactoryGuid = Guid.Parse("00000001-0000-0000-C000-000000000046");
 }
 
@@ -382,5 +391,39 @@ public enum COR_PRF_RUNTIME_TYPE
 {
     COR_PRF_DESKTOP_CLR = 0x1,
     COR_PRF_CORE_CLR = 0x2,
+}
+
+/// <summary>
+/// COR_PRF_GC_REASON describes the reason for a given GC.
+/// </summary>
+public enum COR_PRF_GC_REASON
+{
+    COR_PRF_GC_INDUCED = 1,     // Induced by GC.Collect
+    COR_PRF_GC_OTHER = 0        // Anything else
+}
+
+/// <summary>
+/// COR_PRF_GC_ROOT_KIND describes the kind of GC root exposed by
+/// the RootReferences2 callback.
+/// </summary>
+public enum COR_PRF_GC_ROOT_KIND
+{
+COR_PRF_GC_ROOT_STACK = 1,        // Variables on the stack
+COR_PRF_GC_ROOT_FINALIZER = 2,    // Entry in the finalizer queue
+COR_PRF_GC_ROOT_HANDLE = 3,        // GC Handle
+COR_PRF_GC_ROOT_OTHER = 0        //Misc. roots
+}
+
+/// <summary>
+/// COR_PRF_GC_ROOT_FLAGS describes properties of a GC root
+/// exposed by the RootReferences callback.
+/// </summary>
+public enum COR_PRF_GC_ROOT_FLAGS
+{
+COR_PRF_GC_ROOT_PINNING = 0x1,    // Prevents GC from moving the object
+COR_PRF_GC_ROOT_WEAKREF = 0x2,    // Does not prevent collection
+COR_PRF_GC_ROOT_INTERIOR = 0x4,   // Refers to a field of the object rather than the object itself
+COR_PRF_GC_ROOT_REFCOUNTED = 0x8, // Whether it prevents collection depends on a refcount - if not,
+// COR_PRF_GC_ROOT_WEAKREF will be set also
 }
 

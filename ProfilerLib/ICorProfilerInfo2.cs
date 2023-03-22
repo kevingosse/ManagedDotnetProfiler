@@ -1,4 +1,4 @@
-﻿namespace ManagedDotnetProfiler;
+﻿namespace ProfilerLib;
 
 [NativeObject]
 public unsafe interface ICorProfilerInfo2 : ICorProfilerInfo

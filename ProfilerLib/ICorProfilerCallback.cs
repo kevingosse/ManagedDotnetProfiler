@@ -1,10 +1,10 @@
-﻿using System;
-
-namespace ManagedDotnetProfiler;
+﻿namespace ProfilerLib;
 
 [NativeObject]
 public unsafe interface ICorProfilerCallback : IUnknown
 {
+    public static readonly Guid Guid = Guid.Parse("8a8cc829-ccf2-49fe-bbae-0f022228071a");
+
     HResult Initialize(IntPtr pICorProfilerInfoUnk);
 
     HResult Shutdown();

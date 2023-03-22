@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ManagedDotnetProfiler;
+﻿namespace ProfilerLib;
 
 [NativeObject]
 public unsafe interface ICorProfilerInfo : IUnknown

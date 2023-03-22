@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Diagnostics;
+using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -13,6 +14,8 @@ public class NativeObjectGenerator : ISourceGenerator
         {
             return;
         }
+
+        // Debugger.Launch();
 
         foreach (var symbol in receiver.Interfaces)
         {
@@ -119,6 +122,11 @@ namespace NativeObjects
                     continue;
                 }
 
+                if (method.MethodKind == MethodKind.SharedConstructor)
+                {
+                    continue;
+                }
+
                 var parameterList = new StringBuilder();
 
                 parameterList.Append("IntPtr* self");
@@ -190,7 +198,26 @@ namespace NativeObjects
 
                 for (int i = 0; i < method.Parameters.Length; i++)
                 {
-                    sourceArgsList.Append($", {method.Parameters[i].OriginalDefinition} a{i}");
+                    sourceArgsList.Append($", ");
+
+                    var refKind = method.Parameters[i].RefKind;
+
+                    switch (refKind)
+                    {
+                        case RefKind.In:
+                            sourceArgsList.Append("in ");
+                            break;
+                        case RefKind.Out:
+                            sourceArgsList.Append("out ");
+                            break;
+                        case RefKind.Ref:
+                            sourceArgsList.Append("ref ");
+                            break;
+                    }
+
+                    sourceArgsList.Append(method.Parameters[i].Type);
+                    sourceArgsList.Append($" a{i}");
+                    //sourceArgsList.Append($", {method.Parameters[i].OriginalDefinition} a{i}");
                 }
 
                 var destinationArgsList = new StringBuilder();
@@ -252,7 +279,22 @@ namespace NativeObjects
                         invokerFunctions.Append(", ");
                     }
 
-                    invokerFunctions.Append($"{method.Parameters[i].OriginalDefinition} a{i}");
+                    var refKind = method.Parameters[i].RefKind;
+
+                    switch (refKind)
+                    {
+                        case RefKind.In:
+                            invokerFunctions.Append("in ");
+                            break;
+                        case RefKind.Out:
+                            invokerFunctions.Append("out ");
+                            break;
+                        case RefKind.Ref:
+                            invokerFunctions.Append("ref ");
+                            break;
+                    }
+
+                    invokerFunctions.Append($"{method.Parameters[i].Type} a{i}");
                 }
 
                 invokerFunctions.AppendLine(")");

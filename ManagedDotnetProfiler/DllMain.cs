@@ -1,4 +1,6 @@
-﻿using System.Runtime.InteropServices;
+﻿using System;
+using System.Runtime.InteropServices;
+using ProfilerLib;
 
 namespace ManagedDotnetProfiler;
 
@@ -9,7 +11,9 @@ public class DllMain
     [UnmanagedCallersOnly(EntryPoint = "DllGetClassObject")]
     public static unsafe int DllGetClassObject(void* rclsid, void* riid, nint* ppv)
     {
-        Instance = new ClassFactory();
+        Console.WriteLine("DllGetClassObject");
+
+        Instance = new ClassFactory(new CorProfiler());
         *ppv = Instance.IClassFactory;
 
         return 0;

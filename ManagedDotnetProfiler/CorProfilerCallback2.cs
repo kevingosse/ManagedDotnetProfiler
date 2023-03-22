@@ -1,30 +1,19 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Text;
+using ProfilerLib;
 
 namespace ManagedDotnetProfiler
 {
-    public unsafe class CorProfilerCallback2 : ICorProfilerCallback2
+    public unsafe class CorProfilerCallback : CorProfilerCallback2Base
     {
-        private static readonly Guid ICorProfilerCallback2Guid = Guid.Parse("8a8cc829-ccf2-49fe-bbae-0f022228071a");
-
-        private readonly NativeObjects.ICorProfilerCallback2 _corProfilerCallback2;
         private ICorProfilerInfo3 _corProfilerInfo;
 
-        public CorProfilerCallback2()
+        public override HResult Initialize(IntPtr pICorProfilerInfoUnk)
         {
-            _corProfilerCallback2 = NativeObjects.ICorProfilerCallback2.Wrap(this);
-        }
+            Console.WriteLine($"CorProfilerCallback - Initialize");
 
-        public IntPtr ICorProfilerCallback2Object => _corProfilerCallback2;
 
-        public int AddRef()
-        {
-            return 1;
-        }
-
-        public HResult Initialize(IntPtr pICorProfilerInfoUnk)
-        {
             var impl = NativeObjects.IUnknown.Wrap(pICorProfilerInfoUnk);
 
             var result = impl.QueryInterface(KnownGuids.ICorProfilerInfo3, out IntPtr ptr);
@@ -42,120 +31,7 @@ namespace ManagedDotnetProfiler
             return HResult.S_OK;
         }
 
-        public HResult QueryInterface(in Guid guid, out IntPtr ptr)
-        {
-            if (guid == ICorProfilerCallback2Guid)
-            {
-                Console.WriteLine("[Profiler] Returning instance of ICorProfilerCallback2");
-                ptr = _corProfilerCallback2;
-                return HResult.S_OK;
-            }
-
-            ptr = IntPtr.Zero;
-            return HResult.E_NOTIMPL;
-        }
-
-        public int Release()
-        {
-            return 0;
-        }
-
-        public HResult Shutdown()
-        {
-            return HResult.S_OK;
-        }
-
-        public HResult AppDomainCreationStarted(AppDomainId appDomainId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public HResult AppDomainCreationFinished(AppDomainId appDomainId, HResult hrStatus)
-        {
-            throw new NotImplementedException();
-        }
-
-        public HResult AppDomainShutdownStarted(AppDomainId appDomainId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public HResult AppDomainShutdownFinished(AppDomainId appDomainId, HResult hrStatus)
-        {
-            throw new NotImplementedException();
-        }
-
-        public HResult AssemblyLoadStarted(AssemblyId assemblyId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public HResult AssemblyLoadFinished(AssemblyId assemblyId, HResult hrStatus)
-        {
-            throw new NotImplementedException();
-        }
-
-        public HResult AssemblyUnloadStarted(AssemblyId assemblyId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public HResult AssemblyUnloadFinished(AssemblyId assemblyId, HResult hrStatus)
-        {
-            throw new NotImplementedException();
-        }
-
-        public HResult ModuleLoadStarted(ModuleId moduleId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public HResult ModuleLoadFinished(ModuleId moduleId, HResult hrStatus)
-        {
-            throw new NotImplementedException();
-        }
-
-        public HResult ModuleUnloadStarted(ModuleId moduleId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public HResult ModuleUnloadFinished(ModuleId moduleId, HResult hrStatus)
-        {
-            throw new NotImplementedException();
-        }
-
-        public HResult ModuleAttachedToAssembly(ModuleId moduleId, AssemblyId assemblyId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public HResult ClassLoadStarted(ClassId classId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public HResult ClassLoadFinished(ClassId classId, HResult hrStatus)
-        {
-            throw new NotImplementedException();
-        }
-
-        public HResult ClassUnloadStarted(ClassId classId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public HResult ClassUnloadFinished(ClassId classId, HResult hrStatus)
-        {
-            throw new NotImplementedException();
-        }
-
-        public HResult FunctionUnloadStarted(FunctionId functionId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public HResult JITCompilationStarted(FunctionId functionId, bool fIsSafeToBlock)
+        public override HResult JITCompilationStarted(FunctionId functionId, bool fIsSafeToBlock)
         {
             _corProfilerInfo.GetFunctionInfo(functionId, out var classId, out var moduleId, out var mdToken);
 
@@ -190,159 +66,7 @@ namespace ManagedDotnetProfiler
             return HResult.S_OK;
         }
 
-        public HResult JITCompilationFinished(FunctionId functionId, HResult hrStatus, bool fIsSafeToBlock)
-        {
-            return HResult.S_OK;
-        }
-
-        public HResult JITCachedFunctionSearchStarted(FunctionId functionId, out bool pbUseCachedFunction)
-        {
-            pbUseCachedFunction = true;
-            return HResult.S_OK;
-        }
-
-        public HResult JITCachedFunctionSearchFinished(FunctionId functionId, COR_PRF_JIT_CACHE result)
-        {
-            return HResult.S_OK;
-        }
-
-        public HResult JITFunctionPitched(FunctionId functionId)
-        {
-            return HResult.S_OK;
-        }
-
-        public HResult JITInlining(FunctionId callerId, FunctionId calleeId, out bool pfShouldInline)
-        {
-            pfShouldInline = true;
-            return HResult.S_OK;
-        }
-
-        public HResult ThreadCreated(ThreadId threadId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public HResult ThreadDestroyed(ThreadId threadId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public HResult ThreadAssignedToOSThread(ThreadId managedThreadId, int osThreadId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public HResult RemotingClientInvocationStarted()
-        {
-            throw new NotImplementedException();
-        }
-
-        public HResult RemotingClientSendingMessage(in Guid pCookie, bool fIsAsync)
-        {
-            throw new NotImplementedException();
-        }
-
-        public HResult RemotingClientReceivingReply(in Guid pCookie, bool fIsAsync)
-        {
-            throw new NotImplementedException();
-        }
-
-        public HResult RemotingClientInvocationFinished()
-        {
-            throw new NotImplementedException();
-        }
-
-        public HResult RemotingServerReceivingMessage(in Guid pCookie, bool fIsAsync)
-        {
-            throw new NotImplementedException();
-        }
-
-        public HResult RemotingServerInvocationStarted()
-        {
-            throw new NotImplementedException();
-        }
-
-        public HResult RemotingServerInvocationReturned()
-        {
-            throw new NotImplementedException();
-        }
-
-        public HResult RemotingServerSendingReply(in Guid pCookie, bool fIsAsync)
-        {
-            throw new NotImplementedException();
-        }
-
-        public HResult UnmanagedToManagedTransition(FunctionId functionId, COR_PRF_TRANSITION_REASON reason)
-        {
-            throw new NotImplementedException();
-        }
-
-        public HResult ManagedToUnmanagedTransition(FunctionId functionId, COR_PRF_TRANSITION_REASON reason)
-        {
-            throw new NotImplementedException();
-        }
-
-        public HResult RuntimeSuspendStarted(COR_PRF_SUSPEND_REASON suspendReason)
-        {
-            throw new NotImplementedException();
-        }
-
-        public HResult RuntimeSuspendFinished()
-        {
-            throw new NotImplementedException();
-        }
-
-        public HResult RuntimeSuspendAborted()
-        {
-            throw new NotImplementedException();
-        }
-
-        public HResult RuntimeResumeStarted()
-        {
-            throw new NotImplementedException();
-        }
-
-        public HResult RuntimeResumeFinished()
-        {
-            throw new NotImplementedException();
-        }
-
-        public HResult RuntimeThreadSuspended(ThreadId threadId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public HResult RuntimeThreadResumed(ThreadId threadId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public HResult MovedReferences(uint cMovedObjectIDRanges, ObjectId* oldObjectIDRangeStart, ObjectId* newObjectIDRangeStart, uint* cObjectIDRangeLength)
-        {
-            throw new NotImplementedException();
-        }
-
-        public HResult ObjectAllocated(ObjectId objectId, ClassId classId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public HResult ObjectsAllocatedByClass(uint cClassCount, ClassId* classIds, uint* cObjects)
-        {
-            throw new NotImplementedException();
-        }
-
-        public HResult ObjectReferences(ObjectId objectId, ClassId classId, uint cObjectRefs, ObjectId* objectRefIds)
-        {
-            throw new NotImplementedException();
-        }
-
-        public HResult RootReferences(uint cRootRefs, ObjectId* rootRefIds)
-        {
-            throw new NotImplementedException();
-        }
-
-        public HResult ExceptionThrown(ObjectId thrownObjectId)
+        public override HResult ExceptionThrown(ObjectId thrownObjectId)
         {
             Console.WriteLine("Enumerating modules");
 
@@ -399,31 +123,7 @@ namespace ManagedDotnetProfiler
             return HResult.S_OK;
         }
 
-        public HResult ExceptionSearchFunctionEnter(FunctionId functionId)
-        {
-            Debug.WriteLine("ExceptionSearchFunctionEnter");
-            return HResult.S_OK;
-        }
-
-        public HResult ExceptionSearchFunctionLeave()
-        {
-            Debug.WriteLine("ExceptionSearchFunctionLeave");
-            return HResult.S_OK;
-        }
-
-        public HResult ExceptionSearchFilterEnter(FunctionId functionId)
-        {
-            Debug.WriteLine("ExceptionSearchFilterEnter");
-            return HResult.S_OK;
-        }
-
-        public HResult ExceptionSearchFilterLeave()
-        {
-            Debug.WriteLine("ExceptionSearchFilterLeave");
-            return HResult.S_OK;
-        }
-
-        public HResult ExceptionSearchCatcherFound(FunctionId functionId)
+        public override HResult ExceptionSearchCatcherFound(FunctionId functionId)
         {
             _corProfilerInfo.GetFunctionInfo(functionId, out var classId, out var moduleId, out var mdToken);
 
@@ -457,74 +157,6 @@ namespace ManagedDotnetProfiler
 
             Console.WriteLine($"[Profiler] Exception was caught in {typeName}.{methodName}");
             return HResult.S_OK;
-        }
-
-        public HResult ExceptionOSHandlerEnter(nint* __unused)
-        {
-            Debug.WriteLine("ExceptionOSHandlerEnter");
-            return HResult.S_OK;
-        }
-
-        public HResult ExceptionOSHandlerLeave(nint* __unused)
-        {
-            Debug.WriteLine("ExceptionOSHandlerLeave");
-            return HResult.S_OK;
-        }
-
-        public HResult ExceptionUnwindFunctionEnter(FunctionId functionId)
-        {
-            Debug.WriteLine("ExceptionUnwindFunctionEnter");
-            return HResult.S_OK;
-        }
-
-        public HResult ExceptionUnwindFunctionLeave()
-        {
-            Debug.WriteLine("ExceptionUnwindFunctionLeave");
-            return HResult.S_OK;
-        }
-
-        public HResult ExceptionUnwindFinallyEnter(FunctionId functionId)
-        {
-            Debug.WriteLine("ExceptionUnwindFinallyEnter");
-            return HResult.S_OK;
-        }
-
-        public HResult ExceptionUnwindFinallyLeave()
-        {
-            Debug.WriteLine("ExceptionUnwindFinallyLeave");
-            return HResult.S_OK;
-        }
-
-        public HResult ExceptionCatcherEnter(FunctionId functionId, ObjectId objectId)
-        {
-            Debug.WriteLine("ExceptionCatcherEnter");
-            return HResult.S_OK;
-        }
-
-        public HResult ExceptionCatcherLeave()
-        {
-            Debug.WriteLine("ExceptionCatcherLeave");
-            return HResult.S_OK;
-        }
-
-        public HResult COMClassicVTableCreated(ClassId wrappedClassId, in Guid implementedIID, void* pVTable, uint cSlots)
-        {
-            throw new NotImplementedException();
-        }
-
-        public HResult COMClassicVTableDestroyed(ClassId wrappedClassId, in Guid implementedIID, void* pVTable)
-        {
-            throw new NotImplementedException();
-        }
-
-        public HResult ExceptionCLRCatcherFound()
-        {
-            throw new NotImplementedException();
-        }
-
-        public HResult ExceptionCLRCatcherExecute()
-        {
-            throw new NotImplementedException();
         }
     }
 }

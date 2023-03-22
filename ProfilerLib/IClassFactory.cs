@@ -1,9 +1,7 @@
-﻿using System;
-
-namespace ManagedDotnetProfiler;
+﻿namespace ProfilerLib;
 
 [NativeObject]
-internal interface IClassFactory : IUnknown
+public interface IClassFactory : IUnknown
 {
     HResult CreateInstance(IntPtr outer, in Guid guid, out IntPtr instance);
 
