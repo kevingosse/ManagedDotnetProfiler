@@ -16,7 +16,7 @@ namespace ManagedDotnetProfiler
 
             var impl = NativeObjects.IUnknown.Wrap(pICorProfilerInfoUnk);
 
-            var result = impl.QueryInterface(KnownGuids.ICorProfilerInfo3, out IntPtr ptr);
+            var result = impl.QueryInterface(ICorProfilerInfo3.Guid, out IntPtr ptr);
 
             Console.WriteLine("[Profiler] Fetched ICorProfilerInfo3: " + result);
 

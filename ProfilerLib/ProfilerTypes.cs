@@ -339,8 +339,6 @@ public static class KnownGuids
 {
     public static Guid IMetaDataImport = Guid.Parse("7DAC8207-D3AE-4c75-9B67-92801A497D44");
     public static Guid IMetaDataImport2 = Guid.Parse("FCE5EFA0-8BBA-4f8e-A036-8F2022B08466");
-    public static Guid ICorProfilerInfo3 = Guid.Parse("B555ED4F-452A-4E54-8B39-B5360BAD32A0");
-    public static Guid ICorProfilerInfo11 = Guid.Parse("06398876-8987-4154-B621-40A00D6E4D04");
     public static Guid ClassFactoryGuid = Guid.Parse("00000001-0000-0000-C000-000000000046");
 }
 
@@ -408,10 +406,10 @@ public enum COR_PRF_GC_REASON
 /// </summary>
 public enum COR_PRF_GC_ROOT_KIND
 {
-COR_PRF_GC_ROOT_STACK = 1,        // Variables on the stack
-COR_PRF_GC_ROOT_FINALIZER = 2,    // Entry in the finalizer queue
-COR_PRF_GC_ROOT_HANDLE = 3,        // GC Handle
-COR_PRF_GC_ROOT_OTHER = 0        //Misc. roots
+    COR_PRF_GC_ROOT_STACK = 1,        // Variables on the stack
+    COR_PRF_GC_ROOT_FINALIZER = 2,    // Entry in the finalizer queue
+    COR_PRF_GC_ROOT_HANDLE = 3,        // GC Handle
+    COR_PRF_GC_ROOT_OTHER = 0        //Misc. roots
 }
 
 /// <summary>
@@ -420,10 +418,70 @@ COR_PRF_GC_ROOT_OTHER = 0        //Misc. roots
 /// </summary>
 public enum COR_PRF_GC_ROOT_FLAGS
 {
-COR_PRF_GC_ROOT_PINNING = 0x1,    // Prevents GC from moving the object
-COR_PRF_GC_ROOT_WEAKREF = 0x2,    // Does not prevent collection
-COR_PRF_GC_ROOT_INTERIOR = 0x4,   // Refers to a field of the object rather than the object itself
-COR_PRF_GC_ROOT_REFCOUNTED = 0x8, // Whether it prevents collection depends on a refcount - if not,
-// COR_PRF_GC_ROOT_WEAKREF will be set also
+    COR_PRF_GC_ROOT_PINNING = 0x1,    // Prevents GC from moving the object
+    COR_PRF_GC_ROOT_WEAKREF = 0x2,    // Does not prevent collection
+    COR_PRF_GC_ROOT_INTERIOR = 0x4,   // Refers to a field of the object rather than the object itself
+    COR_PRF_GC_ROOT_REFCOUNTED = 0x8, // Whether it prevents collection depends on a refcount - if not,
+                                      // COR_PRF_GC_ROOT_WEAKREF will be set also
 }
 
+public struct COR_DEBUG_IL_TO_NATIVE_MAP
+{
+    public uint ilOffset;
+    public uint nativeStartOffset;
+    public uint nativeEndOffset;
+}
+
+public unsafe struct COR_PRF_EVENTPIPE_PROVIDER_CONFIG
+{
+    public char* providerName;
+    public ulong keywords;
+    public uint loggingLevel;
+    // filterData expects a semicolon delimited string that defines key value pairs
+    // such as "key1=value1;key2=value2;". Quotes can be used to escape the '=' and ';'
+    // characters. These key value pairs will be passed in the enable callback to event
+    // providers
+    public char* filterData;
+}
+
+public readonly struct EVENTPIPE_SESSION
+{
+    public readonly ulong Value;
+}
+
+public readonly struct EVENTPIPE_PROVIDER
+{
+    public readonly nint Value;
+}
+
+public readonly struct EVENTPIPE_EVENT
+{
+    public readonly nint Value;
+}
+
+public unsafe struct COR_PRF_EVENTPIPE_PARAM_DESC
+{
+    public uint type;
+    // Used if type == ArrayType
+    public uint elementType;
+    public char* name;
+}
+
+public struct COR_PRF_EVENT_DATA
+{
+    public ulong ptr;
+    public uint size;
+    public uint reserved;
+}
+
+public enum COR_PRF_HANDLE_TYPE
+{
+    COR_PRF_HANDLE_TYPE_WEAK = 0x1,
+    COR_PRF_HANDLE_TYPE_STRONG = 0x2,
+    COR_PRF_HANDLE_TYPE_PINNED = 0x3,
+}
+
+public readonly struct ObjectHandleId
+{
+    public readonly nint Value;
+}

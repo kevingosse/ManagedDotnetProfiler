@@ -3,13 +3,15 @@
 [NativeObject]
 public unsafe interface ICorProfilerInfo3 : ICorProfilerInfo2
 {
+    public static readonly Guid Guid = new("B555ED4F-452A-4E54-8B39-B5360BAD32A0");
+
     /*
- * Returns an enumerator for all previously jitted functions. May overlap with
- * functions previously reported via CompilationStarted callbacks.
- * NOTE: The returned enumeration will only include '0' for the value of the
- * COR_PRF_FUNCTION::reJitId field.  If you require valid COR_PRF_FUNCTION::reJitId values, use
- * ICorProfilerInfo4::EnumJITedFunctions2.
- */
+     * Returns an enumerator for all previously jitted functions. May overlap with
+     * functions previously reported via CompilationStarted callbacks.
+     * NOTE: The returned enumeration will only include '0' for the value of the
+     * COR_PRF_FUNCTION::reJitId field.  If you require valid COR_PRF_FUNCTION::reJitId values, use
+     * ICorProfilerInfo4::EnumJITedFunctions2.
+     */
     HResult EnumJITedFunctions(out void* ppEnum);
 
     HResult RequestProfilerDetach(int dwExpectedCompletionMilliseconds);

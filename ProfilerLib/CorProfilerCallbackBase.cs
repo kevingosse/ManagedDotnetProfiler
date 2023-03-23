@@ -45,9 +45,32 @@ namespace ProfilerLib
 
             var impl = NativeObjects.IUnknown.Wrap(pICorProfilerInfoUnk);
 
-            var result = impl.QueryInterface(KnownGuids.ICorProfilerInfo11, out IntPtr ptr);
+            var result = impl.QueryInterface(ICorProfilerInfo.Guid, out IntPtr ptr);
+            Console.WriteLine("[Profiler] Fetched ICorProfilerInfo: " + result);
+
+            result = impl.QueryInterface(ICorProfilerInfo2.Guid, out ptr);
+            Console.WriteLine("[Profiler] Fetched ICorProfilerInfo2: " + result);
+
+            result = impl.QueryInterface(ICorProfilerInfo3.Guid, out ptr);
+            Console.WriteLine("[Profiler] Fetched ICorProfilerInfo3: " + result);
+            result = impl.QueryInterface(ICorProfilerInfo4.Guid, out ptr);
+            Console.WriteLine("[Profiler] Fetched ICorProfilerInfo4: " + result);
+            result = impl.QueryInterface(ICorProfilerInfo5.Guid, out ptr);
+            Console.WriteLine("[Profiler] Fetched ICorProfilerInfo5: " + result);
+            result = impl.QueryInterface(ICorProfilerInfo6.Guid, out ptr);
+            Console.WriteLine("[Profiler] Fetched ICorProfilerInfo6: " + result);
+            result = impl.QueryInterface(ICorProfilerInfo7.Guid, out ptr);
+            Console.WriteLine("[Profiler] Fetched ICorProfilerInfo7: " + result);
+            result = impl.QueryInterface(ICorProfilerInfo8.Guid, out ptr);
+            Console.WriteLine("[Profiler] Fetched ICorProfilerInfo8: " + result);
+            result = impl.QueryInterface(ICorProfilerInfo9.Guid, out ptr);
+            Console.WriteLine("[Profiler] Fetched ICorProfilerInfo9: " + result);
+            result = impl.QueryInterface(ICorProfilerInfo10.Guid, out ptr);
+            Console.WriteLine("[Profiler] Fetched ICorProfilerInfo10: " + result);
+            result = impl.QueryInterface(ICorProfilerInfo11.Guid, out ptr);
 
             Console.WriteLine("[Profiler] Fetched ICorProfilerInfo11: " + result);
+
 
             var corProfilerInfo = NativeObjects.ICorProfilerInfo3.Wrap(ptr);
 

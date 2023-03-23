@@ -90,8 +90,7 @@ namespace NativeObjects
 
 {invokerFunctions}
  
-        }
-       
+        }       
     }
 }
 ");
@@ -214,34 +213,6 @@ namespace NativeObjects
 
                     sourceArgsList.Append(method.Parameters[i].Type);
                     sourceArgsList.Append($" a{i}");
-                    //sourceArgsList.Append($", {method.Parameters[i].OriginalDefinition} a{i}");
-                }
-
-                var destinationArgsList = new StringBuilder();
-
-                for (int i = 0; i < method.Parameters.Length; i++)
-                {
-                    if (i > 0)
-                    {
-                        destinationArgsList.Append(", ");
-                    }
-
-                    var refKind = method.Parameters[i].RefKind;
-
-                    switch (refKind)
-                    {
-                        case RefKind.In:
-                            destinationArgsList.Append("in ");
-                            break;
-                        case RefKind.Out:
-                            destinationArgsList.Append("out ");
-                            break;
-                        case RefKind.Ref:
-                            destinationArgsList.Append("ref ");
-                            break;
-                    }
-
-                    destinationArgsList.Append($"a{i}");
                 }
 
                 functionPointers.Append($"            *(vtable + {delegateCount}) = (IntPtr)(delegate* unmanaged<IntPtr*");
