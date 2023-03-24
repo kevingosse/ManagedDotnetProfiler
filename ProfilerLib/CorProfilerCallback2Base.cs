@@ -1,13 +1,14 @@
 ﻿namespace ProfilerLib
 {
-    public class CorProfilerCallback2Base : CorProfilerCallbackBase, ICorProfilerCallback2
+    public abstract class CorProfilerCallback2Base : CorProfilerCallbackBase, ICorProfilerCallback2
     {
         private readonly NativeObjects.ICorProfilerCallback2 _corProfilerCallback2;
 
-        public CorProfilerCallback2Base()
+        protected CorProfilerCallback2Base()
         {
             _corProfilerCallback2 = NativeObjects.ICorProfilerCallback2.Wrap(this);
         }
+
         public override HResult QueryInterface(in Guid guid, out IntPtr ptr)
         {
             if (guid == ICorProfilerCallback2.Guid)

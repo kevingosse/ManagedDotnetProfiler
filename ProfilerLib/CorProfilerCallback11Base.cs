@@ -1,10 +1,10 @@
 ﻿namespace ProfilerLib
 {
-    public class CorProfilerCallback11Base : CorProfilerCallback10Base, ICorProfilerCallback11
+    public abstract class CorProfilerCallback11Base : CorProfilerCallback10Base, ICorProfilerCallback11
     {
         private readonly NativeObjects.ICorProfilerCallback11 _corProfilerCallback11;
 
-        public CorProfilerCallback11Base()
+        protected CorProfilerCallback11Base()
         {
             _corProfilerCallback11 = NativeObjects.ICorProfilerCallback11.Wrap(this);
         }

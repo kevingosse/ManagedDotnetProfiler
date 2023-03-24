@@ -6,18 +6,29 @@ using System.Threading.Tasks;
 
 namespace ProfilerLib
 {
-    public class CorProfilerCallbackBase : ICorProfilerCallback
+    public abstract class CorProfilerCallbackBase : Unknown, ICorProfilerCallback
     {
         private readonly NativeObjects.ICorProfilerCallback _corProfilerCallback;
 
-        public CorProfilerCallbackBase()
+        protected CorProfilerCallbackBase()
         {
             _corProfilerCallback = NativeObjects.ICorProfilerCallback.Wrap(this);
         }
 
         public IntPtr ICorProfilerCallback => _corProfilerCallback;
+        public ICorProfilerInfo ICorProfilerInfo;
+        public ICorProfilerInfo2 ICorProfilerInfo2;
+        public ICorProfilerInfo3 ICorProfilerInfo3;
+        public ICorProfilerInfo4 ICorProfilerInfo4;
+        public ICorProfilerInfo5 ICorProfilerInfo5;
+        public ICorProfilerInfo6 ICorProfilerInfo6;
+        public ICorProfilerInfo7 ICorProfilerInfo7;
+        public ICorProfilerInfo8 ICorProfilerInfo8;
+        public ICorProfilerInfo9 ICorProfilerInfo9;
+        public ICorProfilerInfo10 ICorProfilerInfo10;
+        public ICorProfilerInfo11 ICorProfilerInfo11;
 
-        public virtual HResult QueryInterface(in Guid guid, out nint ptr)
+        public override HResult QueryInterface(in Guid guid, out nint ptr)
         {
             Console.WriteLine($"CorProfilerCallbackBase - QueryInterface - {guid}");
 
@@ -26,62 +37,150 @@ namespace ProfilerLib
             return HResult.E_NOTIMPL;
         }
 
-        public virtual int AddRef()
-        {
-            Console.WriteLine("CorProfilerCallbackBase - AddRef");
-            return 1;
-        }
-
-        public virtual int Release()
-        {
-            Console.WriteLine("CorProfilerCallbackBase - Release");
-            return 1;
-        }
-
         public virtual HResult Initialize(nint pICorProfilerInfoUnk)
         {
             Console.WriteLine($"CorProfilerCallbackBase - Initialize");
+            
+            int version = GetICorProfilerInfo(pICorProfilerInfoUnk);
 
+            Console.WriteLine($"[Profiler] Fetched ICorProfilerInfo{version}");
+
+            return OnInitialize(version);
+        }
+
+        protected abstract HResult OnInitialize(int iCorProfilerInfoVersion);
+
+        private int GetICorProfilerInfo(nint pICorProfilerInfoUnk)
+        {
+            int supportedInterface = 0;
 
             var impl = NativeObjects.IUnknown.Wrap(pICorProfilerInfoUnk);
 
-            var result = impl.QueryInterface(ICorProfilerInfo.Guid, out IntPtr ptr);
-            Console.WriteLine("[Profiler] Fetched ICorProfilerInfo: " + result);
+            HResult result;
+            IntPtr ptr;
 
-            result = impl.QueryInterface(ICorProfilerInfo2.Guid, out ptr);
-            Console.WriteLine("[Profiler] Fetched ICorProfilerInfo2: " + result);
+            result = impl.QueryInterface(ProfilerLib.ICorProfilerInfo.Guid, out ptr);
 
-            result = impl.QueryInterface(ICorProfilerInfo3.Guid, out ptr);
-            Console.WriteLine("[Profiler] Fetched ICorProfilerInfo3: " + result);
-            result = impl.QueryInterface(ICorProfilerInfo4.Guid, out ptr);
-            Console.WriteLine("[Profiler] Fetched ICorProfilerInfo4: " + result);
-            result = impl.QueryInterface(ICorProfilerInfo5.Guid, out ptr);
-            Console.WriteLine("[Profiler] Fetched ICorProfilerInfo5: " + result);
-            result = impl.QueryInterface(ICorProfilerInfo6.Guid, out ptr);
-            Console.WriteLine("[Profiler] Fetched ICorProfilerInfo6: " + result);
-            result = impl.QueryInterface(ICorProfilerInfo7.Guid, out ptr);
-            Console.WriteLine("[Profiler] Fetched ICorProfilerInfo7: " + result);
-            result = impl.QueryInterface(ICorProfilerInfo8.Guid, out ptr);
-            Console.WriteLine("[Profiler] Fetched ICorProfilerInfo8: " + result);
-            result = impl.QueryInterface(ICorProfilerInfo9.Guid, out ptr);
-            Console.WriteLine("[Profiler] Fetched ICorProfilerInfo9: " + result);
-            result = impl.QueryInterface(ICorProfilerInfo10.Guid, out ptr);
-            Console.WriteLine("[Profiler] Fetched ICorProfilerInfo10: " + result);
-            result = impl.QueryInterface(ICorProfilerInfo11.Guid, out ptr);
+            if (!result.IsOK)
+            {
+                return supportedInterface;
+            }
 
-            Console.WriteLine("[Profiler] Fetched ICorProfilerInfo11: " + result);
+            supportedInterface++;
 
+            ICorProfilerInfo = NativeObjects.ICorProfilerInfo.Wrap(ptr);
 
-            var corProfilerInfo = NativeObjects.ICorProfilerInfo3.Wrap(ptr);
+            result = impl.QueryInterface(ProfilerLib.ICorProfilerInfo2.Guid, out ptr);
 
-            var eventMask = CorPrfMonitor.COR_PRF_MONITOR_EXCEPTIONS | CorPrfMonitor.COR_PRF_MONITOR_JIT_COMPILATION;
+            if (!result.IsOK)
+            {
+                return supportedInterface;
+            }
 
-            result = corProfilerInfo.SetEventMask(eventMask);
+            supportedInterface++;
 
-            Console.WriteLine("[Profiler] Setting event mask to " + eventMask);
+            ICorProfilerInfo2 = NativeObjects.ICorProfilerInfo2.Wrap(ptr);
 
+            result = impl.QueryInterface(ProfilerLib.ICorProfilerInfo3.Guid, out ptr);
 
-            return HResult.S_OK;
+            if (!result.IsOK)
+            {
+                return supportedInterface;
+            }
+
+            supportedInterface++;
+
+            ICorProfilerInfo3 = NativeObjects.ICorProfilerInfo3.Wrap(ptr);
+
+            result = impl.QueryInterface(ProfilerLib.ICorProfilerInfo4.Guid, out ptr);
+
+            if (!result.IsOK)
+            {
+                return supportedInterface;
+            }
+
+            supportedInterface++;
+
+            ICorProfilerInfo4 = NativeObjects.ICorProfilerInfo4.Wrap(ptr);
+
+            result = impl.QueryInterface(ProfilerLib.ICorProfilerInfo5.Guid, out ptr);
+
+            if (!result.IsOK)
+            {
+                return supportedInterface;
+            }
+
+            supportedInterface++;
+
+            ICorProfilerInfo5 = NativeObjects.ICorProfilerInfo5.Wrap(ptr);
+
+            result = impl.QueryInterface(ProfilerLib.ICorProfilerInfo6.Guid, out ptr);
+
+            if (!result.IsOK)
+            {
+                return supportedInterface;
+            }
+
+            supportedInterface++;
+
+            ICorProfilerInfo6 = NativeObjects.ICorProfilerInfo6.Wrap(ptr);
+
+            result = impl.QueryInterface(ProfilerLib.ICorProfilerInfo7.Guid, out ptr);
+
+            if (!result.IsOK)
+            {
+                return supportedInterface;
+            }
+
+            supportedInterface++;
+
+            ICorProfilerInfo7 = NativeObjects.ICorProfilerInfo7.Wrap(ptr);
+
+            result = impl.QueryInterface(ProfilerLib.ICorProfilerInfo8.Guid, out ptr);
+
+            if (!result.IsOK)
+            {
+                return supportedInterface;
+            }
+
+            supportedInterface++;
+
+            ICorProfilerInfo8 = NativeObjects.ICorProfilerInfo8.Wrap(ptr);
+
+            result = impl.QueryInterface(ProfilerLib.ICorProfilerInfo9.Guid, out ptr);
+
+            if (!result.IsOK)
+            {
+                return supportedInterface;
+            }
+
+            supportedInterface++;
+
+            ICorProfilerInfo9 = NativeObjects.ICorProfilerInfo9.Wrap(ptr);
+
+            result = impl.QueryInterface(ProfilerLib.ICorProfilerInfo10.Guid, out ptr);
+
+            if (!result.IsOK)
+            {
+                return supportedInterface;
+            }
+
+            supportedInterface++;
+
+            ICorProfilerInfo10 = NativeObjects.ICorProfilerInfo10.Wrap(ptr);
+
+            result = impl.QueryInterface(ProfilerLib.ICorProfilerInfo11.Guid, out ptr);
+
+            if (!result.IsOK)
+            {
+                return supportedInterface;
+            }
+
+            supportedInterface++;
+
+            ICorProfilerInfo11 = NativeObjects.ICorProfilerInfo11.Wrap(ptr);
+
+            return supportedInterface;
         }
 
         public virtual HResult Shutdown()
