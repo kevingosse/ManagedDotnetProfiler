@@ -9,7 +9,7 @@
             _corProfilerCallback11 = NativeObjects.ICorProfilerCallback11.Wrap(this);
         }
 
-        public override HResult QueryInterface(in Guid guid, out nint ptr)
+        protected override HResult QueryInterface(in Guid guid, out nint ptr)
         {
             if (guid == ICorProfilerCallback11.Guid)
             {
@@ -20,7 +20,16 @@
             return base.QueryInterface(guid, out ptr);
         }
 
-        public virtual HResult LoadAsNotificationOnly(out bool pbNotificationOnly)
+        #region ICorProfilerCallback11
+
+        HResult ICorProfilerCallback11.LoadAsNotificationOnly(out bool pbNotificationOnly)
+        {
+            return LoadAsNotificationOnly(out pbNotificationOnly);
+        }
+
+        #endregion
+
+        protected virtual HResult LoadAsNotificationOnly(out bool pbNotificationOnly)
         {
             pbNotificationOnly = default;
 

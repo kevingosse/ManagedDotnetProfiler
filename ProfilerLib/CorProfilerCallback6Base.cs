@@ -9,7 +9,7 @@
             _corProfilerCallback6 = NativeObjects.ICorProfilerCallback6.Wrap(this);
         }
 
-        public override HResult QueryInterface(in Guid guid, out nint ptr)
+        protected override HResult QueryInterface(in Guid guid, out nint ptr)
         {
             if (guid == ICorProfilerCallback6.Guid)
             {
@@ -20,9 +20,18 @@
             return base.QueryInterface(guid, out ptr);
         }
 
-        public virtual unsafe HResult GetAssemblyReferences(char* wszAssemblyPath, nint pAsmRefProvider)
+        #region ICorProfilerCallback6
+
+        unsafe HResult ICorProfilerCallback6.GetAssemblyReferences(char* wszAssemblyPath, nint pAsmRefProvider)
         {
-            return default;
+            return GetAssemblyReferences(wszAssemblyPath, pAsmRefProvider);
+        }
+
+        #endregion
+
+        protected virtual unsafe HResult GetAssemblyReferences(char* wszAssemblyPath, nint pAsmRefProvider)
+        {
+            return HResult.E_NOTIMPL;
         }
     }
 }

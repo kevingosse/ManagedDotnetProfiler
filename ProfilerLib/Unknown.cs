@@ -4,14 +4,16 @@
     {
         private int _referenceCount;
 
-        public abstract HResult QueryInterface(in Guid guid, out nint ptr);
+        protected abstract HResult QueryInterface(in Guid guid, out nint ptr);
 
-        public int AddRef()
+        HResult IUnknown.QueryInterface(in System.Guid guid, out nint ptr) => QueryInterface(guid, out ptr);
+
+        int IUnknown.AddRef()
         {
             return Interlocked.Increment(ref _referenceCount);
         }
 
-        public int Release()
+        int IUnknown.Release()
         {
             var value = Interlocked.Decrement(ref _referenceCount);
 

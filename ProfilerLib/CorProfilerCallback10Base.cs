@@ -9,7 +9,7 @@
             _corProfilerCallback10 = NativeObjects.ICorProfilerCallback10.Wrap(this);
         }
 
-        public override HResult QueryInterface(in Guid guid, out nint ptr)
+        protected override HResult QueryInterface(in Guid guid, out nint ptr)
         {
             if (guid == ICorProfilerCallback10.Guid)
             {
@@ -20,14 +20,28 @@
             return base.QueryInterface(guid, out ptr);
         }
 
-        public virtual unsafe HResult EventPipeEventDelivered(nint provider, int eventId, int eventVersion, uint cbMetadataBlob, byte* metadataBlob, uint cbEventData, byte* eventData, in Guid pActivityId, in Guid pRelatedActivityId, ThreadId eventThread, uint numStackFrames, nint* stackFrames)
+        #region ICorProfilerCallback10
+
+        HResult ICorProfilerCallback10.EventPipeProviderCreated(nint provider)
         {
-            return default;
+            return EventPipeProviderCreated(provider);
         }
 
-        public virtual HResult EventPipeProviderCreated(nint provider)
+        unsafe HResult ICorProfilerCallback10.EventPipeEventDelivered(nint provider, int eventId, int eventVersion, uint cbMetadataBlob, byte* metadataBlob, uint cbEventData, byte* eventData, in Guid pActivityId, in Guid pRelatedActivityId, ThreadId eventThread, uint numStackFrames, nint* stackFrames)
         {
-            return default;
+            return EventPipeEventDelivered(provider, eventId, eventVersion, cbMetadataBlob, metadataBlob, cbEventData, eventData, in pActivityId, in pRelatedActivityId, eventThread, numStackFrames, stackFrames);
+        }
+
+        #endregion
+
+        protected virtual unsafe HResult EventPipeEventDelivered(nint provider, int eventId, int eventVersion, uint cbMetadataBlob, byte* metadataBlob, uint cbEventData, byte* eventData, in Guid pActivityId, in Guid pRelatedActivityId, ThreadId eventThread, uint numStackFrames, nint* stackFrames)
+        {
+            return HResult.E_NOTIMPL;
+        }
+
+        protected virtual HResult EventPipeProviderCreated(nint provider)
+        {
+            return HResult.E_NOTIMPL;
         }
     }
 }

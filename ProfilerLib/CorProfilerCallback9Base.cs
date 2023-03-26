@@ -9,7 +9,7 @@
             _corProfilerCallback9 = NativeObjects.ICorProfilerCallback9.Wrap(this);
         }
 
-        public override HResult QueryInterface(in Guid guid, out nint ptr)
+        protected override HResult QueryInterface(in Guid guid, out nint ptr)
         {
             if (guid == ICorProfilerCallback9.Guid)
             {
@@ -20,9 +20,18 @@
             return base.QueryInterface(guid, out ptr);
         }
 
-        public virtual HResult DynamicMethodUnloaded(FunctionId functionId)
+        #region ICorProfilerCallback9
+
+        HResult ICorProfilerCallback9.DynamicMethodUnloaded(FunctionId functionId)
         {
-            return default;
+            return DynamicMethodUnloaded(functionId);
+        }
+
+        #endregion
+
+        protected virtual HResult DynamicMethodUnloaded(FunctionId functionId)
+        {
+            return HResult.E_NOTIMPL;
         }
     }
 }

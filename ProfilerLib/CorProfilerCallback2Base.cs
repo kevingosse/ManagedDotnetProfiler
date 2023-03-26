@@ -9,7 +9,7 @@
             _corProfilerCallback2 = NativeObjects.ICorProfilerCallback2.Wrap(this);
         }
 
-        public override HResult QueryInterface(in Guid guid, out IntPtr ptr)
+        protected override HResult QueryInterface(in Guid guid, out IntPtr ptr)
         {
             if (guid == ICorProfilerCallback2.Guid)
             {
@@ -20,44 +20,88 @@
             return base.QueryInterface(guid, out ptr);
         }
 
-        public virtual unsafe HResult ThreadNameChanged(ThreadId threadId, uint cchName, char* name)
+        #region ICorProfilerCallback2
+
+        unsafe HResult ICorProfilerCallback2.GarbageCollectionStarted(int cGenerations, bool* generationCollected, COR_PRF_GC_REASON reason)
         {
-            return default;
+            return GarbageCollectionStarted(cGenerations, generationCollected, reason);
         }
 
-        public virtual unsafe HResult GarbageCollectionStarted(int cGenerations, bool* generationCollected, COR_PRF_GC_REASON reason)
+        unsafe HResult ICorProfilerCallback2.SurvivingReferences(uint cSurvivingObjectIDRanges, ObjectId* objectIDRangeStart, uint* cObjectIDRangeLength)
         {
-            return default;
+            return SurvivingReferences(cSurvivingObjectIDRanges, objectIDRangeStart, cObjectIDRangeLength);
         }
 
-        public virtual unsafe HResult SurvivingReferences(uint cSurvivingObjectIDRanges, ObjectId* objectIDRangeStart, uint* cObjectIDRangeLength)
+        HResult ICorProfilerCallback2.GarbageCollectionFinished()
         {
-            return default;
+            return GarbageCollectionFinished();
         }
 
-        public virtual HResult GarbageCollectionFinished()
+        HResult ICorProfilerCallback2.FinalizeableObjectQueued(int finalizerFlags, ObjectId objectID)
         {
-            return default;
+            return FinalizeableObjectQueued(finalizerFlags, objectID);
         }
 
-        public virtual HResult FinalizeableObjectQueued(int finalizerFlags, ObjectId objectID)
+        unsafe HResult ICorProfilerCallback2.RootReferences2(uint cRootRefs, ObjectId* rootRefIds, COR_PRF_GC_ROOT_KIND* rootKinds, COR_PRF_GC_ROOT_FLAGS* rootFlags, uint* rootIds)
         {
-            return default;
+            return RootReferences2(cRootRefs, rootRefIds, rootKinds, rootFlags, rootIds);
         }
 
-        public virtual unsafe HResult RootReferences2(uint cRootRefs, ObjectId* rootRefIds, COR_PRF_GC_ROOT_KIND* rootKinds, COR_PRF_GC_ROOT_FLAGS* rootFlags, uint* rootIds)
+        HResult ICorProfilerCallback2.HandleCreated(GCHandleId handleId, ObjectId initialObjectId)
         {
-            return default;
+            return HandleCreated(handleId, initialObjectId);
         }
 
-        public virtual HResult HandleCreated(GCHandleId handleId, ObjectId initialObjectId)
+        HResult ICorProfilerCallback2.HandleDestroyed(GCHandleId handleId)
         {
-            return default;
+            return HandleDestroyed(handleId);
         }
 
-        public virtual HResult HandleDestroyed(GCHandleId handleId)
+        unsafe HResult ICorProfilerCallback2.ThreadNameChanged(ThreadId threadId, uint cchName, char* name)
         {
-            return default;
+            return ThreadNameChanged(threadId, cchName, name);
+        }
+
+        #endregion
+
+        protected virtual unsafe HResult ThreadNameChanged(ThreadId threadId, uint cchName, char* name)
+        {
+            return HResult.E_NOTIMPL;
+        }
+
+        protected virtual unsafe HResult GarbageCollectionStarted(int cGenerations, bool* generationCollected, COR_PRF_GC_REASON reason)
+        {
+            return HResult.E_NOTIMPL;
+        }
+
+        protected virtual unsafe HResult SurvivingReferences(uint cSurvivingObjectIDRanges, ObjectId* objectIDRangeStart, uint* cObjectIDRangeLength)
+        {
+            return HResult.E_NOTIMPL;
+        }
+
+        protected virtual HResult GarbageCollectionFinished()
+        {
+            return HResult.E_NOTIMPL;
+        }
+
+        protected virtual HResult FinalizeableObjectQueued(int finalizerFlags, ObjectId objectID)
+        {
+            return HResult.E_NOTIMPL;
+        }
+
+        protected virtual unsafe HResult RootReferences2(uint cRootRefs, ObjectId* rootRefIds, COR_PRF_GC_ROOT_KIND* rootKinds, COR_PRF_GC_ROOT_FLAGS* rootFlags, uint* rootIds)
+        {
+            return HResult.E_NOTIMPL;
+        }
+
+        protected virtual HResult HandleCreated(GCHandleId handleId, ObjectId initialObjectId)
+        {
+            return HResult.E_NOTIMPL;
+        }
+
+        protected virtual HResult HandleDestroyed(GCHandleId handleId)
+        {
+            return HResult.E_NOTIMPL;
         }
     }
 }

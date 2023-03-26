@@ -9,7 +9,7 @@
             _corProfilerCallback8 = NativeObjects.ICorProfilerCallback8.Wrap(this);
         }
 
-        public override HResult QueryInterface(in Guid guid, out nint ptr)
+        protected override HResult QueryInterface(in Guid guid, out nint ptr)
         {
             if (guid == ICorProfilerCallback8.Guid)
             {
@@ -20,14 +20,28 @@
             return base.QueryInterface(guid, out ptr);
         }
 
-        public virtual unsafe HResult DynamicMethodJITCompilationStarted(FunctionId functionId, bool fIsSafeToBlock, byte* pILHeader, uint cbILHeader)
+        #region ICorProfilerCallback8
+
+        HResult ICorProfilerCallback8.DynamicMethodJITCompilationFinished(FunctionId functionId, HResult hrStatus, bool fIsSafeToBlock)
         {
-            return default;
+            return DynamicMethodJITCompilationFinished(functionId, hrStatus, fIsSafeToBlock);
         }
 
-        public virtual HResult DynamicMethodJITCompilationFinished(FunctionId functionId, HResult hrStatus, bool fIsSafeToBlock)
+        unsafe HResult ICorProfilerCallback8.DynamicMethodJITCompilationStarted(FunctionId functionId, bool fIsSafeToBlock, byte* pILHeader, uint cbILHeader)
         {
-            return default;
+            return DynamicMethodJITCompilationStarted(functionId, fIsSafeToBlock, pILHeader, cbILHeader);
+        }
+
+        #endregion
+
+        protected virtual unsafe HResult DynamicMethodJITCompilationStarted(FunctionId functionId, bool fIsSafeToBlock, byte* pILHeader, uint cbILHeader)
+        {
+            return HResult.E_NOTIMPL;
+        }
+
+        protected virtual HResult DynamicMethodJITCompilationFinished(FunctionId functionId, HResult hrStatus, bool fIsSafeToBlock)
+        {
+            return HResult.E_NOTIMPL;
         }
     }
 }

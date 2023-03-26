@@ -9,7 +9,7 @@ namespace ManagedDotnetProfiler
 {
     internal unsafe class CorProfiler : CorProfilerCallback10Base
     {
-        protected override HResult OnInitialize(int iCorProfilerInfoVersion)
+        protected override HResult Initialize(int iCorProfilerInfoVersion)
         {
             if (iCorProfilerInfoVersion < 11)
             {
@@ -23,7 +23,7 @@ namespace ManagedDotnetProfiler
             return ICorProfilerInfo11.SetEventMask(eventMask);
         }
 
-        public override HResult JITCompilationStarted(FunctionId functionId, bool fIsSafeToBlock)
+        protected override HResult JITCompilationStarted(FunctionId functionId, bool fIsSafeToBlock)
         {
             ICorProfilerInfo2.GetFunctionInfo(functionId, out var classId, out var moduleId, out var mdToken);
 
@@ -58,7 +58,7 @@ namespace ManagedDotnetProfiler
             return HResult.S_OK;
         }
 
-        public override HResult ExceptionThrown(ObjectId thrownObjectId)
+        protected override HResult ExceptionThrown(ObjectId thrownObjectId)
         {
             Console.WriteLine("Enumerating modules");
 
@@ -115,7 +115,7 @@ namespace ManagedDotnetProfiler
             return HResult.S_OK;
         }
 
-        public override HResult ExceptionSearchCatcherFound(FunctionId functionId)
+        protected override HResult ExceptionSearchCatcherFound(FunctionId functionId)
         {
             ICorProfilerInfo2.GetFunctionInfo(functionId, out var classId, out var moduleId, out var mdToken);
 

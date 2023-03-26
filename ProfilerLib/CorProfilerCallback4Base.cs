@@ -9,7 +9,7 @@
             _corProfilerCallback4 = NativeObjects.ICorProfilerCallback4.Wrap(this);
         }
 
-        public override HResult QueryInterface(in Guid guid, out nint ptr)
+        protected override HResult QueryInterface(in Guid guid, out nint ptr)
         {
             if (guid == ICorProfilerCallback4.Guid)
             {
@@ -20,34 +20,68 @@
             return base.QueryInterface(guid, out ptr);
         }
 
-        public virtual HResult ReJITCompilationStarted(FunctionId functionId, ReJITId rejitId, bool fIsSafeToBlock)
+        #region ICorProfilerCallback4
+
+        HResult ICorProfilerCallback4.GetReJITParameters(ModuleId moduleId, MdMethodDef methodId, nint pFunctionControl)
         {
-            return default;
+            return GetReJITParameters(moduleId, methodId, pFunctionControl);
         }
 
-        public virtual HResult GetReJITParameters(ModuleId moduleId, MdMethodDef methodId, nint pFunctionControl)
+        HResult ICorProfilerCallback4.ReJITCompilationFinished(FunctionId functionId, ReJITId rejitId, HResult hrStatus, bool fIsSafeToBlock)
         {
-            return default;
+            return ReJITCompilationFinished(functionId, rejitId, hrStatus, fIsSafeToBlock);
         }
 
-        public virtual HResult ReJITCompilationFinished(FunctionId functionId, ReJITId rejitId, HResult hrStatus, bool fIsSafeToBlock)
+        HResult ICorProfilerCallback4.ReJITError(ModuleId moduleId, MdMethodDef methodId, FunctionId functionId, HResult hrStatus)
         {
-            return default;
+            return ReJITError(moduleId, methodId, functionId, hrStatus);
         }
 
-        public virtual HResult ReJITError(ModuleId moduleId, MdMethodDef methodId, FunctionId functionId, HResult hrStatus)
+        unsafe HResult ICorProfilerCallback4.MovedReferences2(uint cMovedObjectIDRanges, ObjectId* oldObjectIDRangeStart, ObjectId* newObjectIDRangeStart, nint* cObjectIDRangeLength)
         {
-            return default;
+            return MovedReferences2(cMovedObjectIDRanges, oldObjectIDRangeStart, newObjectIDRangeStart, cObjectIDRangeLength);
         }
 
-        public virtual unsafe HResult MovedReferences2(uint cMovedObjectIDRanges, ObjectId* oldObjectIDRangeStart, ObjectId* newObjectIDRangeStart, nint* cObjectIDRangeLength)
+        unsafe HResult ICorProfilerCallback4.SurvivingReferences2(uint cSurvivingObjectIDRanges, ObjectId* objectIDRangeStart, nint* cObjectIDRangeLength)
         {
-            return default;
+            return SurvivingReferences2(cSurvivingObjectIDRanges, objectIDRangeStart, cObjectIDRangeLength);
         }
 
-        public virtual unsafe HResult SurvivingReferences2(uint cSurvivingObjectIDRanges, ObjectId* objectIDRangeStart, nint* cObjectIDRangeLength)
+        HResult ICorProfilerCallback4.ReJITCompilationStarted(FunctionId functionId, ReJITId rejitId, bool fIsSafeToBlock)
         {
-            return default;
+            return ReJITCompilationStarted(functionId, rejitId, fIsSafeToBlock);
+        }
+
+        #endregion
+
+        protected virtual HResult ReJITCompilationStarted(FunctionId functionId, ReJITId rejitId, bool fIsSafeToBlock)
+        {
+            return HResult.E_NOTIMPL;
+        }
+
+        protected virtual HResult GetReJITParameters(ModuleId moduleId, MdMethodDef methodId, nint pFunctionControl)
+        {
+            return HResult.E_NOTIMPL;
+        }
+
+        protected virtual HResult ReJITCompilationFinished(FunctionId functionId, ReJITId rejitId, HResult hrStatus, bool fIsSafeToBlock)
+        {
+            return HResult.E_NOTIMPL;
+        }
+
+        protected virtual HResult ReJITError(ModuleId moduleId, MdMethodDef methodId, FunctionId functionId, HResult hrStatus)
+        {
+            return HResult.E_NOTIMPL;
+        }
+
+        protected virtual unsafe HResult MovedReferences2(uint cMovedObjectIDRanges, ObjectId* oldObjectIDRangeStart, ObjectId* newObjectIDRangeStart, nint* cObjectIDRangeLength)
+        {
+            return HResult.E_NOTIMPL;
+        }
+
+        protected virtual unsafe HResult SurvivingReferences2(uint cSurvivingObjectIDRanges, ObjectId* objectIDRangeStart, nint* cObjectIDRangeLength)
+        {
+            return HResult.E_NOTIMPL;
         }
     }
 }

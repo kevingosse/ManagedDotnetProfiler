@@ -9,7 +9,7 @@
             _corProfilerCallback5 = NativeObjects.ICorProfilerCallback5.Wrap(this);
         }
 
-        public override HResult QueryInterface(in Guid guid, out nint ptr)
+        protected override HResult QueryInterface(in Guid guid, out nint ptr)
         {
             if (guid == ICorProfilerCallback5.Guid)
             {
@@ -20,9 +20,17 @@
             return base.QueryInterface(guid, out ptr);
         }
 
-        public virtual unsafe HResult ConditionalWeakTableElementReferences(uint cRootRefs, ObjectId* keyRefIds, ObjectId* valueRefIds, GCHandleId* rootIds)
+        #region ICorProfilerCallback5
+        unsafe HResult ICorProfilerCallback5.ConditionalWeakTableElementReferences(uint cRootRefs, ObjectId* keyRefIds, ObjectId* valueRefIds, GCHandleId* rootIds)
         {
-            return default;
+            return ConditionalWeakTableElementReferences(cRootRefs, keyRefIds, valueRefIds, rootIds);
+        }
+
+        #endregion
+
+        protected virtual unsafe HResult ConditionalWeakTableElementReferences(uint cRootRefs, ObjectId* keyRefIds, ObjectId* valueRefIds, GCHandleId* rootIds)
+        {
+            return HResult.E_NOTIMPL;
         }
     }
 }

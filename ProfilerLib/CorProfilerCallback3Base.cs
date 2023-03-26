@@ -9,7 +9,7 @@
             _corProfilerCallback3 = NativeObjects.ICorProfilerCallback3.Wrap(this);
         }
 
-        public override HResult QueryInterface(in Guid guid, out nint ptr)
+        protected override HResult QueryInterface(in Guid guid, out nint ptr)
         {
             if (guid == ICorProfilerCallback3.Guid)
             {
@@ -20,19 +20,38 @@
             return base.QueryInterface(guid, out ptr);
         }
 
-        public virtual HResult InitializeForAttach(nint pCorProfilerInfoUnk, nint pvClientData, uint cbClientData)
+        #region ICorProfilerCallback3
+
+        HResult ICorProfilerCallback3.ProfilerAttachComplete()
         {
-            return default;
+            return ProfilerAttachComplete();
         }
 
-        public virtual HResult ProfilerAttachComplete()
+        HResult ICorProfilerCallback3.ProfilerDetachSucceeded()
         {
-            return default;
+            return ProfilerDetachSucceeded();
         }
 
-        public virtual HResult ProfilerDetachSucceeded()
+        HResult ICorProfilerCallback3.InitializeForAttach(nint pCorProfilerInfoUnk, nint pvClientData, uint cbClientData)
         {
-            return default;
+            return InitializeForAttach(pCorProfilerInfoUnk, pvClientData, cbClientData);
+        }
+
+        #endregion
+
+        protected virtual HResult InitializeForAttach(nint pCorProfilerInfoUnk, nint pvClientData, uint cbClientData)
+        {
+            return HResult.E_NOTIMPL;
+        }
+
+        protected virtual HResult ProfilerAttachComplete()
+        {
+            return HResult.E_NOTIMPL;
+        }
+
+        protected virtual HResult ProfilerDetachSucceeded()
+        {
+            return HResult.E_NOTIMPL;
         }
     }
 }
