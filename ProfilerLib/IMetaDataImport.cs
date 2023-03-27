@@ -71,9 +71,12 @@ namespace ProfilerLib
             return _impl.GetModuleFromScope(out pmd);
         }
 
-        public unsafe HResult GetTypeDefProps(MdTypeDef td, char* szTypeDef, uint cchTypeDef, out uint pchTypeDef, out int pdwTypeDefFlags, out MdToken ptkExtends)
+        public unsafe HResult GetTypeDefProps(MdTypeDef td, Span<char> typeName, out uint pchTypeDef, out int pdwTypeDefFlags, out MdToken ptkExtends)
         {
-            return _impl.GetTypeDefProps(td, szTypeDef, cchTypeDef, out pchTypeDef, out pdwTypeDefFlags, out ptkExtends);
+            fixed (char* c = typeName)
+            {
+                return _impl.GetTypeDefProps(td, c, (uint)typeName.Length, out pchTypeDef, out pdwTypeDefFlags, out ptkExtends);
+            }
         }
 
         public HResult GetInterfaceImplProps(MdInterfaceImpl iiImpl, out MdTypeDef pClass, out MdToken ptkIface)

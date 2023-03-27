@@ -41,14 +41,11 @@ namespace ManagedDotnetProfiler
 
             var methodName = new string(buffer);
 
-            metaDataImport.GetTypeDefProps(typeDef, null, 0, out size, out _, out _);
+            metaDataImport.GetTypeDefProps(typeDef, null, out size, out _, out _);
 
             buffer = new char[size];
 
-            fixed (char* p = buffer)
-            {
-                metaDataImport.GetTypeDefProps(typeDef, p, size, out _, out _, out _);
-            }
+            metaDataImport.GetTypeDefProps(typeDef, buffer, out _, out _, out _);
 
             var typeName = new string(buffer);
 
@@ -98,14 +95,11 @@ namespace ManagedDotnetProfiler
             ICorProfilerInfo2.GetClassIdInfo(classId, out var moduleId, out var typeDef);
             ICorProfilerInfo2.GetModuleMetaData(moduleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport, out var metaDataImport);
 
-            metaDataImport.GetTypeDefProps(typeDef, null, 0, out var nameCharCount, out _, out _);
+            metaDataImport.GetTypeDefProps(typeDef, null, out var nameCharCount, out _, out _);
 
             Span<char> buffer = stackalloc char[(int)nameCharCount];
 
-            fixed (char* p = buffer)
-            {
-                metaDataImport.GetTypeDefProps(typeDef, p, nameCharCount, out _, out _, out _);
-            }
+            metaDataImport.GetTypeDefProps(typeDef, buffer, out _, out _, out _);
 
             Console.WriteLine("[Profiler] An exception was thrown: " + new string(buffer));
 
@@ -129,16 +123,13 @@ namespace ManagedDotnetProfiler
                 metaDataImport.GetMethodProps(new MdMethodDef(mdToken), out typeDef, p, size, out _, out _, out _, out _, out _, out _);
             }
 
-            metaDataImport.GetTypeDefProps(typeDef, null, 0, out size, out _, out _);
+            metaDataImport.GetTypeDefProps(typeDef, null, out size, out _, out _);
 
             var methodName = new string(buffer);
 
             buffer = new char[size];
 
-            fixed (char* p = buffer)
-            {
-                metaDataImport.GetTypeDefProps(typeDef, p, size, out _, out _, out _);
-            }
+            metaDataImport.GetTypeDefProps(typeDef, buffer, out _, out _, out _);
 
             var typeName = new string(buffer);
 
