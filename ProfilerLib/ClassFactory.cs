@@ -1,8 +1,9 @@
 ﻿using System;
+using ProfilerLib.Interfaces;
 
 namespace ProfilerLib;
 
-public unsafe class ClassFactory : IClassFactory
+public unsafe class ClassFactory : Interfaces.IClassFactory
 {
     private NativeObjects.IClassFactory _classFactory;
 

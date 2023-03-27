@@ -1,6 +1,6 @@
 ﻿namespace ProfilerLib
 {
-    public abstract class CorProfilerCallback3Base : CorProfilerCallback2Base, ICorProfilerCallback3
+    public abstract class CorProfilerCallback3Base : CorProfilerCallback2Base, Interfaces.ICorProfilerCallback3
     {
         private readonly NativeObjects.ICorProfilerCallback3 _corProfilerCallback3;
 
@@ -11,7 +11,7 @@
 
         protected override HResult QueryInterface(in Guid guid, out nint ptr)
         {
-            if (guid == ICorProfilerCallback3.Guid)
+            if (guid == Interfaces.ICorProfilerCallback3.Guid)
             {
                 ptr = _corProfilerCallback3;
                 return HResult.S_OK;
@@ -22,17 +22,17 @@
 
         #region ICorProfilerCallback3
 
-        HResult ICorProfilerCallback3.ProfilerAttachComplete()
+        HResult Interfaces.ICorProfilerCallback3.ProfilerAttachComplete()
         {
             return ProfilerAttachComplete();
         }
 
-        HResult ICorProfilerCallback3.ProfilerDetachSucceeded()
+        HResult Interfaces.ICorProfilerCallback3.ProfilerDetachSucceeded()
         {
             return ProfilerDetachSucceeded();
         }
 
-        HResult ICorProfilerCallback3.InitializeForAttach(nint pCorProfilerInfoUnk, nint pvClientData, uint cbClientData)
+        HResult Interfaces.ICorProfilerCallback3.InitializeForAttach(nint pCorProfilerInfoUnk, nint pvClientData, uint cbClientData)
         {
             return InitializeForAttach(pCorProfilerInfoUnk, pvClientData, cbClientData);
         }

@@ -1,9 +1,9 @@
-﻿namespace ProfilerLib;
+﻿namespace ProfilerLib.Interfaces;
 
 [NativeObject]
-public unsafe interface ICorProfilerInfo12 : ICorProfilerInfo11
+internal unsafe interface ICorProfilerInfo12 : ICorProfilerInfo11
 {
-    public static readonly Guid Guid = new("27b24ccd-1cb1-47c5-96ee-98190dc30959");
+    public new static readonly Guid Guid = new("27b24ccd-1cb1-47c5-96ee-98190dc30959");
 
     HResult EventPipeStartSession(
         uint cProviderConfigs,
@@ -42,9 +42,9 @@ public unsafe interface ICorProfilerInfo12 : ICorProfilerInfo11
                 out EVENTPIPE_EVENT pEvent);
 
     HResult EventPipeWriteEvent(
-                EVENTPIPE_EVENT    @event,
+                EVENTPIPE_EVENT @event,
                 uint cData,
                 COR_PRF_EVENT_DATA* data,
                 in Guid pActivityId,
                 in Guid pRelatedActivityId);
-    }
+}

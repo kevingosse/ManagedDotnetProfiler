@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NativeObjects;
 
 namespace ManagedDotnetProfiler
 {
@@ -27,10 +28,8 @@ namespace ManagedDotnetProfiler
         {
             ICorProfilerInfo2.GetFunctionInfo(functionId, out var classId, out var moduleId, out var mdToken);
 
-            ICorProfilerInfo2.GetModuleMetaData(moduleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport, out var ppOut);
-
-            IMetaDataImport metaDataImport = NativeObjects.IMetaDataImport.Wrap((IntPtr)ppOut);
-
+            ICorProfilerInfo2.GetModuleMetaData(moduleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport, out var metaDataImport);
+            
             metaDataImport.GetMethodProps(new MdMethodDef(mdToken), out var typeDef, null, 0, out var size, out _, out _, out _, out _, out _);
 
             var buffer = new char[size];
@@ -64,7 +63,7 @@ namespace ManagedDotnetProfiler
 
             ICorProfilerInfo3.EnumModules(out void* enumerator);
 
-            ICorProfilerModuleEnum moduleEnumerator = NativeObjects.ICorProfilerModuleEnum.Wrap((IntPtr)enumerator);
+            var moduleEnumerator = new ICorProfilerModuleEnumInvoker((IntPtr)enumerator);
 
             moduleEnumerator.GetCount(out var modulesCount);
 
@@ -97,9 +96,7 @@ namespace ManagedDotnetProfiler
 
             ICorProfilerInfo2.GetClassFromObject(thrownObjectId, out var classId);
             ICorProfilerInfo2.GetClassIdInfo(classId, out var moduleId, out var typeDef);
-            ICorProfilerInfo2.GetModuleMetaData(moduleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport, out void* ppOut);
-
-            var metaDataImport = NativeObjects.IMetaDataImport.Wrap((IntPtr)ppOut);
+            ICorProfilerInfo2.GetModuleMetaData(moduleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport, out var metaDataImport);
 
             metaDataImport.GetTypeDefProps(typeDef, null, 0, out var nameCharCount, out _, out _);
 
@@ -119,9 +116,7 @@ namespace ManagedDotnetProfiler
         {
             ICorProfilerInfo2.GetFunctionInfo(functionId, out var classId, out var moduleId, out var mdToken);
 
-            ICorProfilerInfo2.GetModuleMetaData(moduleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport, out var ppOut);
-
-            IMetaDataImport metaDataImport = NativeObjects.IMetaDataImport.Wrap((IntPtr)ppOut);
+            ICorProfilerInfo2.GetModuleMetaData(moduleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport, out var metaDataImport);
 
             metaDataImport.GetMethodProps(new MdMethodDef(mdToken), out _, null, 0, out var size, out _, out _, out _, out _, out _);
 

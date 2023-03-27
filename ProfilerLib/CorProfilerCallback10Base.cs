@@ -1,6 +1,6 @@
 ﻿namespace ProfilerLib
 {
-    public abstract class CorProfilerCallback10Base : CorProfilerCallback9Base, ICorProfilerCallback10
+    public abstract class CorProfilerCallback10Base : CorProfilerCallback9Base, Interfaces.ICorProfilerCallback10
     {
         private readonly NativeObjects.ICorProfilerCallback10 _corProfilerCallback10;
 
@@ -11,7 +11,7 @@
 
         protected override HResult QueryInterface(in Guid guid, out nint ptr)
         {
-            if (guid == ICorProfilerCallback10.Guid)
+            if (guid == Interfaces.ICorProfilerCallback10.Guid)
             {
                 ptr = _corProfilerCallback10;
                 return HResult.S_OK;
@@ -22,12 +22,12 @@
 
         #region ICorProfilerCallback10
 
-        HResult ICorProfilerCallback10.EventPipeProviderCreated(nint provider)
+        HResult Interfaces.ICorProfilerCallback10.EventPipeProviderCreated(nint provider)
         {
             return EventPipeProviderCreated(provider);
         }
 
-        unsafe HResult ICorProfilerCallback10.EventPipeEventDelivered(nint provider, int eventId, int eventVersion, uint cbMetadataBlob, byte* metadataBlob, uint cbEventData, byte* eventData, in Guid pActivityId, in Guid pRelatedActivityId, ThreadId eventThread, uint numStackFrames, nint* stackFrames)
+        unsafe HResult Interfaces.ICorProfilerCallback10.EventPipeEventDelivered(nint provider, int eventId, int eventVersion, uint cbMetadataBlob, byte* metadataBlob, uint cbEventData, byte* eventData, in Guid pActivityId, in Guid pRelatedActivityId, ThreadId eventThread, uint numStackFrames, nint* stackFrames)
         {
             return EventPipeEventDelivered(provider, eventId, eventVersion, cbMetadataBlob, metadataBlob, cbEventData, eventData, in pActivityId, in pRelatedActivityId, eventThread, numStackFrames, stackFrames);
         }

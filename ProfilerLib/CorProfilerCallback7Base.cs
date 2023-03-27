@@ -1,6 +1,6 @@
 ﻿namespace ProfilerLib
 {
-    public abstract class CorProfilerCallback7Base : CorProfilerCallback6Base, ICorProfilerCallback7
+    public abstract class CorProfilerCallback7Base : CorProfilerCallback6Base, Interfaces.ICorProfilerCallback7
     {
         private readonly NativeObjects.ICorProfilerCallback7 _corProfilerCallback7;
 
@@ -11,7 +11,7 @@
 
         protected override HResult QueryInterface(in Guid guid, out nint ptr)
         {
-            if (guid == ICorProfilerCallback7.Guid)
+            if (guid == Interfaces.ICorProfilerCallback7.Guid)
             {
                 ptr = _corProfilerCallback7;
                 return HResult.S_OK;
@@ -22,7 +22,7 @@
 
         #region ICorProfilerCallback7
 
-        HResult ICorProfilerCallback7.ModuleInMemorySymbolsUpdated(ModuleId moduleId)
+        HResult Interfaces.ICorProfilerCallback7.ModuleInMemorySymbolsUpdated(ModuleId moduleId)
         {
             return ModuleInMemorySymbolsUpdated(moduleId);
         }

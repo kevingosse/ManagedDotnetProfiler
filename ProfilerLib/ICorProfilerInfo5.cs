@@ -1,29 +1,21 @@
 ﻿namespace ProfilerLib;
 
-[NativeObject]
-public unsafe interface ICorProfilerInfo5 : ICorProfilerInfo4
+public class ICorProfilerInfo5 : ICorProfilerInfo4
 {
-    public static readonly Guid Guid = new("07602928-CE38-4B83-81E7-74ADAF781214");
+    private NativeObjects.ICorProfilerInfo5Invoker _impl;
 
-    /*
-     * The code profiler calls GetEventMask2 to obtain the current event
-     * categories for which it is to receive event notifications from the CLR
-     *
-     * *pdwEventsLow is a bitwise combination of values from COR_PRF_MONITOR
-     * *pdwEventsHigh is a bitwise combination of values from COR_PRF_HIGH_MONITOR
-     */
-    HResult GetEventMask2(
-        out int pdwEventsLow,
-        out int pdwEventsHigh);
+    public ICorProfilerInfo5(IntPtr ptr) : base(ptr)
+    {
+        _impl = new(ptr);
+    }
 
-    /*
-     * The code profiler calls SetEventMask2 to set the event categories for
-     * which it is set to receive notification from the CLR.
-     *
-     * dwEventsLow is a bitwise combination of values from COR_PRF_MONITOR
-     * dwEventsHigh is a bitwise combination of values from COR_PRF_HIGH_MONITOR
-     */
-    HResult SetEventMask2(
-        int dwEventsLow,
-        int dwEventsHigh);
+    public HResult GetEventMask2(out int pdwEventsLow, out int pdwEventsHigh)
+    {
+        return _impl.GetEventMask2(out pdwEventsLow, out pdwEventsHigh);
+    }
+
+    public HResult SetEventMask2(int dwEventsLow, int dwEventsHigh)
+    {
+        return _impl.SetEventMask2(dwEventsLow, dwEventsHigh);
+    }
 }

@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ProfilerLib
+﻿namespace ProfilerLib
 {
-    public abstract class CorProfilerCallbackBase : Unknown, ICorProfilerCallback
+    public abstract class CorProfilerCallbackBase : Unknown, Interfaces.ICorProfilerCallback
     {
         private readonly NativeObjects.ICorProfilerCallback _corProfilerCallback;
 
@@ -30,7 +24,7 @@ namespace ProfilerLib
 
         protected override HResult QueryInterface(in Guid guid, out nint ptr)
         {
-            if (guid == ProfilerLib.ICorProfilerCallback.Guid)
+            if (guid == Interfaces.ICorProfilerCallback.Guid)
             {
                 ptr = _corProfilerCallback;
                 return HResult.S_OK;
@@ -46,12 +40,12 @@ namespace ProfilerLib
         {
             int supportedInterface = 0;
 
-            var impl = NativeObjects.IUnknown.Wrap(pICorProfilerInfoUnk);
+            var impl = new NativeObjects.IUnknownInvoker(pICorProfilerInfoUnk);
 
             HResult result;
             IntPtr ptr;
 
-            result = impl.QueryInterface(ProfilerLib.ICorProfilerInfo.Guid, out ptr);
+            result = impl.QueryInterface(Interfaces.ICorProfilerInfo.Guid, out ptr);
 
             if (!result.IsOK)
             {
@@ -60,20 +54,9 @@ namespace ProfilerLib
 
             supportedInterface++;
 
-            ICorProfilerInfo = NativeObjects.ICorProfilerInfo.Wrap(ptr);
+            ICorProfilerInfo = new ICorProfilerInfo(ptr);
 
-            result = impl.QueryInterface(ProfilerLib.ICorProfilerInfo2.Guid, out ptr);
-
-            if (!result.IsOK)
-            {
-                return supportedInterface;
-            }
-
-            supportedInterface++;
-
-            ICorProfilerInfo2 = NativeObjects.ICorProfilerInfo2.Wrap(ptr);
-
-            result = impl.QueryInterface(ProfilerLib.ICorProfilerInfo3.Guid, out ptr);
+            result = impl.QueryInterface(Interfaces.ICorProfilerInfo2.Guid, out ptr);
 
             if (!result.IsOK)
             {
@@ -82,20 +65,9 @@ namespace ProfilerLib
 
             supportedInterface++;
 
-            ICorProfilerInfo3 = NativeObjects.ICorProfilerInfo3.Wrap(ptr);
+            ICorProfilerInfo2 = new ICorProfilerInfo2(ptr);
 
-            result = impl.QueryInterface(ProfilerLib.ICorProfilerInfo4.Guid, out ptr);
-
-            if (!result.IsOK)
-            {
-                return supportedInterface;
-            }
-
-            supportedInterface++;
-
-            ICorProfilerInfo4 = NativeObjects.ICorProfilerInfo4.Wrap(ptr);
-
-            result = impl.QueryInterface(ProfilerLib.ICorProfilerInfo5.Guid, out ptr);
+            result = impl.QueryInterface(Interfaces.ICorProfilerInfo3.Guid, out ptr);
 
             if (!result.IsOK)
             {
@@ -104,20 +76,9 @@ namespace ProfilerLib
 
             supportedInterface++;
 
-            ICorProfilerInfo5 = NativeObjects.ICorProfilerInfo5.Wrap(ptr);
+            ICorProfilerInfo3 = new ICorProfilerInfo3(ptr);
 
-            result = impl.QueryInterface(ProfilerLib.ICorProfilerInfo6.Guid, out ptr);
-
-            if (!result.IsOK)
-            {
-                return supportedInterface;
-            }
-
-            supportedInterface++;
-
-            ICorProfilerInfo6 = NativeObjects.ICorProfilerInfo6.Wrap(ptr);
-
-            result = impl.QueryInterface(ProfilerLib.ICorProfilerInfo7.Guid, out ptr);
+            result = impl.QueryInterface(Interfaces.ICorProfilerInfo4.Guid, out ptr);
 
             if (!result.IsOK)
             {
@@ -126,20 +87,9 @@ namespace ProfilerLib
 
             supportedInterface++;
 
-            ICorProfilerInfo7 = NativeObjects.ICorProfilerInfo7.Wrap(ptr);
+            ICorProfilerInfo4 = new ICorProfilerInfo4(ptr);
 
-            result = impl.QueryInterface(ProfilerLib.ICorProfilerInfo8.Guid, out ptr);
-
-            if (!result.IsOK)
-            {
-                return supportedInterface;
-            }
-
-            supportedInterface++;
-
-            ICorProfilerInfo8 = NativeObjects.ICorProfilerInfo8.Wrap(ptr);
-
-            result = impl.QueryInterface(ProfilerLib.ICorProfilerInfo9.Guid, out ptr);
+            result = impl.QueryInterface(Interfaces.ICorProfilerInfo5.Guid, out ptr);
 
             if (!result.IsOK)
             {
@@ -148,20 +98,9 @@ namespace ProfilerLib
 
             supportedInterface++;
 
-            ICorProfilerInfo9 = NativeObjects.ICorProfilerInfo9.Wrap(ptr);
+            ICorProfilerInfo5 = new ICorProfilerInfo5(ptr);
 
-            result = impl.QueryInterface(ProfilerLib.ICorProfilerInfo10.Guid, out ptr);
-
-            if (!result.IsOK)
-            {
-                return supportedInterface;
-            }
-
-            supportedInterface++;
-
-            ICorProfilerInfo10 = NativeObjects.ICorProfilerInfo10.Wrap(ptr);
-
-            result = impl.QueryInterface(ProfilerLib.ICorProfilerInfo11.Guid, out ptr);
+            result = impl.QueryInterface(Interfaces.ICorProfilerInfo6.Guid, out ptr);
 
             if (!result.IsOK)
             {
@@ -170,14 +109,69 @@ namespace ProfilerLib
 
             supportedInterface++;
 
-            ICorProfilerInfo11 = NativeObjects.ICorProfilerInfo11.Wrap(ptr);
+            ICorProfilerInfo6 = new ICorProfilerInfo6(ptr);
+
+            result = impl.QueryInterface(Interfaces.ICorProfilerInfo7.Guid, out ptr);
+
+            if (!result.IsOK)
+            {
+                return supportedInterface;
+            }
+
+            supportedInterface++;
+
+            ICorProfilerInfo7 = new ICorProfilerInfo7(ptr);
+
+            result = impl.QueryInterface(Interfaces.ICorProfilerInfo8.Guid, out ptr);
+
+            if (!result.IsOK)
+            {
+                return supportedInterface;
+            }
+
+            supportedInterface++;
+
+            ICorProfilerInfo8 = new ICorProfilerInfo8(ptr);
+
+            result = impl.QueryInterface(Interfaces.ICorProfilerInfo9.Guid, out ptr);
+
+            if (!result.IsOK)
+            {
+                return supportedInterface;
+            }
+
+            supportedInterface++;
+
+            ICorProfilerInfo9 = new ICorProfilerInfo9(ptr);
+
+            result = impl.QueryInterface(Interfaces.ICorProfilerInfo10.Guid, out ptr);
+
+            if (!result.IsOK)
+            {
+                return supportedInterface;
+            }
+
+            supportedInterface++;
+
+            ICorProfilerInfo10 = new ICorProfilerInfo10(ptr);
+
+            result = impl.QueryInterface(Interfaces.ICorProfilerInfo11.Guid, out ptr);
+
+            if (!result.IsOK)
+            {
+                return supportedInterface;
+            }
+
+            supportedInterface++;
+
+            ICorProfilerInfo11 = new ICorProfilerInfo11(ptr);
 
             return supportedInterface;
         }
 
         #region ICorProfilerCallback
 
-        HResult ICorProfilerCallback.Initialize(nint pICorProfilerInfoUnk)
+        HResult Interfaces.ICorProfilerCallback.Initialize(nint pICorProfilerInfoUnk)
         {
             Console.WriteLine($"CorProfilerCallbackBase - Initialize");
 
@@ -188,342 +182,342 @@ namespace ProfilerLib
             return Initialize(version);
         }
 
-        HResult ICorProfilerCallback.Shutdown()
+        HResult Interfaces.ICorProfilerCallback.Shutdown()
         {
             return Shutdown();
         }
 
-        HResult ICorProfilerCallback.AppDomainCreationStarted(AppDomainId appDomainId)
+        HResult Interfaces.ICorProfilerCallback.AppDomainCreationStarted(AppDomainId appDomainId)
         {
             return AppDomainCreationStarted(appDomainId);
         }
 
-        HResult ICorProfilerCallback.AppDomainCreationFinished(AppDomainId appDomainId, HResult hrStatus)
+        HResult Interfaces.ICorProfilerCallback.AppDomainCreationFinished(AppDomainId appDomainId, HResult hrStatus)
         {
             return AppDomainCreationFinished(appDomainId, hrStatus);
         }
 
-        HResult ICorProfilerCallback.AppDomainShutdownStarted(AppDomainId appDomainId)
+        HResult Interfaces.ICorProfilerCallback.AppDomainShutdownStarted(AppDomainId appDomainId)
         {
             return AppDomainShutdownStarted(appDomainId);
         }
 
-        HResult ICorProfilerCallback.AppDomainShutdownFinished(AppDomainId appDomainId, HResult hrStatus)
+        HResult Interfaces.ICorProfilerCallback.AppDomainShutdownFinished(AppDomainId appDomainId, HResult hrStatus)
         {
             return AppDomainShutdownFinished(appDomainId, hrStatus);
         }
 
-        HResult ICorProfilerCallback.AssemblyLoadStarted(AssemblyId assemblyId)
+        HResult Interfaces.ICorProfilerCallback.AssemblyLoadStarted(AssemblyId assemblyId)
         {
             return AssemblyLoadStarted(assemblyId);
         }
 
-        HResult ICorProfilerCallback.AssemblyLoadFinished(AssemblyId assemblyId, HResult hrStatus)
+        HResult Interfaces.ICorProfilerCallback.AssemblyLoadFinished(AssemblyId assemblyId, HResult hrStatus)
         {
             return AssemblyLoadFinished(assemblyId, hrStatus);
         }
 
-        HResult ICorProfilerCallback.AssemblyUnloadStarted(AssemblyId assemblyId)
+        HResult Interfaces.ICorProfilerCallback.AssemblyUnloadStarted(AssemblyId assemblyId)
         {
             return AssemblyUnloadStarted(assemblyId);
         }
 
-        HResult ICorProfilerCallback.AssemblyUnloadFinished(AssemblyId assemblyId, HResult hrStatus)
+        HResult Interfaces.ICorProfilerCallback.AssemblyUnloadFinished(AssemblyId assemblyId, HResult hrStatus)
         {
             return AssemblyUnloadFinished(assemblyId, hrStatus);
         }
 
-        HResult ICorProfilerCallback.ModuleLoadStarted(ModuleId moduleId)
+        HResult Interfaces.ICorProfilerCallback.ModuleLoadStarted(ModuleId moduleId)
         {
             return ModuleLoadStarted(moduleId);
         }
 
-        HResult ICorProfilerCallback.ModuleLoadFinished(ModuleId moduleId, HResult hrStatus)
+        HResult Interfaces.ICorProfilerCallback.ModuleLoadFinished(ModuleId moduleId, HResult hrStatus)
         {
             return ModuleLoadFinished(moduleId, hrStatus);
         }
 
-        HResult ICorProfilerCallback.ModuleUnloadStarted(ModuleId moduleId)
+        HResult Interfaces.ICorProfilerCallback.ModuleUnloadStarted(ModuleId moduleId)
         {
             return ModuleUnloadStarted(moduleId);
         }
 
-        HResult ICorProfilerCallback.ModuleUnloadFinished(ModuleId moduleId, HResult hrStatus)
+        HResult Interfaces.ICorProfilerCallback.ModuleUnloadFinished(ModuleId moduleId, HResult hrStatus)
         {
             return ModuleUnloadFinished(moduleId, hrStatus);
         }
 
-        HResult ICorProfilerCallback.ModuleAttachedToAssembly(ModuleId moduleId, AssemblyId assemblyId)
+        HResult Interfaces.ICorProfilerCallback.ModuleAttachedToAssembly(ModuleId moduleId, AssemblyId assemblyId)
         {
             return ModuleAttachedToAssembly(moduleId, assemblyId);
         }
 
-        HResult ICorProfilerCallback.ClassLoadStarted(ClassId classId)
+        HResult Interfaces.ICorProfilerCallback.ClassLoadStarted(ClassId classId)
         {
             return ClassLoadStarted(classId);
         }
 
-        HResult ICorProfilerCallback.ClassLoadFinished(ClassId classId, HResult hrStatus)
+        HResult Interfaces.ICorProfilerCallback.ClassLoadFinished(ClassId classId, HResult hrStatus)
         {
             return ClassLoadFinished(classId, hrStatus);
         }
 
-        HResult ICorProfilerCallback.ClassUnloadStarted(ClassId classId)
+        HResult Interfaces.ICorProfilerCallback.ClassUnloadStarted(ClassId classId)
         {
             return ClassUnloadStarted(classId);
         }
 
-        HResult ICorProfilerCallback.ClassUnloadFinished(ClassId classId, HResult hrStatus)
+        HResult Interfaces.ICorProfilerCallback.ClassUnloadFinished(ClassId classId, HResult hrStatus)
         {
             return ClassUnloadFinished(classId, hrStatus);
         }
 
-        HResult ICorProfilerCallback.FunctionUnloadStarted(FunctionId functionId)
+        HResult Interfaces.ICorProfilerCallback.FunctionUnloadStarted(FunctionId functionId)
         {
             return FunctionUnloadStarted(functionId);
         }
 
-        HResult ICorProfilerCallback.JITCompilationStarted(FunctionId functionId, bool fIsSafeToBlock)
+        HResult Interfaces.ICorProfilerCallback.JITCompilationStarted(FunctionId functionId, bool fIsSafeToBlock)
         {
             return JITCompilationStarted(functionId, fIsSafeToBlock);
         }
 
-        HResult ICorProfilerCallback.JITCompilationFinished(FunctionId functionId, HResult hrStatus, bool fIsSafeToBlock)
+        HResult Interfaces.ICorProfilerCallback.JITCompilationFinished(FunctionId functionId, HResult hrStatus, bool fIsSafeToBlock)
         {
             return JITCompilationFinished(functionId, hrStatus, fIsSafeToBlock);
         }
 
-        HResult ICorProfilerCallback.JITCachedFunctionSearchStarted(FunctionId functionId, out bool pbUseCachedFunction)
+        HResult Interfaces.ICorProfilerCallback.JITCachedFunctionSearchStarted(FunctionId functionId, out bool pbUseCachedFunction)
         {
             return JITCachedFunctionSearchStarted(functionId, out pbUseCachedFunction);
         }
 
-        HResult ICorProfilerCallback.JITCachedFunctionSearchFinished(FunctionId functionId, COR_PRF_JIT_CACHE result)
+        HResult Interfaces.ICorProfilerCallback.JITCachedFunctionSearchFinished(FunctionId functionId, COR_PRF_JIT_CACHE result)
         {
             return JITCachedFunctionSearchFinished(functionId, result);
         }
 
-        HResult ICorProfilerCallback.JITFunctionPitched(FunctionId functionId)
+        HResult Interfaces.ICorProfilerCallback.JITFunctionPitched(FunctionId functionId)
         {
             return JITFunctionPitched(functionId);
         }
 
-        HResult ICorProfilerCallback.JITInlining(FunctionId callerId, FunctionId calleeId, out bool pfShouldInline)
+        HResult Interfaces.ICorProfilerCallback.JITInlining(FunctionId callerId, FunctionId calleeId, out bool pfShouldInline)
         {
             return JITInlining(callerId, calleeId, out pfShouldInline);
         }
 
-        HResult ICorProfilerCallback.ThreadCreated(ThreadId threadId)
+        HResult Interfaces.ICorProfilerCallback.ThreadCreated(ThreadId threadId)
         {
             return ThreadCreated(threadId);
         }
 
-        HResult ICorProfilerCallback.ThreadDestroyed(ThreadId threadId)
+        HResult Interfaces.ICorProfilerCallback.ThreadDestroyed(ThreadId threadId)
         {
             return ThreadDestroyed(threadId);
         }
 
-        HResult ICorProfilerCallback.ThreadAssignedToOSThread(ThreadId managedThreadId, int osThreadId)
+        HResult Interfaces.ICorProfilerCallback.ThreadAssignedToOSThread(ThreadId managedThreadId, int osThreadId)
         {
             return ThreadAssignedToOSThread(managedThreadId, osThreadId);
         }
 
-        HResult ICorProfilerCallback.RemotingClientInvocationStarted()
+        HResult Interfaces.ICorProfilerCallback.RemotingClientInvocationStarted()
         {
             return RemotingClientInvocationStarted();
         }
 
-        HResult ICorProfilerCallback.RemotingClientSendingMessage(in Guid pCookie, bool fIsAsync)
+        HResult Interfaces.ICorProfilerCallback.RemotingClientSendingMessage(in Guid pCookie, bool fIsAsync)
         {
             return RemotingClientSendingMessage(in pCookie, fIsAsync);
         }
 
-        HResult ICorProfilerCallback.RemotingClientReceivingReply(in Guid pCookie, bool fIsAsync)
+        HResult Interfaces.ICorProfilerCallback.RemotingClientReceivingReply(in Guid pCookie, bool fIsAsync)
         {
             return RemotingClientReceivingReply(in pCookie, fIsAsync);
         }
 
-        HResult ICorProfilerCallback.RemotingClientInvocationFinished()
+        HResult Interfaces.ICorProfilerCallback.RemotingClientInvocationFinished()
         {
             return RemotingClientInvocationFinished();
         }
 
-        HResult ICorProfilerCallback.RemotingServerReceivingMessage(in Guid pCookie, bool fIsAsync)
+        HResult Interfaces.ICorProfilerCallback.RemotingServerReceivingMessage(in Guid pCookie, bool fIsAsync)
         {
             return RemotingServerReceivingMessage(in pCookie, fIsAsync);
         }
 
-        HResult ICorProfilerCallback.RemotingServerInvocationStarted()
+        HResult Interfaces.ICorProfilerCallback.RemotingServerInvocationStarted()
         {
             return RemotingServerInvocationStarted();
         }
 
-        HResult ICorProfilerCallback.RemotingServerInvocationReturned()
+        HResult Interfaces.ICorProfilerCallback.RemotingServerInvocationReturned()
         {
             return RemotingServerInvocationReturned();
         }
 
-        HResult ICorProfilerCallback.RemotingServerSendingReply(in Guid pCookie, bool fIsAsync)
+        HResult Interfaces.ICorProfilerCallback.RemotingServerSendingReply(in Guid pCookie, bool fIsAsync)
         {
             return RemotingServerSendingReply(in pCookie, fIsAsync);
         }
 
-        HResult ICorProfilerCallback.UnmanagedToManagedTransition(FunctionId functionId, COR_PRF_TRANSITION_REASON reason)
+        HResult Interfaces.ICorProfilerCallback.UnmanagedToManagedTransition(FunctionId functionId, COR_PRF_TRANSITION_REASON reason)
         {
             return UnmanagedToManagedTransition(functionId, reason);
         }
 
-        HResult ICorProfilerCallback.ManagedToUnmanagedTransition(FunctionId functionId, COR_PRF_TRANSITION_REASON reason)
+        HResult Interfaces.ICorProfilerCallback.ManagedToUnmanagedTransition(FunctionId functionId, COR_PRF_TRANSITION_REASON reason)
         {
             return ManagedToUnmanagedTransition(functionId, reason);
         }
 
-        HResult ICorProfilerCallback.RuntimeSuspendStarted(COR_PRF_SUSPEND_REASON suspendReason)
+        HResult Interfaces.ICorProfilerCallback.RuntimeSuspendStarted(COR_PRF_SUSPEND_REASON suspendReason)
         {
             return RuntimeSuspendStarted(suspendReason);
         }
 
-        HResult ICorProfilerCallback.RuntimeSuspendFinished()
+        HResult Interfaces.ICorProfilerCallback.RuntimeSuspendFinished()
         {
             return RuntimeSuspendFinished();
         }
 
-        HResult ICorProfilerCallback.RuntimeSuspendAborted()
+        HResult Interfaces.ICorProfilerCallback.RuntimeSuspendAborted()
         {
             return RuntimeSuspendAborted();
         }
 
-        HResult ICorProfilerCallback.RuntimeResumeStarted()
+        HResult Interfaces.ICorProfilerCallback.RuntimeResumeStarted()
         {
             return RuntimeResumeStarted();
         }
 
-        HResult ICorProfilerCallback.RuntimeResumeFinished()
+        HResult Interfaces.ICorProfilerCallback.RuntimeResumeFinished()
         {
             return RuntimeResumeFinished();
         }
 
-        HResult ICorProfilerCallback.RuntimeThreadSuspended(ThreadId threadId)
+        HResult Interfaces.ICorProfilerCallback.RuntimeThreadSuspended(ThreadId threadId)
         {
             return RuntimeThreadSuspended(threadId);
         }
 
-        HResult ICorProfilerCallback.RuntimeThreadResumed(ThreadId threadId)
+        HResult Interfaces.ICorProfilerCallback.RuntimeThreadResumed(ThreadId threadId)
         {
             return RuntimeThreadResumed(threadId);
         }
 
-        unsafe HResult ICorProfilerCallback.MovedReferences(uint cMovedObjectIDRanges, ObjectId* oldObjectIDRangeStart, ObjectId* newObjectIDRangeStart, uint* cObjectIDRangeLength)
+        unsafe HResult Interfaces.ICorProfilerCallback.MovedReferences(uint cMovedObjectIDRanges, ObjectId* oldObjectIDRangeStart, ObjectId* newObjectIDRangeStart, uint* cObjectIDRangeLength)
         {
             return MovedReferences(cMovedObjectIDRanges, oldObjectIDRangeStart, newObjectIDRangeStart, cObjectIDRangeLength);
         }
 
-        HResult ICorProfilerCallback.ObjectAllocated(ObjectId objectId, ClassId classId)
+        HResult Interfaces.ICorProfilerCallback.ObjectAllocated(ObjectId objectId, ClassId classId)
         {
             return ObjectAllocated(objectId, classId);
         }
 
-        unsafe HResult ICorProfilerCallback.ObjectsAllocatedByClass(uint cClassCount, ClassId* classIds, uint* cObjects)
+        unsafe HResult Interfaces.ICorProfilerCallback.ObjectsAllocatedByClass(uint cClassCount, ClassId* classIds, uint* cObjects)
         {
             return ObjectsAllocatedByClass(cClassCount, classIds, cObjects);
         }
 
-        unsafe HResult ICorProfilerCallback.ObjectReferences(ObjectId objectId, ClassId classId, uint cObjectRefs, ObjectId* objectRefIds)
+        unsafe HResult Interfaces.ICorProfilerCallback.ObjectReferences(ObjectId objectId, ClassId classId, uint cObjectRefs, ObjectId* objectRefIds)
         {
             return ObjectReferences(objectId, classId, cObjectRefs, objectRefIds);
         }
 
-        unsafe HResult ICorProfilerCallback.RootReferences(uint cRootRefs, ObjectId* rootRefIds)
+        unsafe HResult Interfaces.ICorProfilerCallback.RootReferences(uint cRootRefs, ObjectId* rootRefIds)
         {
             return RootReferences(cRootRefs, rootRefIds);
         }
 
-        HResult ICorProfilerCallback.ExceptionThrown(ObjectId thrownObjectId)
+        HResult Interfaces.ICorProfilerCallback.ExceptionThrown(ObjectId thrownObjectId)
         {
             return ExceptionThrown(thrownObjectId);
         }
 
-        HResult ICorProfilerCallback.ExceptionSearchFunctionEnter(FunctionId functionId)
+        HResult Interfaces.ICorProfilerCallback.ExceptionSearchFunctionEnter(FunctionId functionId)
         {
             return ExceptionSearchFunctionEnter(functionId);
         }
 
-        HResult ICorProfilerCallback.ExceptionSearchFunctionLeave()
+        HResult Interfaces.ICorProfilerCallback.ExceptionSearchFunctionLeave()
         {
             return ExceptionSearchFunctionLeave();
         }
 
-        HResult ICorProfilerCallback.ExceptionSearchFilterEnter(FunctionId functionId)
+        HResult Interfaces.ICorProfilerCallback.ExceptionSearchFilterEnter(FunctionId functionId)
         {
             return ExceptionSearchFilterEnter(functionId);
         }
 
-        HResult ICorProfilerCallback.ExceptionSearchFilterLeave()
+        HResult Interfaces.ICorProfilerCallback.ExceptionSearchFilterLeave()
         {
             return ExceptionSearchFilterLeave();
         }
 
-        HResult ICorProfilerCallback.ExceptionSearchCatcherFound(FunctionId functionId)
+        HResult Interfaces.ICorProfilerCallback.ExceptionSearchCatcherFound(FunctionId functionId)
         {
             return ExceptionSearchCatcherFound(functionId);
         }
 
-        unsafe HResult ICorProfilerCallback.ExceptionOSHandlerEnter(nint* __unused)
+        unsafe HResult Interfaces.ICorProfilerCallback.ExceptionOSHandlerEnter(nint* __unused)
         {
             return ExceptionOSHandlerEnter(__unused);
         }
 
-        unsafe HResult ICorProfilerCallback.ExceptionOSHandlerLeave(nint* __unused)
+        unsafe HResult Interfaces.ICorProfilerCallback.ExceptionOSHandlerLeave(nint* __unused)
         {
             return ExceptionOSHandlerLeave(__unused);
         }
 
-        HResult ICorProfilerCallback.ExceptionUnwindFunctionEnter(FunctionId functionId)
+        HResult Interfaces.ICorProfilerCallback.ExceptionUnwindFunctionEnter(FunctionId functionId)
         {
             return ExceptionUnwindFunctionEnter(functionId);
         }
 
-        HResult ICorProfilerCallback.ExceptionUnwindFunctionLeave()
+        HResult Interfaces.ICorProfilerCallback.ExceptionUnwindFunctionLeave()
         {
             return ExceptionUnwindFunctionLeave();
         }
 
-        HResult ICorProfilerCallback.ExceptionUnwindFinallyEnter(FunctionId functionId)
+        HResult Interfaces.ICorProfilerCallback.ExceptionUnwindFinallyEnter(FunctionId functionId)
         {
             return ExceptionUnwindFinallyEnter(functionId);
         }
 
-        HResult ICorProfilerCallback.ExceptionUnwindFinallyLeave()
+        HResult Interfaces.ICorProfilerCallback.ExceptionUnwindFinallyLeave()
         {
             return ExceptionUnwindFinallyLeave();
         }
 
-        HResult ICorProfilerCallback.ExceptionCatcherEnter(FunctionId functionId, ObjectId objectId)
+        HResult Interfaces.ICorProfilerCallback.ExceptionCatcherEnter(FunctionId functionId, ObjectId objectId)
         {
             return ExceptionCatcherEnter(functionId, objectId);
         }
 
-        HResult ICorProfilerCallback.ExceptionCatcherLeave()
+        HResult Interfaces.ICorProfilerCallback.ExceptionCatcherLeave()
         {
             return ExceptionCatcherLeave();
         }
 
-        unsafe HResult ICorProfilerCallback.COMClassicVTableCreated(ClassId wrappedClassId, in Guid implementedIID, void* pVTable, uint cSlots)
+        unsafe HResult Interfaces.ICorProfilerCallback.COMClassicVTableCreated(ClassId wrappedClassId, in Guid implementedIID, void* pVTable, uint cSlots)
         {
             return COMClassicVTableCreated(wrappedClassId, in implementedIID, pVTable, cSlots);
         }
 
-        unsafe HResult ICorProfilerCallback.COMClassicVTableDestroyed(ClassId wrappedClassId, in Guid implementedIID, void* pVTable)
+        unsafe HResult Interfaces.ICorProfilerCallback.COMClassicVTableDestroyed(ClassId wrappedClassId, in Guid implementedIID, void* pVTable)
         {
             return COMClassicVTableDestroyed(wrappedClassId, in implementedIID, pVTable);
         }
 
-        HResult ICorProfilerCallback.ExceptionCLRCatcherFound()
+        HResult Interfaces.ICorProfilerCallback.ExceptionCLRCatcherFound()
         {
             return ExceptionCLRCatcherFound();
         }
 
-        HResult ICorProfilerCallback.ExceptionCLRCatcherExecute()
+        HResult Interfaces.ICorProfilerCallback.ExceptionCLRCatcherExecute()
         {
             return ExceptionCLRCatcherExecute();
         }

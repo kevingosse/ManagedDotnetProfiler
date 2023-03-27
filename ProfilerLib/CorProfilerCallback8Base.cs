@@ -1,6 +1,6 @@
 ﻿namespace ProfilerLib
 {
-    public abstract class CorProfilerCallback8Base : CorProfilerCallback7Base, ICorProfilerCallback8
+    public abstract class CorProfilerCallback8Base : CorProfilerCallback7Base, Interfaces.ICorProfilerCallback8
     {
         private readonly NativeObjects.ICorProfilerCallback8 _corProfilerCallback8;
 
@@ -11,7 +11,7 @@
 
         protected override HResult QueryInterface(in Guid guid, out nint ptr)
         {
-            if (guid == ICorProfilerCallback8.Guid)
+            if (guid == Interfaces.ICorProfilerCallback8.Guid)
             {
                 ptr = _corProfilerCallback8;
                 return HResult.S_OK;
@@ -22,12 +22,12 @@
 
         #region ICorProfilerCallback8
 
-        HResult ICorProfilerCallback8.DynamicMethodJITCompilationFinished(FunctionId functionId, HResult hrStatus, bool fIsSafeToBlock)
+        HResult Interfaces.ICorProfilerCallback8.DynamicMethodJITCompilationFinished(FunctionId functionId, HResult hrStatus, bool fIsSafeToBlock)
         {
             return DynamicMethodJITCompilationFinished(functionId, hrStatus, fIsSafeToBlock);
         }
 
-        unsafe HResult ICorProfilerCallback8.DynamicMethodJITCompilationStarted(FunctionId functionId, bool fIsSafeToBlock, byte* pILHeader, uint cbILHeader)
+        unsafe HResult Interfaces.ICorProfilerCallback8.DynamicMethodJITCompilationStarted(FunctionId functionId, bool fIsSafeToBlock, byte* pILHeader, uint cbILHeader)
         {
             return DynamicMethodJITCompilationStarted(functionId, fIsSafeToBlock, pILHeader, cbILHeader);
         }

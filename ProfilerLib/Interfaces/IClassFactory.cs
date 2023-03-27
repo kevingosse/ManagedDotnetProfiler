@@ -1,4 +1,4 @@
-﻿namespace ProfilerLib;
+﻿namespace ProfilerLib.Interfaces;
 
 [NativeObject]
 public interface IClassFactory : IUnknown

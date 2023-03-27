@@ -1,31 +1,21 @@
 ﻿namespace ProfilerLib;
 
-[NativeObject]
-public unsafe interface ICorProfilerInfo11 : ICorProfilerInfo10
+public class ICorProfilerInfo11 : ICorProfilerInfo10
 {
-    public static readonly Guid Guid = new("06398876-8987-4154-B621-40A00D6E4D04");
+    private NativeObjects.ICorProfilerInfo11Invoker _impl;
 
-    /*
-     * Get environment variable for the running managed code.
-     */
-    HResult GetEnvironmentVariable(
-        char* szName,
-        uint cchValue,
-        out uint pcchValue,
-        char* szValue);
+    public ICorProfilerInfo11(IntPtr ptr) : base(ptr)
+    {
+        _impl = new(ptr);
+    }
 
-    /*
-     * Set environment variable for the running managed code.
-     *
-     * The code profiler calls this function to modify environment variables of the
-     * current managed process. For example, it can be used in the profiler's Initialize()
-     * or InitializeForAttach() callbacks.
-     *
-     * szName is the name of the environment variable, should not be NULL.
-     *
-     * szValue is the contents of the environment variable, or NULL if the variable should be deleted.
-     */
-    HResult SetEnvironmentVariable(
-        char* szName,
-        char* szValue);
+    public unsafe HResult GetEnvironmentVariable(char* szName, uint cchValue, out uint pcchValue, char* szValue)
+    {
+        return _impl.GetEnvironmentVariable(szName, cchValue, out pcchValue, szValue);
+    }
+
+    public unsafe HResult SetEnvironmentVariable(char* szName, char* szValue)
+    {
+        return _impl.SetEnvironmentVariable(szName, szValue);
+    }
 }

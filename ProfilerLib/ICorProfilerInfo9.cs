@@ -1,16 +1,26 @@
 ﻿namespace ProfilerLib;
 
-[NativeObject]
-public unsafe interface ICorProfilerInfo9 : ICorProfilerInfo8
+public class ICorProfilerInfo9 : ICorProfilerInfo8
 {
-    public static readonly Guid Guid = new("008170DB-F8CC-4796-9A51-DC8AA0B47012");
+    private NativeObjects.ICorProfilerInfo9Invoker _impl;
 
-    //Given functionId + rejitId, enumerate the native code start address of all jitted versions of this code that currently exist
-    HResult GetNativeCodeStartAddresses(FunctionId functionID, ReJITId reJitId, uint cCodeStartAddresses, uint* pcCodeStartAddresses, uint* codeStartAddresses);
+    public ICorProfilerInfo9(IntPtr ptr) : base(ptr)
+    {
+        _impl = new(ptr);
+    }
 
-    //Given the native code start address, return the native->IL mapping information for this jitted version of the code
-    HResult GetILToNativeMapping3(uint* pNativeCodeStartAddress, uint cMap, uint* pcMap, COR_DEBUG_IL_TO_NATIVE_MAP* map);
+    public unsafe HResult GetNativeCodeStartAddresses(FunctionId functionID, ReJITId reJitId, uint cCodeStartAddresses, uint* pcCodeStartAddresses, uint* codeStartAddresses)
+    {
+        return _impl.GetNativeCodeStartAddresses(functionID, reJitId, cCodeStartAddresses, pcCodeStartAddresses, codeStartAddresses);
+    }
 
-    //Given the native code start address, return the blocks of virtual memory that store this code (method code is not necessarily stored in a single contiguous memory region)
-    HResult GetCodeInfo4(uint* pNativeCodeStartAddress, uint cCodeInfos, uint* pcCodeInfos, COR_PRF_CODE_INFO* codeInfos);
+    public unsafe HResult GetILToNativeMapping3(uint* pNativeCodeStartAddress, uint cMap, uint* pcMap, COR_DEBUG_IL_TO_NATIVE_MAP* map)
+    {
+        return _impl.GetILToNativeMapping3(pNativeCodeStartAddress, cMap, pcMap, map);
+    }
+
+    public unsafe HResult GetCodeInfo4(uint* pNativeCodeStartAddress, uint cCodeInfos, uint* pcCodeInfos, COR_PRF_CODE_INFO* codeInfos)
+    {
+        return _impl.GetCodeInfo4(pNativeCodeStartAddress, cCodeInfos, pcCodeInfos, codeInfos);
+    }
 }

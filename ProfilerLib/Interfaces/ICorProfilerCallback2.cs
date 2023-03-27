@@ -1,9 +1,9 @@
-﻿namespace ProfilerLib;
+﻿namespace ProfilerLib.Interfaces;
 
 [NativeObject]
-public unsafe interface ICorProfilerCallback2 : ICorProfilerCallback
+internal unsafe interface ICorProfilerCallback2 : ICorProfilerCallback
 {
-    public static readonly Guid Guid = Guid.Parse("8A8CC829-CCF2-49fe-BBAE-0F022228071A");
+    public new static readonly Guid Guid = Guid.Parse("8A8CC829-CCF2-49fe-BBAE-0F022228071A");
 
     /*
      *

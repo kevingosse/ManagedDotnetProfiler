@@ -1,9 +1,9 @@
-﻿namespace ProfilerLib;
+﻿namespace ProfilerLib.Interfaces;
 
 [NativeObject]
-public unsafe interface ICorProfilerCallback10 : ICorProfilerCallback9
+internal unsafe interface ICorProfilerCallback10 : ICorProfilerCallback9
 {
-    public static readonly Guid Guid = Guid.Parse("CEC5B60E-C69C-495F-87F6-84D28EE16FFB");
+    public new static readonly Guid Guid = Guid.Parse("CEC5B60E-C69C-495F-87F6-84D28EE16FFB");
 
     // This event is triggered whenever an EventPipe event is configured to be delivered.
     //
@@ -18,7 +18,7 @@ public unsafe interface ICorProfilerCallback10 : ICorProfilerCallback9
     uint cbEventData,
     byte* eventData,
     in Guid pActivityId,
-    in Guid pRelatedActivityId, 
+    in Guid pRelatedActivityId,
     ThreadId eventThread,
     uint numStackFrames,
     nint* stackFrames);

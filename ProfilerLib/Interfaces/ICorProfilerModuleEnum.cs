@@ -1,4 +1,4 @@
-﻿namespace ProfilerLib;
+﻿namespace ProfilerLib.Interfaces;
 
 [NativeObject]
 public unsafe interface ICorProfilerModuleEnum : IUnknown

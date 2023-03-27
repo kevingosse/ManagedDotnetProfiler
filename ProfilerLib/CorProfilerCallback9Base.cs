@@ -1,6 +1,6 @@
 ﻿namespace ProfilerLib
 {
-    public abstract class CorProfilerCallback9Base : CorProfilerCallback8Base, ICorProfilerCallback9
+    public abstract class CorProfilerCallback9Base : CorProfilerCallback8Base, Interfaces.ICorProfilerCallback9
     {
         private readonly NativeObjects.ICorProfilerCallback9 _corProfilerCallback9;
 
@@ -11,7 +11,7 @@
 
         protected override HResult QueryInterface(in Guid guid, out nint ptr)
         {
-            if (guid == ICorProfilerCallback9.Guid)
+            if (guid == Interfaces.ICorProfilerCallback9.Guid)
             {
                 ptr = _corProfilerCallback9;
                 return HResult.S_OK;
@@ -22,7 +22,7 @@
 
         #region ICorProfilerCallback9
 
-        HResult ICorProfilerCallback9.DynamicMethodUnloaded(FunctionId functionId)
+        HResult Interfaces.ICorProfilerCallback9.DynamicMethodUnloaded(FunctionId functionId)
         {
             return DynamicMethodUnloaded(functionId);
         }

@@ -1,9 +1,9 @@
-﻿namespace ProfilerLib;
+﻿namespace ProfilerLib.Interfaces;
 
 [NativeObject]
-public unsafe interface ICorProfilerCallback8 : ICorProfilerCallback7
+internal unsafe interface ICorProfilerCallback8 : ICorProfilerCallback7
 {
-    public static readonly Guid Guid = Guid.Parse("5BED9B15-C079-4D47-BFE2-215A140C07E0");
+    public new static readonly Guid Guid = Guid.Parse("5BED9B15-C079-4D47-BFE2-215A140C07E0");
 
     // This event is triggered whenever a dynamic method is jit compiled.
     // These include various IL Stubs and LCG Methods.

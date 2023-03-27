@@ -1,6 +1,6 @@
 ﻿namespace ProfilerLib
 {
-    public abstract class CorProfilerCallback5Base : CorProfilerCallback4Base, ICorProfilerCallback5
+    public abstract class CorProfilerCallback5Base : CorProfilerCallback4Base, Interfaces.ICorProfilerCallback5
     {
         private readonly NativeObjects.ICorProfilerCallback5 _corProfilerCallback5;
 
@@ -11,7 +11,7 @@
 
         protected override HResult QueryInterface(in Guid guid, out nint ptr)
         {
-            if (guid == ICorProfilerCallback5.Guid)
+            if (guid == Interfaces.ICorProfilerCallback5.Guid)
             {
                 ptr = _corProfilerCallback5;
                 return HResult.S_OK;
@@ -21,7 +21,7 @@
         }
 
         #region ICorProfilerCallback5
-        unsafe HResult ICorProfilerCallback5.ConditionalWeakTableElementReferences(uint cRootRefs, ObjectId* keyRefIds, ObjectId* valueRefIds, GCHandleId* rootIds)
+        unsafe HResult Interfaces.ICorProfilerCallback5.ConditionalWeakTableElementReferences(uint cRootRefs, ObjectId* keyRefIds, ObjectId* valueRefIds, GCHandleId* rootIds)
         {
             return ConditionalWeakTableElementReferences(cRootRefs, keyRefIds, valueRefIds, rootIds);
         }

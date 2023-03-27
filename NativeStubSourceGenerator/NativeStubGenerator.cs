@@ -52,8 +52,6 @@ namespace NativeObjects
 
         public static implicit operator IntPtr({typeName} stub) => stub.Object;
 
-        public static {interfaceName} Wrap(IntPtr obj) => new {invokerName}(obj);
-
         ~{typeName}()
         {
             Dispose();
@@ -76,21 +74,21 @@ namespace NativeObjects
         {
 {exports}
         }
+    }
 
-        private class {invokerName} : {interfaceName}
+    public unsafe struct {invokerName}
+    {
+        private readonly IntPtr _implementation;
+
+        public {invokerName}(IntPtr implementation)
         {
-            private readonly IntPtr _implementation;
-            private readonly nint* _vtable;
+            _implementation = implementation;
+        }
 
-            public {invokerName}(IntPtr implementation)
-            {
-                _implementation = implementation;
-                _vtable = (nint*)*(nint*)implementation;
-            }
+        private nint* VTable => (nint*)*(nint*)_implementation;
 
-{invokerFunctions}
+    {invokerFunctions}
  
-        }       
     }
 }
 ");
@@ -292,7 +290,7 @@ namespace NativeObjects
                     invokerFunctions.Append(method.Parameters[i].Type);
                 }
 
-                invokerFunctions.AppendLine($", {method.ReturnType}>)*(_vtable + {delegateCount});");
+                invokerFunctions.AppendLine($", {method.ReturnType}>)*(VTable + {delegateCount});");
 
                 invokerFunctions.Append("                ");
 
@@ -341,6 +339,8 @@ namespace NativeObjects
         sourceBuilder.Replace("{functionPointers}", functionPointers.ToString());
         sourceBuilder.Replace("{invokerFunctions}", invokerFunctions.ToString());
         sourceBuilder.Replace("{invokerName}", invokerName);
+        
+        //File.WriteAllText(Path.Combine(@"E:\temp", symbol.Name + ".g.cs"), sourceBuilder.ToString());
 
         return ($"{symbol.ContainingNamespace?.Name ?? "_"}.{symbol.Name}", sourceBuilder.ToString());
     }

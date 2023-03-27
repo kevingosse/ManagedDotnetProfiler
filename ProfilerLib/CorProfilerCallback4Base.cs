@@ -1,6 +1,6 @@
 ﻿namespace ProfilerLib
 {
-    public abstract class CorProfilerCallback4Base : CorProfilerCallback3Base, ICorProfilerCallback4
+    public abstract class CorProfilerCallback4Base : CorProfilerCallback3Base, Interfaces.ICorProfilerCallback4
     {
         private readonly NativeObjects.ICorProfilerCallback4 _corProfilerCallback4;
 
@@ -11,7 +11,7 @@
 
         protected override HResult QueryInterface(in Guid guid, out nint ptr)
         {
-            if (guid == ICorProfilerCallback4.Guid)
+            if (guid == Interfaces.ICorProfilerCallback4.Guid)
             {
                 ptr = _corProfilerCallback4;
                 return HResult.S_OK;
@@ -22,32 +22,32 @@
 
         #region ICorProfilerCallback4
 
-        HResult ICorProfilerCallback4.GetReJITParameters(ModuleId moduleId, MdMethodDef methodId, nint pFunctionControl)
+        HResult Interfaces.ICorProfilerCallback4.GetReJITParameters(ModuleId moduleId, MdMethodDef methodId, nint pFunctionControl)
         {
             return GetReJITParameters(moduleId, methodId, pFunctionControl);
         }
 
-        HResult ICorProfilerCallback4.ReJITCompilationFinished(FunctionId functionId, ReJITId rejitId, HResult hrStatus, bool fIsSafeToBlock)
+        HResult Interfaces.ICorProfilerCallback4.ReJITCompilationFinished(FunctionId functionId, ReJITId rejitId, HResult hrStatus, bool fIsSafeToBlock)
         {
             return ReJITCompilationFinished(functionId, rejitId, hrStatus, fIsSafeToBlock);
         }
 
-        HResult ICorProfilerCallback4.ReJITError(ModuleId moduleId, MdMethodDef methodId, FunctionId functionId, HResult hrStatus)
+        HResult Interfaces.ICorProfilerCallback4.ReJITError(ModuleId moduleId, MdMethodDef methodId, FunctionId functionId, HResult hrStatus)
         {
             return ReJITError(moduleId, methodId, functionId, hrStatus);
         }
 
-        unsafe HResult ICorProfilerCallback4.MovedReferences2(uint cMovedObjectIDRanges, ObjectId* oldObjectIDRangeStart, ObjectId* newObjectIDRangeStart, nint* cObjectIDRangeLength)
+        unsafe HResult Interfaces.ICorProfilerCallback4.MovedReferences2(uint cMovedObjectIDRanges, ObjectId* oldObjectIDRangeStart, ObjectId* newObjectIDRangeStart, nint* cObjectIDRangeLength)
         {
             return MovedReferences2(cMovedObjectIDRanges, oldObjectIDRangeStart, newObjectIDRangeStart, cObjectIDRangeLength);
         }
 
-        unsafe HResult ICorProfilerCallback4.SurvivingReferences2(uint cSurvivingObjectIDRanges, ObjectId* objectIDRangeStart, nint* cObjectIDRangeLength)
+        unsafe HResult Interfaces.ICorProfilerCallback4.SurvivingReferences2(uint cSurvivingObjectIDRanges, ObjectId* objectIDRangeStart, nint* cObjectIDRangeLength)
         {
             return SurvivingReferences2(cSurvivingObjectIDRanges, objectIDRangeStart, cObjectIDRangeLength);
         }
 
-        HResult ICorProfilerCallback4.ReJITCompilationStarted(FunctionId functionId, ReJITId rejitId, bool fIsSafeToBlock)
+        HResult Interfaces.ICorProfilerCallback4.ReJITCompilationStarted(FunctionId functionId, ReJITId rejitId, bool fIsSafeToBlock)
         {
             return ReJITCompilationStarted(functionId, rejitId, fIsSafeToBlock);
         }

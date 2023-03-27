@@ -1,9 +1,9 @@
-﻿namespace ProfilerLib;
+﻿namespace ProfilerLib.Interfaces;
 
 [NativeObject]
-public unsafe interface ICorProfilerCallback6 : ICorProfilerCallback5
+internal unsafe interface ICorProfilerCallback6 : ICorProfilerCallback5
 {
-    public static readonly Guid Guid = Guid.Parse("FC13DF4B-4448-4F4F-950C-BA8D19D00C36");
+    public new static readonly Guid Guid = Guid.Parse("FC13DF4B-4448-4F4F-950C-BA8D19D00C36");
 
     // CORECLR DEPRECATION WARNING: This callback does not occur on coreclr.
     // Controlled by the COR_PRF_HIGH_ADD_ASSEMBLY_REFERENCES event mask flag.

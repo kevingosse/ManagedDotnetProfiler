@@ -1,9 +1,9 @@
-﻿namespace ProfilerLib;
+﻿namespace ProfilerLib.Interfaces;
 
 [NativeObject]
-public unsafe interface ICorProfilerCallback7 : ICorProfilerCallback6
+internal unsafe interface ICorProfilerCallback7 : ICorProfilerCallback6
 {
-    public static readonly Guid Guid = Guid.Parse("F76A2DBA-1D52-4539-866C-2AA518F9EFC3");
+    public new static readonly Guid Guid = Guid.Parse("F76A2DBA-1D52-4539-866C-2AA518F9EFC3");
 
     // This event is triggered whenever the symbol stream associated with an
     // in-memory module is updated. Even when symbols are provided up-front in
