@@ -42,7 +42,7 @@ public readonly struct ReJITId
 
 public readonly struct ThreadId
 {
-    public readonly nint Value;
+    public readonly nuint Value;
 }
 
 public readonly struct ProcessId

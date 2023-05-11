@@ -136,9 +136,12 @@
             return _impl.SetILFunctionBody(ModuleId, methodid, pbNewILMethodHeader);
         }
 
-        public unsafe HResult GetAppDomainInfo(AppDomainId appDomainId, uint cchName, out uint pcchName, out char* szName, out ProcessId pProcessId)
+        public unsafe HResult GetAppDomainInfo(AppDomainId appDomainId, Span<char> appDomainName,out uint pcchName, out ProcessId pProcessId)
         {
-            return _impl.GetAppDomainInfo(appDomainId, cchName, out pcchName, out szName, out pProcessId);
+            fixed (char* c = appDomainName)
+            {
+                return _impl.GetAppDomainInfo(appDomainId, (uint)appDomainName.Length, out pcchName, c, out pProcessId);
+            }
         }
 
         public unsafe HResult GetAssemblyInfo(AssemblyId assemblyId, uint cchName, out uint pcchName, out char* szName, out AppDomainId pAppDomainId, out ModuleId pModuleId)

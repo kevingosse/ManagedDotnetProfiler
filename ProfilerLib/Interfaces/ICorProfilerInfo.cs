@@ -52,7 +52,7 @@ internal unsafe interface ICorProfilerInfo : IUnknown
      * in managed code to a FunctionId.
      */
     HResult GetFunctionFromIP(
-                byte ip,
+                nint ip,
                 out FunctionId pFunctionId);
 
     /*
@@ -284,7 +284,7 @@ internal unsafe interface ICorProfilerInfo : IUnknown
                 AppDomainId appDomainId,
                 uint cchName,
                 out uint pcchName,
-                out char* szName,
+                char* szName,
                 out ProcessId pProcessId);
 
     /*

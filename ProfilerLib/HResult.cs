@@ -8,6 +8,7 @@
         public const int E_INVALIDARG = unchecked((int)0x80070057);
         public const int E_NOTIMPL = unchecked((int)0x80004001);
         public const int E_NOINTERFACE = unchecked((int)0x80004002);
+        public const int CORPROF_E_UNSUPPORTED_CALL_SEQUENCE = unchecked((int)0x80131363);
 
         public bool IsOK => Value == S_OK;
 
@@ -37,6 +38,7 @@
                 E_INVALIDARG => "E_INVALIDARG",
                 E_NOTIMPL => "E_NOTIMPL",
                 E_NOINTERFACE => "E_NOINTERFACE",
+                CORPROF_E_UNSUPPORTED_CALL_SEQUENCE => "CORPROF_E_UNSUPPORTED_CALL_SEQUENCE",
                 _ => $"{Value:x8}",
             };
         }

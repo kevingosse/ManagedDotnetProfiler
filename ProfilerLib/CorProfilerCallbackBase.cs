@@ -173,11 +173,7 @@
 
         HResult Interfaces.ICorProfilerCallback.Initialize(nint pICorProfilerInfoUnk)
         {
-            Console.WriteLine($"CorProfilerCallbackBase - Initialize");
-
             int version = GetICorProfilerInfo(pICorProfilerInfoUnk);
-
-            Console.WriteLine($"[Profiler] Fetched ICorProfilerInfo{version}");
 
             return Initialize(version);
         }

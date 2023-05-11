@@ -4,12 +4,55 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Runtime.InteropServices;
 using NativeObjects;
+using System.Threading;
+using System.Collections.Concurrent;
 
 namespace ManagedDotnetProfiler
 {
-    internal unsafe class CorProfiler : CorProfilerCallback10Base
+    internal unsafe partial class CorProfiler : CorProfilerCallback10Base
     {
+        public static CorProfiler Instance { get; private set; }
+
+        public static ConcurrentQueue<string> Logs { get; } = new();
+
+        public bool GetThreadId(ulong expectedThreadId, int expectedOsId)
+        {
+            var result = ICorProfilerInfo.GetCurrentThreadId(out var threadId);
+
+            if (!result.IsOK)
+            {
+                LogHResult(nameof(ICorProfilerInfo.GetCurrentThreadId), result);
+                return false;
+            }
+
+            Log($"GetThreadId - expected: {expectedThreadId} - actual: {threadId.Value}");
+
+            if (expectedThreadId != threadId.Value)
+            {
+                return false;
+            }
+
+            // Can't call GetThreadInfo in the CLR thread
+            int osId = 0;
+
+            Task.Run(() =>
+            {
+                result = ICorProfilerInfo.GetThreadInfo(threadId, out osId);
+            }).Wait();
+
+            if (!result.IsOK)
+            {
+                LogHResult(nameof(ICorProfilerInfo.GetThreadInfo), result);
+                return false;
+            }
+
+            Log($"GetThreadInfo - expected: {expectedOsId} - actual: {osId}");
+
+            return true;
+        }
+
         protected override HResult Initialize(int iCorProfilerInfoVersion)
         {
             if (iCorProfilerInfoVersion < 11)
@@ -17,9 +60,11 @@ namespace ManagedDotnetProfiler
                 return HResult.E_FAIL;
             }
 
-            var eventMask = CorPrfMonitor.COR_PRF_MONITOR_EXCEPTIONS | CorPrfMonitor.COR_PRF_MONITOR_JIT_COMPILATION;
+            Instance = this;
 
-            Console.WriteLine("[Profiler] Setting event mask to " + eventMask);
+            var eventMask = CorPrfMonitor.COR_PRF_MONITOR_ALL;
+
+            Log($"Setting event mask to {eventMask}");
 
             return ICorProfilerInfo11.SetEventMask(eventMask);
         }
@@ -29,7 +74,7 @@ namespace ManagedDotnetProfiler
             ICorProfilerInfo2.GetFunctionInfo(functionId, out var classId, out var moduleId, out var mdToken);
 
             ICorProfilerInfo2.GetModuleMetaData(moduleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport, out var metaDataImport);
-            
+
             metaDataImport.GetMethodProps(new MdMethodDef(mdToken), out var typeDef, null, 0, out var size, out _, out _, out _, out _, out _);
 
             var buffer = new char[size];
@@ -49,14 +94,14 @@ namespace ManagedDotnetProfiler
 
             var typeName = new string(buffer);
 
-            Console.WriteLine($"[Profiler] JITCompilationStarted: {typeName}.{methodName}");
+            Log($"JITCompilationStarted: {typeName}.{methodName}");
 
             return HResult.S_OK;
         }
 
         protected override HResult ExceptionThrown(ObjectId thrownObjectId)
         {
-            Console.WriteLine("Enumerating modules");
+            Log("Enumerating modules");
 
             ICorProfilerInfo3.EnumModules(out void* enumerator);
 
@@ -64,7 +109,7 @@ namespace ManagedDotnetProfiler
 
             moduleEnumerator.GetCount(out var modulesCount);
 
-            Console.WriteLine($"Fetching {modulesCount} modules");
+            Log($"Fetching {modulesCount} modules");
 
             var modules = new ModuleId[modulesCount];
 
@@ -73,7 +118,7 @@ namespace ManagedDotnetProfiler
                 moduleEnumerator.Next(modulesCount, p, out modulesCount);
             }
 
-            Console.WriteLine($"Fetched {modulesCount} modules");
+            Log($"Fetched {modulesCount} modules");
 
             foreach (var module in modules)
             {
@@ -88,7 +133,7 @@ namespace ManagedDotnetProfiler
                     ICorProfilerInfo2.GetModuleInfo(module, out baseAddress, moduleSize, out _, p, out _);
                 }
 
-                Console.WriteLine($"Module: {new string(moduleBuffer)} loaded at address {baseAddress:x2}");
+                Log($"Module: {new string(moduleBuffer)} loaded at address {baseAddress:x2}");
             }
 
             ICorProfilerInfo2.GetClassFromObject(thrownObjectId, out var classId);
@@ -101,7 +146,7 @@ namespace ManagedDotnetProfiler
 
             metaDataImport.GetTypeDefProps(typeDef, buffer, out _, out _, out _);
 
-            Console.WriteLine("[Profiler] An exception was thrown: " + new string(buffer));
+            Log("An exception was thrown: " + new string(buffer));
 
             return HResult.S_OK;
         }
@@ -133,9 +178,34 @@ namespace ManagedDotnetProfiler
 
             var typeName = new string(buffer);
 
-            Console.WriteLine($"[Profiler] Exception was caught in {typeName}.{methodName}");
+            Log($"Exception was caught in {typeName}.{methodName}");
             return HResult.S_OK;
         }
 
+        protected override HResult AppDomainCreationStarted(AppDomainId appDomainId)
+        {
+            ICorProfilerInfo.GetAppDomainInfo(appDomainId, Span<char>.Empty, out var length, out _);
+
+            Span<char> appDomainName = stackalloc char[(int)length];
+            
+            ICorProfilerInfo.GetAppDomainInfo(appDomainId, appDomainName, out _, out var processId);
+            
+            Log($"AppDomainCreationStarted - {appDomainName[..^1]} - Process Id {processId.Value}");
+
+            return HResult.S_OK;
+        }
+
+
+        private static void LogHResult(string function, HResult hresult)
+        {
+            Log($"Call to {function} failed with code {hresult}");
+        }
+
+        private static void Log(string line)
+        {
+            Logs.Enqueue(line);
+
+            // Console.WriteLine($"[Profiler] {line}");
+        }
     }
 }

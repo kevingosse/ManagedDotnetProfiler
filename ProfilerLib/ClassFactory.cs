@@ -1,13 +1,10 @@
-﻿using System;
-using ProfilerLib.Interfaces;
+﻿namespace ProfilerLib;
 
-namespace ProfilerLib;
-
-public unsafe class ClassFactory : Interfaces.IClassFactory
+public class ClassFactory : Interfaces.IClassFactory
 {
-    private NativeObjects.IClassFactory _classFactory;
+    private readonly NativeObjects.IClassFactory _classFactory;
 
-    private CorProfilerCallbackBase _corProfilerCallback;
+    private readonly CorProfilerCallbackBase _corProfilerCallback;
 
     public ClassFactory(CorProfilerCallbackBase corProfilerCallback)
     {
@@ -19,24 +16,17 @@ public unsafe class ClassFactory : Interfaces.IClassFactory
 
     public HResult CreateInstance(IntPtr outer, in Guid guid, out IntPtr instance)
     {
-        Console.WriteLine("ClassFactory - CreateInstance - " + guid);
-
         instance = _corProfilerCallback.ICorProfilerCallback;
         return HResult.S_OK;
-
-        // return _callback.IUnknown.QueryInterface(_callback.IUnknownObject, guid, out instance);
     }
 
     public HResult LockServer(bool @lock)
     {
-        Console.WriteLine("ClassFactory - LockServer");
         return default;
     }
 
     public HResult QueryInterface(in Guid guid, out IntPtr ptr)
     {
-        Console.WriteLine("ClassFactory - QueryInterface - " + guid);
-
         if (guid == KnownGuids.ClassFactoryGuid)
         {
             ptr = IClassFactory;
@@ -49,13 +39,11 @@ public unsafe class ClassFactory : Interfaces.IClassFactory
 
     public int AddRef()
     {
-        Console.WriteLine("ClassFactory - AddRef");
         return 1;
     }
 
     public int Release()
     {
-        Console.WriteLine("ClassFactory - Release");
         return 0;
     }
 }
