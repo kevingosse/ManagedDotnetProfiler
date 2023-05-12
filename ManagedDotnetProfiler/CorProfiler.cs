@@ -13,6 +13,8 @@ namespace ManagedDotnetProfiler
 {
     internal unsafe partial class CorProfiler : CorProfilerCallback10Base
     {
+        private ConcurrentDictionary<AssemblyId, bool> _assemblyLoads = new();
+
         public static CorProfiler Instance { get; private set; }
 
         public static ConcurrentQueue<string> Logs { get; } = new();
@@ -122,18 +124,9 @@ namespace ManagedDotnetProfiler
 
             foreach (var module in modules)
             {
-                ICorProfilerInfo2.GetModuleInfo(module, out _, 0, out uint moduleSize, null, out _);
+                var (_, moduleName, baseAddress, _) = ICorProfilerInfo.GetModuleInfo(module);
 
-                Span<char> moduleBuffer = stackalloc char[(int)moduleSize];
-
-                nint baseAddress;
-
-                fixed (char* p = moduleBuffer)
-                {
-                    ICorProfilerInfo2.GetModuleInfo(module, out baseAddress, moduleSize, out _, p, out _);
-                }
-
-                Log($"Module: {new string(moduleBuffer)} loaded at address {baseAddress:x2}");
+                Log($"Module: {moduleName} loaded at address {baseAddress:x2}");
             }
 
             ICorProfilerInfo2.GetClassFromObject(thrownObjectId, out var classId);
@@ -184,21 +177,88 @@ namespace ManagedDotnetProfiler
 
         protected override HResult AppDomainCreationStarted(AppDomainId appDomainId)
         {
-            ICorProfilerInfo.GetAppDomainInfo(appDomainId, Span<char>.Empty, out var length, out _);
+            var (_, appDomainName, processId) = ICorProfilerInfo.GetAppDomainInfo(appDomainId);
 
-            Span<char> appDomainName = stackalloc char[(int)length];
-            
-            ICorProfilerInfo.GetAppDomainInfo(appDomainId, appDomainName, out _, out var processId);
-            
-            Log($"AppDomainCreationStarted - {appDomainName[..^1]} - Process Id {processId.Value}");
+            Log($"AppDomainCreationStarted - {appDomainName} - Process Id {processId.Value}");
 
             return HResult.S_OK;
         }
 
+        protected override HResult AppDomainCreationFinished(AppDomainId appDomainId, HResult hrStatus)
+        {
+            var (_, appDomainName, _) = ICorProfilerInfo.GetAppDomainInfo(appDomainId);
+
+            Log($"AppDomainCreationFinished - {appDomainName} - HResult {hrStatus}");
+
+            return HResult.S_OK;
+        }
+
+        protected override HResult AppDomainShutdownStarted(AppDomainId appDomainId)
+        {
+            // TODO: Test on .NET Framework
+            var (_, appDomainName, _) = ICorProfilerInfo.GetAppDomainInfo(appDomainId);
+
+            Log($"AppDomainShutdownStarted - {appDomainName}");
+
+            return HResult.S_OK;
+        }
+
+        protected override HResult AppDomainShutdownFinished(AppDomainId appDomainId, HResult hrStatus)
+        {
+            // TODO: Test on .NET Framework
+            var (_, appDomainName, _) = ICorProfilerInfo.GetAppDomainInfo(appDomainId);
+
+            Log($"AppDomainShutdownFinished - {appDomainName} - HResult {hrStatus}");
+
+            return HResult.S_OK;
+        }
+
+        protected override HResult AssemblyLoadStarted(AssemblyId assemblyId)
+        {
+            if (!_assemblyLoads.TryAdd(assemblyId, true))
+            {
+                Error($"{assemblyId} already loading");
+            }
+
+            return HResult.S_OK;
+        }
+
+        protected override HResult AssemblyLoadFinished(AssemblyId assemblyId, HResult hrStatus)
+        {
+            var (_, assemblyName, appDomainId, moduleId) = ICorProfilerInfo.GetAssemblyInfo(assemblyId);
+            var (_, appDomainName, _) = ICorProfilerInfo.GetAppDomainInfo(appDomainId);
+            var (_, moduleName, _, _) = ICorProfilerInfo.GetModuleInfo(moduleId);
+
+            Log($"AssemblyLoadFinished - {assemblyName} - AppDomain {appDomainName} - Module {moduleName}");
+
+            if (!_assemblyLoads.TryRemove(assemblyId, out _))
+            {
+                Error($"Saw no AssemblyLoadStarted event for {assemblyId.Value}");
+            }
+
+            return HResult.S_OK;
+        }
+
+        protected override HResult Shutdown()
+        {
+            Console.WriteLine("[Profiler] *** Shutting down, dumping remaining logs ***");
+
+            while (Logs.TryDequeue(out var log))
+            {
+                Console.WriteLine($"[Profiler] {log}");
+            }
+
+            return HResult.S_OK;
+        }
 
         private static void LogHResult(string function, HResult hresult)
         {
             Log($"Call to {function} failed with code {hresult}");
+        }
+
+        private static void Error(string explanation)
+        {
+            Log($"Error: {explanation}");
         }
 
         private static void Log(string line)

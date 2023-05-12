@@ -294,7 +294,7 @@ internal unsafe interface ICorProfilerInfo : IUnknown
                 AssemblyId assemblyId,
                 uint cchName,
                 out uint pcchName,
-                out char* szName,
+                char* szName,
                 out AppDomainId pAppDomainId,
                 out ModuleId pModuleId);
 
