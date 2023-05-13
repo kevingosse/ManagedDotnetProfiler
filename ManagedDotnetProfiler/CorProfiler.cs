@@ -239,6 +239,25 @@ namespace ManagedDotnetProfiler
             return HResult.S_OK;
         }
 
+        protected override HResult AssemblyUnloadStarted(AssemblyId assemblyId)
+        {
+            // TODO: Test on .NET Framework or after the ALC bug is fixed
+            Log("AssemblyUnloadStarted");
+
+            return HResult.S_OK;
+        }
+
+        protected override HResult AssemblyUnloadFinished(AssemblyId assemblyId, HResult hrStatus)
+        {
+            var (_, assemblyName, appDomainId, moduleId) = ICorProfilerInfo.GetAssemblyInfo(assemblyId);
+            var (_, appDomainName, _) = ICorProfilerInfo.GetAppDomainInfo(appDomainId);
+            var (_, moduleName, _, _) = ICorProfilerInfo.GetModuleInfo(moduleId);
+
+            Log($"AssemblyUnloadFinished - {assemblyName} - AppDomain {appDomainName} - Module {moduleName}");
+
+            return HResult.S_OK;
+        }
+
         protected override HResult Shutdown()
         {
             Console.WriteLine("[Profiler] *** Shutting down, dumping remaining logs ***");

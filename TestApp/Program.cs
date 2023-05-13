@@ -1,7 +1,12 @@
-﻿using System.Reflection;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.Loader;
 using TestApp;
 
+
 Console.WriteLine($"PID: {Environment.ProcessId}");
+
 
 var logs = FetchLogs().ToList();
 
@@ -23,6 +28,54 @@ var threadId = (IntPtr)typeof(Thread).GetField("_DONT_USE_InternalThread", Bindi
 var osId = PInvokes.Win32.GetCurrentThreadId();
 
 Assert(PInvokes.GetThreadId((ulong)threadId, (int)osId));
+
+
+foreach (var log in FetchLogs())
+{
+    Console.WriteLine(log);
+}
+
+Console.WriteLine("**** Try loading/unloading assembly");
+
+CreateAndUnloadAlc();
+
+GC.Collect(2, GCCollectionMode.Forced, true);
+GC.WaitForPendingFinalizers();
+GC.Collect(2, GCCollectionMode.Forced, true);
+
+logs = FetchLogs().ToList();
+
+AssertContains(logs, $"AssemblyUnloadFinished - TestApp - AppDomain clrhost - Module {typeof(Program).Assembly.Location}");
+
+/*
+
+for (int j = 0; j < 10; j++)
+{
+    Console.WriteLine("**** Try loading/unloading assembly");
+
+    CreateAndUnloadAlc(out var weakref);
+
+    Console.WriteLine(weakref.IsAlive);
+
+    for (int i = 0; i < 10; i++)
+    {
+        GC.Collect(2, GCCollectionMode.Forced, true);
+        GC.WaitForPendingFinalizers();
+        GC.Collect(2, GCCollectionMode.Forced, true);
+    }
+
+    Console.WriteLine(weakref.IsAlive);
+}
+
+*/
+
+[MethodImpl(MethodImplOptions.NoInlining)]
+static void CreateAndUnloadAlc()
+{
+    var alc = new TestAssemblyLoadContext();
+    _ = alc.LoadFromAssemblyPath(typeof(Program).Assembly.Location);
+    alc.Unload();
+}
 
 // Dump last logs before exiting
 foreach (var log in FetchLogs())
