@@ -1,7 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Reflection;
+﻿using System.Reflection;
+using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
-using System.Runtime.Loader;
 using TestApp;
 
 
@@ -15,7 +14,6 @@ foreach (var log in logs)
     Console.WriteLine(log);
 }
 
-AssertContains(logs, "ClassLoadFinished - System.Array");
 AssertContains(logs, $"AssemblyLoadFinished - TestApp - AppDomain clrhost - Module {typeof(Program).Assembly.Location}");
 AssertContains(logs, $"AppDomainCreationStarted - System.Private.CoreLib.dll - Process Id {Environment.ProcessId}");
 AssertContains(logs, $"AppDomainCreationStarted - DefaultDomain - Process Id {Environment.ProcessId}");
@@ -36,39 +34,54 @@ foreach (var log in FetchLogs())
     Console.WriteLine(log);
 }
 
-Console.WriteLine("**** Try loading/unloading assembly");
+TestCreateAndUnloadAlc();
 
-CreateAndUnloadAlc();
+TestCreateAndUnloadType();
 
-GC.Collect(2, GCCollectionMode.Forced, true);
-GC.WaitForPendingFinalizers();
-GC.Collect(2, GCCollectionMode.Forced, true);
+static void TestCreateAndUnloadType()
+{
+    Console.WriteLine("**** Try loading/unloading type");
 
-logs = FetchLogs().ToList();
+    CreateAndUnloadType();
 
-AssertContains(logs, $"AssemblyUnloadFinished - TestApp - AppDomain clrhost - Module {typeof(Program).Assembly.Location}");
+    GC.Collect(2, GCCollectionMode.Forced, true);
+    GC.WaitForPendingFinalizers();
+    GC.Collect(2, GCCollectionMode.Forced, true);
 
-/*
+    var logs = FetchLogs().ToList();
 
-for (int j = 0; j < 10; j++)
+    AssertContains(logs, "ClassLoadFinished - DynamicType");
+    AssertContains(logs, "ClassUnloadStarted - DynamicType");
+    AssertContains(logs, "ClassUnloadFinished - DynamicType");
+}
+
+static void CreateAndUnloadType()
+{
+    var assembly = AssemblyBuilder.DefineDynamicAssembly(new("DynamicAssembly"), AssemblyBuilderAccess.RunAndCollect);
+    var module = assembly.DefineDynamicModule("DynamicModule");
+    var type = module.DefineType("DynamicType");
+    type.CreateType();
+}
+
+static void TestCreateAndUnloadAlc()
 {
     Console.WriteLine("**** Try loading/unloading assembly");
 
-    CreateAndUnloadAlc(out var weakref);
+    CreateAndUnloadAlc();
 
-    Console.WriteLine(weakref.IsAlive);
+    GC.Collect(2, GCCollectionMode.Forced, true);
+    GC.WaitForPendingFinalizers();
+    GC.Collect(2, GCCollectionMode.Forced, true);
 
-    for (int i = 0; i < 10; i++)
+    var logs = FetchLogs().ToList();
+
+    foreach (var log in logs)
     {
-        GC.Collect(2, GCCollectionMode.Forced, true);
-        GC.WaitForPendingFinalizers();
-        GC.Collect(2, GCCollectionMode.Forced, true);
+        Console.WriteLine(log);
     }
 
-    Console.WriteLine(weakref.IsAlive);
+    AssertContains(logs, $"AssemblyUnloadFinished - TestApp - AppDomain clrhost - Module {typeof(Program).Assembly.Location}");
 }
-
-*/
 
 [MethodImpl(MethodImplOptions.NoInlining)]
 static void CreateAndUnloadAlc()

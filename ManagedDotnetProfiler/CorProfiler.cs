@@ -235,7 +235,6 @@ namespace ManagedDotnetProfiler
         {
             var (_, moduleId, typeDef) = ICorProfilerInfo.GetClassIdInfo(classId);
             var (_, metaDataImport) = ICorProfilerInfo.GetModuleMetaData(moduleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport);
-
             var (_, typeName, _, _) = metaDataImport.GetTypeDefProps(typeDef);
 
             Log($"ClassLoadFinished - {typeName}");
@@ -244,6 +243,28 @@ namespace ManagedDotnetProfiler
             {
                 Error($"Saw no ClassLoadStarted event for {classId.Value}");
             }
+
+            return HResult.S_OK;
+        }
+
+        protected override HResult ClassUnloadStarted(ClassId classId)
+        {
+            var (_, moduleId, typeDef) = ICorProfilerInfo.GetClassIdInfo(classId);
+            var (_, metaDataImport) = ICorProfilerInfo.GetModuleMetaData(moduleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport);
+            var (_, typeName, _, _) = metaDataImport.GetTypeDefProps(typeDef);
+
+            Log($"ClassUnloadStarted - {typeName}");
+
+            return HResult.S_OK;
+        }
+
+        protected override HResult ClassUnloadFinished(ClassId classId, HResult hrStatus)
+        {
+            var (_, moduleId, typeDef) = ICorProfilerInfo.GetClassIdInfo(classId);
+            var (_, metaDataImport) = ICorProfilerInfo.GetModuleMetaData(moduleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport);
+            var (_, typeName, _, _) = metaDataImport.GetTypeDefProps(typeDef);
+
+            Log($"ClassUnloadFinished - {typeName}");
 
             return HResult.S_OK;
         }
