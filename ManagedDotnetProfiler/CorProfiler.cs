@@ -14,6 +14,7 @@ namespace ManagedDotnetProfiler
     internal unsafe partial class CorProfiler : CorProfilerCallback10Base
     {
         private ConcurrentDictionary<AssemblyId, bool> _assemblyLoads = new();
+        private ConcurrentDictionary<ClassId, bool> _classLoads = new();
 
         public static CorProfiler Instance { get; private set; }
 
@@ -77,7 +78,7 @@ namespace ManagedDotnetProfiler
             var (_, metaDataImport) = ICorProfilerInfo2.GetModuleMetaData(moduleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport);
             var (_, methodProperties) = metaDataImport.GetMethodProps(new MdMethodDef(mdToken));
             var (_, typeName, _, _) = metaDataImport.GetTypeDefProps(methodProperties.Class);
-            
+
             Log($"JITCompilationStarted: {typeName}.{methodProperties.Name}");
 
             return HResult.S_OK;
@@ -179,7 +180,7 @@ namespace ManagedDotnetProfiler
         {
             if (!_assemblyLoads.TryAdd(assemblyId, true))
             {
-                Error($"{assemblyId} already loading");
+                Error($"Assembly {assemblyId} already loading");
             }
 
             return HResult.S_OK;
@@ -220,6 +221,16 @@ namespace ManagedDotnetProfiler
             return HResult.S_OK;
         }
 
+        protected override HResult ClassLoadStarted(ClassId classId)
+        {
+            if (!_classLoads.TryAdd(classId, true))
+            {
+                Error($"Class {classId.Value} already loading");
+            }
+
+            return HResult.S_OK;
+        }
+
         protected override HResult ClassLoadFinished(ClassId classId, HResult hrStatus)
         {
             var (_, moduleId, typeDef) = ICorProfilerInfo.GetClassIdInfo(classId);
@@ -228,6 +239,11 @@ namespace ManagedDotnetProfiler
             var (_, typeName, _, _) = metaDataImport.GetTypeDefProps(typeDef);
 
             Log($"ClassLoadFinished - {typeName}");
+
+            if (!_classLoads.TryRemove(classId, out _))
+            {
+                Error($"Saw no ClassLoadStarted event for {classId.Value}");
+            }
 
             return HResult.S_OK;
         }

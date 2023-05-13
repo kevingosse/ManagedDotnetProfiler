@@ -15,6 +15,7 @@ foreach (var log in logs)
     Console.WriteLine(log);
 }
 
+AssertContains(logs, "ClassLoadFinished - System.Array");
 AssertContains(logs, $"AssemblyLoadFinished - TestApp - AppDomain clrhost - Module {typeof(Program).Assembly.Location}");
 AssertContains(logs, $"AppDomainCreationStarted - System.Private.CoreLib.dll - Process Id {Environment.ProcessId}");
 AssertContains(logs, $"AppDomainCreationStarted - DefaultDomain - Process Id {Environment.ProcessId}");
