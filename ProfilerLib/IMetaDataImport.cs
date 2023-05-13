@@ -71,11 +71,27 @@ namespace ProfilerLib
             return _impl.GetModuleFromScope(out pmd);
         }
 
-        public unsafe HResult GetTypeDefProps(MdTypeDef td, Span<char> typeName, out uint pchTypeDef, out int pdwTypeDefFlags, out MdToken ptkExtends)
+        public unsafe (HResult result, string typeName, int typeDefFlags, MdToken extends) GetTypeDefProps(MdTypeDef typeDef)
+        {
+            var result = GetTypeDefProps(typeDef, Span<char>.Empty, out var length, out _, out _);
+
+            if (!result.IsOK)
+            {
+                return (result, default, default, default);
+            }
+
+            Span<char> buffer = stackalloc char[(int)length];
+
+            result = GetTypeDefProps(typeDef, buffer, out _, out var typeDefFlags, out var extends);
+
+            return (result, buffer.WithoutNullTerminator(), typeDefFlags, extends);
+        }
+
+        public unsafe HResult GetTypeDefProps(MdTypeDef typeDef, Span<char> typeName, out uint pchTypeDef, out int pdwTypeDefFlags, out MdToken ptkExtends)
         {
             fixed (char* c = typeName)
             {
-                return _impl.GetTypeDefProps(td, c, (uint)typeName.Length, out pchTypeDef, out pdwTypeDefFlags, out ptkExtends);
+                return _impl.GetTypeDefProps(typeDef, c, (uint)typeName.Length, out pchTypeDef, out pdwTypeDefFlags, out ptkExtends);
             }
         }
 
@@ -164,9 +180,28 @@ namespace ProfilerLib
             return _impl.FindMemberRef(td, szName, pvSigBlob, cbSigBlob, out pmr);
         }
 
-        public unsafe HResult GetMethodProps(MdMethodDef mb, out MdTypeDef pClass, char* szMethod, uint cchMethod, out uint pchMethod, out int pdwAttr, out nint* ppvSigBlob, out uint pcbSigBlob, out uint pulCodeRVA, out int pdwImplFlags)
+        public unsafe (HResult result, MethodProperties properties) GetMethodProps(MdMethodDef methodDef)
         {
-            return _impl.GetMethodProps(mb, out pClass, szMethod, cchMethod, out pchMethod, out pdwAttr, out ppvSigBlob, out pcbSigBlob, out pulCodeRVA, out pdwImplFlags);
+            var result = GetMethodProps(methodDef, out _, Span<char>.Empty, out var length, out _, out _, out _, out _, out _);
+
+            if (!result)
+            {
+                return (result, default);
+            }
+
+            Span<char> name = stackalloc char[(int)length];
+
+            result = GetMethodProps(methodDef, out var @class, name, out _, out var attributes, out var signature, out var signatureLength, out var rva, out var implementationFlags);
+
+            return (result, new(@class, name.WithoutNullTerminator(), attributes, signature, (int)signatureLength, rva, implementationFlags));
+        }
+
+        public unsafe HResult GetMethodProps(MdMethodDef mb, out MdTypeDef pClass, Span<char> name, out uint pchMethod, out int pdwAttr, out byte* ppvSigBlob, out uint pcbSigBlob, out uint pulCodeRVA, out int pdwImplFlags)
+        {
+            fixed (char* c = name)
+            {
+                return _impl.GetMethodProps(mb, out pClass, c, (uint)name.Length, out pchMethod, out pdwAttr, out ppvSigBlob, out pcbSigBlob, out pulCodeRVA, out pdwImplFlags);
+            }
         }
 
         public unsafe HResult GetMemberRefProps(MdMemberRef mr, out MdToken ptk, char* szMember, uint cchMember, out uint pchMember, out nint* ppvSigBlob, out uint pbSig)

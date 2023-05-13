@@ -49,44 +49,48 @@
             return _impl.GetFunctionFromIP(ip, out pFunctionId);
         }
 
-        public HResult GetFunctionFromToken(ModuleId ModuleId, MdToken token, out FunctionId pFunctionId)
+        public HResult GetFunctionFromToken(ModuleId moduleId, MdToken token, out FunctionId pFunctionId)
         {
-            return _impl.GetFunctionFromToken(ModuleId, token, out pFunctionId);
+            return _impl.GetFunctionFromToken(moduleId, token, out pFunctionId);
         }
 
-        public HResult GetHandleFromThread(ThreadId ThreadId, out nint phThread)
+        public HResult GetHandleFromThread(ThreadId threadId, out nint phThread)
         {
-            return _impl.GetHandleFromThread(ThreadId, out phThread);
+            return _impl.GetHandleFromThread(threadId, out phThread);
         }
 
-        public HResult GetObjectSize(ObjectId ObjectId, out uint pcSize)
+        public HResult GetObjectSize(ObjectId objectId, out uint pcSize)
         {
-            return _impl.GetObjectSize(ObjectId, out pcSize);
+            return _impl.GetObjectSize(objectId, out pcSize);
         }
 
-        public HResult IsArrayClass(ClassId ClassId, out CorElementType pBaseElemType, out ClassId pBaseClassId, out uint pcRank)
+        public HResult IsArrayClass(ClassId classId, out CorElementType pBaseElemType, out ClassId pBaseClassId, out uint pcRank)
         {
-            return _impl.IsArrayClass(ClassId, out pBaseElemType, out pBaseClassId, out pcRank);
+            return _impl.IsArrayClass(classId, out pBaseElemType, out pBaseClassId, out pcRank);
         }
 
-        public HResult GetThreadInfo(ThreadId ThreadId, out int pdwWin32ThreadId)
+        public (HResult result, int win32ThreadId) GetThreadInfo(ThreadId threadId)
         {
-            return _impl.GetThreadInfo(ThreadId, out pdwWin32ThreadId);
+            var result = _impl.GetThreadInfo(threadId, out var win32ThreadId);
+            return (result, win32ThreadId);
         }
 
-        public HResult GetCurrentThreadId(out ThreadId pThreadId)
+        public (HResult result, ThreadId threadId) GetCurrentThreadId()
         {
-            return _impl.GetCurrentThreadId(out pThreadId);
+            var code = _impl.GetCurrentThreadId(out var threadId);
+            return new(code, threadId);
         }
 
-        public HResult GetClassIdInfo(ClassId ClassId, out ModuleId pModuleId, out MdTypeDef pTypeDefToken)
+        public (HResult result, ModuleId moduleId, MdTypeDef typeDef) GetClassIdInfo(ClassId classId)
         {
-            return _impl.GetClassIdInfo(ClassId, out pModuleId, out pTypeDefToken);
+            var result = _impl.GetClassIdInfo(classId, out var moduleId, out var typeDefToken);
+            return (result, moduleId, typeDefToken);
         }
 
-        public HResult GetFunctionInfo(FunctionId FunctionId, out ClassId pClassId, out ModuleId pModuleId, out MdToken pToken)
+        public (HResult result, ClassId classId, ModuleId moduleId, MdToken token) GetFunctionInfo(FunctionId functionId)
         {
-            return _impl.GetFunctionInfo(FunctionId, out pClassId, out pModuleId, out pToken);
+            var result = _impl.GetFunctionInfo(functionId, out var classId, out var moduleId, out var token);
+            return (result, classId, moduleId, token);
         }
 
         public HResult SetEventMask(CorPrfMonitor dwEvents)
@@ -104,9 +108,9 @@
             return _impl.SetFunctionIdMapper(pFunc);
         }
 
-        public unsafe HResult GetTokenAndMetaDataFromFunction(FunctionId FunctionId, out Guid riid, out void* ppImport, out MdToken pToken)
+        public unsafe HResult GetTokenAndMetaDataFromFunction(FunctionId functionId, out Guid riid, out void* ppImport, out MdToken pToken)
         {
-            return _impl.GetTokenAndMetaDataFromFunction(FunctionId, out riid, out ppImport, out pToken);
+            return _impl.GetTokenAndMetaDataFromFunction(functionId, out riid, out ppImport, out pToken);
         }
 
         public unsafe (HResult result, string moduleName, nint baseLoadAddress, AssemblyId assemblyId) GetModuleInfo(ModuleId moduleId)
@@ -139,11 +143,10 @@
             }
         }
 
-        public HResult GetModuleMetaData(ModuleId moduleId, CorOpenFlags dwOpenFlags, Guid riid, out IMetaDataImport metaDataImport)
+        public (HResult result, IMetaDataImport metaDataImport) GetModuleMetaData(ModuleId moduleId, CorOpenFlags dwOpenFlags, Guid riid)
         {
             var result = _impl.GetModuleMetaData(moduleId, dwOpenFlags, riid, out var ptr);
-            metaDataImport = new(ptr);
-            return result;
+            return (result, new(ptr));
         }
 
         public unsafe HResult GetILFunctionBody(ModuleId moduleId, MdMethodDef methodId, out byte* ppMethodHeader, out uint pcbMethodSize)

@@ -21,7 +21,7 @@ namespace ManagedDotnetProfiler
 
         public bool GetThreadId(ulong expectedThreadId, int expectedOsId)
         {
-            var result = ICorProfilerInfo.GetCurrentThreadId(out var threadId);
+            var (result, threadId) = ICorProfilerInfo.GetCurrentThreadId();
 
             if (!result.IsOK)
             {
@@ -41,7 +41,7 @@ namespace ManagedDotnetProfiler
 
             Task.Run(() =>
             {
-                result = ICorProfilerInfo.GetThreadInfo(threadId, out osId);
+                (result, osId) = ICorProfilerInfo.GetThreadInfo(threadId);
             }).Wait();
 
             if (!result.IsOK)
@@ -73,30 +73,12 @@ namespace ManagedDotnetProfiler
 
         protected override HResult JITCompilationStarted(FunctionId functionId, bool fIsSafeToBlock)
         {
-            ICorProfilerInfo2.GetFunctionInfo(functionId, out var classId, out var moduleId, out var mdToken);
-
-            ICorProfilerInfo2.GetModuleMetaData(moduleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport, out var metaDataImport);
-
-            metaDataImport.GetMethodProps(new MdMethodDef(mdToken), out var typeDef, null, 0, out var size, out _, out _, out _, out _, out _);
-
-            var buffer = new char[size];
-
-            fixed (char* p = buffer)
-            {
-                metaDataImport.GetMethodProps(new MdMethodDef(mdToken), out _, p, size, out _, out _, out _, out _, out _, out _);
-            }
-
-            var methodName = new string(buffer);
-
-            metaDataImport.GetTypeDefProps(typeDef, null, out size, out _, out _);
-
-            buffer = new char[size];
-
-            metaDataImport.GetTypeDefProps(typeDef, buffer, out _, out _, out _);
-
-            var typeName = new string(buffer);
-
-            Log($"JITCompilationStarted: {typeName}.{methodName}");
+            var (_, _, moduleId, mdToken) = ICorProfilerInfo2.GetFunctionInfo(functionId);
+            var (_, metaDataImport) = ICorProfilerInfo2.GetModuleMetaData(moduleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport);
+            var (_, methodProperties) = metaDataImport.GetMethodProps(new MdMethodDef(mdToken));
+            var (_, typeName, _, _) = metaDataImport.GetTypeDefProps(methodProperties.Class);
+            
+            Log($"JITCompilationStarted: {typeName}.{methodProperties.Name}");
 
             return HResult.S_OK;
         }
@@ -130,8 +112,8 @@ namespace ManagedDotnetProfiler
             }
 
             ICorProfilerInfo2.GetClassFromObject(thrownObjectId, out var classId);
-            ICorProfilerInfo2.GetClassIdInfo(classId, out var moduleId, out var typeDef);
-            ICorProfilerInfo2.GetModuleMetaData(moduleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport, out var metaDataImport);
+            var (_, moduleId, typeDef) = ICorProfilerInfo2.GetClassIdInfo(classId);
+            var (_, metaDataImport) = ICorProfilerInfo2.GetModuleMetaData(moduleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport);
 
             metaDataImport.GetTypeDefProps(typeDef, null, out var nameCharCount, out _, out _);
 
@@ -146,32 +128,12 @@ namespace ManagedDotnetProfiler
 
         protected override HResult ExceptionSearchCatcherFound(FunctionId functionId)
         {
-            ICorProfilerInfo2.GetFunctionInfo(functionId, out var classId, out var moduleId, out var mdToken);
-
-            ICorProfilerInfo2.GetModuleMetaData(moduleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport, out var metaDataImport);
-
-            metaDataImport.GetMethodProps(new MdMethodDef(mdToken), out _, null, 0, out var size, out _, out _, out _, out _, out _);
-
-            var buffer = new char[size];
-
-            MdTypeDef typeDef;
-
-            fixed (char* p = buffer)
-            {
-                metaDataImport.GetMethodProps(new MdMethodDef(mdToken), out typeDef, p, size, out _, out _, out _, out _, out _, out _);
-            }
-
-            metaDataImport.GetTypeDefProps(typeDef, null, out size, out _, out _);
-
-            var methodName = new string(buffer);
-
-            buffer = new char[size];
-
-            metaDataImport.GetTypeDefProps(typeDef, buffer, out _, out _, out _);
-
-            var typeName = new string(buffer);
-
-            Log($"Exception was caught in {typeName}.{methodName}");
+            var (_, _, moduleId, mdToken) = ICorProfilerInfo2.GetFunctionInfo(functionId);
+            var (_, metaDataImport) = ICorProfilerInfo2.GetModuleMetaData(moduleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport);
+            var (_, methodProperties) = metaDataImport.GetMethodProps(new MdMethodDef(mdToken));
+            var (_, typeName, _, _) = metaDataImport.GetTypeDefProps(methodProperties.Class);
+            
+            Log($"Exception was caught in {typeName}.{methodProperties.Name}");
             return HResult.S_OK;
         }
 
@@ -254,6 +216,18 @@ namespace ManagedDotnetProfiler
             var (_, moduleName, _, _) = ICorProfilerInfo.GetModuleInfo(moduleId);
 
             Log($"AssemblyUnloadFinished - {assemblyName} - AppDomain {appDomainName} - Module {moduleName}");
+
+            return HResult.S_OK;
+        }
+
+        protected override HResult ClassLoadFinished(ClassId classId, HResult hrStatus)
+        {
+            var (_, moduleId, typeDef) = ICorProfilerInfo.GetClassIdInfo(classId);
+            var (_, metaDataImport) = ICorProfilerInfo.GetModuleMetaData(moduleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport);
+
+            var (_, typeName, _, _) = metaDataImport.GetTypeDefProps(typeDef);
+
+            Log($"ClassLoadFinished - {typeName}");
 
             return HResult.S_OK;
         }

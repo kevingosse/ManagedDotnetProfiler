@@ -157,7 +157,7 @@ public unsafe interface IMetaDataImport : IUnknown
         uint cchMethod,              // Size of szMethod buffer in wide chars.
         out uint pchMethod,             // Put actual size here
         out int pdwAttr,               // Put flags here.
-        out nint* ppvSigBlob,        // [OUT] point to the blob value of meta data
+        out byte* ppvSigBlob,        // [OUT] point to the blob value of meta data
         out uint pcbSigBlob,            // [OUT] actual size of signature blob
         out uint pulCodeRVA,            // [OUT] codeRVA
         out int pdwImplFlags);    // [OUT] Impl. Flags

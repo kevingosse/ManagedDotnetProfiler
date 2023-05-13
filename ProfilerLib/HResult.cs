@@ -1,6 +1,6 @@
 ﻿namespace ProfilerLib
 {
-    public struct HResult
+    public readonly struct HResult
     {
         public const int S_OK = 0;
         public const int S_FALSE = 1;
@@ -10,27 +10,27 @@
         public const int E_NOINTERFACE = unchecked((int)0x80004002);
         public const int CORPROF_E_UNSUPPORTED_CALL_SEQUENCE = unchecked((int)0x80131363);
 
-        public bool IsOK => Value == S_OK;
+        public bool IsOK => Code == S_OK;
 
-        public int Value { get; set; }
+        public int Code { get; }
 
-        public HResult(int hr) => Value = hr;
+        public HResult(int hr) => Code = hr;
 
-        public static implicit operator HResult(int hr) => new HResult(hr);
+        public static implicit operator HResult(int hr) => new(hr);
 
         /// <summary>
         /// Helper to convert to int for comparisons.
         /// </summary>
-        public static implicit operator int(HResult hr) => hr.Value;
+        public static implicit operator int(HResult hr) => (int)hr.Code;
 
         /// <summary>
         /// This makes "if (hr)" equivalent to SUCCEEDED(hr).
         /// </summary>
-        public static implicit operator bool(HResult hr) => hr.Value >= 0;
+        public static implicit operator bool(HResult hr) => hr.Code >= 0;
 
-        public override string ToString()
+        public static string ToString(int code)
         {
-            return Value switch
+            return code switch
             {
                 S_OK => "S_OK",
                 S_FALSE => "S_FALSE",
@@ -39,8 +39,11 @@
                 E_NOTIMPL => "E_NOTIMPL",
                 E_NOINTERFACE => "E_NOINTERFACE",
                 CORPROF_E_UNSUPPORTED_CALL_SEQUENCE => "CORPROF_E_UNSUPPORTED_CALL_SEQUENCE",
-                _ => $"{Value:x8}",
+                _ => $"{code:x8}",
             };
+
         }
+
+        public override string ToString() => ToString(Code);
     }
 }
