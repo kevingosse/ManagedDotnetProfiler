@@ -1,8 +1,8 @@
 ﻿using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using TestApp;
-
 
 Console.WriteLine($"PID: {Environment.ProcessId}");
 
@@ -37,6 +37,28 @@ foreach (var log in FetchLogs())
 TestCreateAndUnloadAlc();
 
 TestCreateAndUnloadType();
+
+TestCom();
+
+TestConditionalWeakTable();
+
+static void TestConditionalWeakTable()
+{
+    var cwt = new ConditionalWeakTable<string, string>();
+    cwt.Add("hello", "world");
+    GC.Collect(2, GCCollectionMode.Forced, true);
+
+    var logs = FetchLogs().ToList();
+    AssertContains(logs, "ConditionalWeakTableElementReferences: hello -> world");
+}
+
+static void TestCom()
+{
+    _ = Marshal.GetIUnknownForObject(new object());
+
+    var logs = FetchLogs().ToList();
+    AssertContains(logs, "COMClassicVTableCreated - System.Object - fbec27f0-fc44-396c-8a8c-4c1993516f2d - 11");
+}
 
 static void TestCreateAndUnloadType()
 {
@@ -175,4 +197,9 @@ static unsafe string? FetchNextLog()
 
         return length >= 0 ? new string(buffer.Slice(0, length)) : null;
     }
+}
+
+public class TestCom
+{
+    public int Method() => 42;
 }

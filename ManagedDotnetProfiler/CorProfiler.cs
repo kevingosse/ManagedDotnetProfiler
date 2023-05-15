@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 using NativeObjects;
 using System.Threading;
 using System.Collections.Concurrent;
+using System.Runtime.CompilerServices;
 
 namespace ManagedDotnetProfiler
 {
@@ -249,9 +250,9 @@ namespace ManagedDotnetProfiler
 
         protected override HResult ClassUnloadStarted(ClassId classId)
         {
-            var (_, moduleId, typeDef) = ICorProfilerInfo.GetClassIdInfo(classId);
-            var (_, metaDataImport) = ICorProfilerInfo.GetModuleMetaData(moduleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport);
-            var (_, typeName, _, _) = metaDataImport.GetTypeDefProps(typeDef);
+            var (moduleId, typeDef) = ICorProfilerInfo.GetClassIdInfo(classId).ThrowIfFailed();
+            var metaDataImport = ICorProfilerInfo.GetModuleMetaData(moduleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport).ThrowIfFailed();
+            var (typeName, _, _) = metaDataImport.GetTypeDefProps(typeDef).ThrowIfFailed();
 
             Log($"ClassUnloadStarted - {typeName}");
 
@@ -265,6 +266,37 @@ namespace ManagedDotnetProfiler
             var (_, typeName, _, _) = metaDataImport.GetTypeDefProps(typeDef);
 
             Log($"ClassUnloadFinished - {typeName}");
+
+            return HResult.S_OK;
+        }
+
+        protected override unsafe HResult COMClassicVTableCreated(ClassId wrappedClassId, in Guid implementedIID, void* pVTable, uint cSlots)
+        {
+            var (moduleId, typeDef) = ICorProfilerInfo.GetClassIdInfo(wrappedClassId).ThrowIfFailed();
+            var metaDataImport = ICorProfilerInfo.GetModuleMetaData(moduleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport).ThrowIfFailed();
+            var (typeName, _, _) = metaDataImport.GetTypeDefProps(typeDef).ThrowIfFailed();
+
+            Log($"COMClassicVTableCreated - {typeName} - {implementedIID} - {cSlots}");
+            return HResult.S_OK;
+        }
+
+        protected override unsafe HResult COMClassicVTableDestroyed(ClassId wrappedClassId, in Guid implementedIID, void* pVTable)
+        {
+            Log("Error: the profiling API never raises this event");
+            return HResult.S_OK;
+        }
+
+        protected override unsafe HResult ConditionalWeakTableElementReferences(uint cRootRefs, ObjectId* keyRefIds, ObjectId* valueRefIds, GCHandleId* rootIds)
+        {
+            var (_, stringLengthOffset, bufferOffset) = ICorProfilerInfo2.GetStringLayout().ThrowIfFailed();
+
+            var stringPtr1 = (byte*)(*keyRefIds).Value;
+            var str1 = new ReadOnlySpan<char>(stringPtr1 + bufferOffset, Unsafe.Read<int>(stringPtr1 + stringLengthOffset));
+
+            var stringPtr2 = (byte*)(*valueRefIds).Value;
+            var str2 = new ReadOnlySpan<char>(stringPtr2 + bufferOffset, Unsafe.Read<int>(stringPtr2 + stringLengthOffset));
+
+            Log($"ConditionalWeakTableElementReferences: {str1} -> {str2}");
 
             return HResult.S_OK;
         }

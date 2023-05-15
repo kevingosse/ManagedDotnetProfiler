@@ -1,7 +1,37 @@
 ﻿namespace ProfilerLib
 {
-    internal static class Extensions
+    public static class Extensions
     {
+        public static T ThrowIfFailed<T>(this (HResult, T) value)
+        {
+            if (!value.Item1.IsOK)
+            {
+                throw new InvalidOperationException($"The HResult is failed: {value.Item1}");
+            }
+
+            return value.Item2;
+        }
+
+        public static (T1, T2) ThrowIfFailed<T1, T2>(this (HResult, T1, T2) value)
+        {
+            if (!value.Item1.IsOK)
+            {
+                throw new InvalidOperationException($"The HResult is failed: {value.Item1}");
+            }
+
+            return (value.Item2, value.Item3);
+        }
+
+        public static (T1, T2, T3) ThrowIfFailed<T1, T2, T3>(this (HResult, T1, T2, T3) value)
+        {
+            if (!value.Item1.IsOK)
+            {
+                throw new InvalidOperationException($"The HResult is failed: {value.Item1}");
+            }
+
+            return (value.Item2, value.Item3, value.Item4);
+        }
+
         internal static string WithoutNullTerminator(this Span<char> buffer)
         {
             if (buffer.Length == 0)
