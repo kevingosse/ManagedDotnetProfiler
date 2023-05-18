@@ -9,12 +9,12 @@ public class ICorProfilerInfo5 : ICorProfilerInfo4
         _impl = new(ptr);
     }
 
-    public HResult GetEventMask2(out int pdwEventsLow, out int pdwEventsHigh)
+    public HResult GetEventMask2(out CorPrfMonitor pdwEventsLow, out CorPrfHighMonitor pdwEventsHigh)
     {
         return _impl.GetEventMask2(out pdwEventsLow, out pdwEventsHigh);
     }
 
-    public HResult SetEventMask2(int dwEventsLow, int dwEventsHigh)
+    public HResult SetEventMask2(CorPrfMonitor dwEventsLow, CorPrfHighMonitor dwEventsHigh)
     {
         return _impl.SetEventMask2(dwEventsLow, dwEventsHigh);
     }

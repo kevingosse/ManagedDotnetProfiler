@@ -292,6 +292,61 @@ public enum CorPrfMonitor : uint
                                           COR_PRF_DISABLE_ALL_NGEN_IMAGES
 }
 
+/// <summary>
+/// Additional flags the profiler can specify via SetEventMask2 when loading
+/// </summary>
+[Flags]
+public enum CorPrfHighMonitor : uint
+{
+    COR_PRF_HIGH_MONITOR_NONE = 0x00000000,
+
+    // CORECLR DEPRECATION WARNING: This flag is no longer checked by the runtime
+    COR_PRF_HIGH_ADD_ASSEMBLY_REFERENCES = 0x00000001,
+
+    COR_PRF_HIGH_IN_MEMORY_SYMBOLS_UPDATED = 0x00000002,
+
+    COR_PRF_HIGH_MONITOR_DYNAMIC_FUNCTION_UNLOADS = 0x00000004,
+
+    COR_PRF_HIGH_DISABLE_TIERED_COMPILATION = 0x00000008,
+
+    COR_PRF_HIGH_BASIC_GC = 0x00000010,
+
+    // Enables the MovedReferences/MovedReferences2 callback for compacting GCs only.
+    COR_PRF_HIGH_MONITOR_GC_MOVED_OBJECTS = 0x00000020,
+
+    COR_PRF_HIGH_REQUIRE_PROFILE_IMAGE = 0,
+
+    // Enables the large object allocation monitoring according to the LOH threshold.
+    COR_PRF_HIGH_MONITOR_LARGEOBJECT_ALLOCATED = 0x00000040,
+
+    COR_PRF_HIGH_MONITOR_EVENT_PIPE = 0x00000080,
+
+    // Enables the pinned object allocation monitoring.
+    COR_PRF_HIGH_MONITOR_PINNEDOBJECT_ALLOCATED = 0x00000100,
+
+    COR_PRF_HIGH_ALLOWABLE_AFTER_ATTACH = COR_PRF_HIGH_IN_MEMORY_SYMBOLS_UPDATED |
+                                                      COR_PRF_HIGH_MONITOR_DYNAMIC_FUNCTION_UNLOADS |
+                                                      COR_PRF_HIGH_BASIC_GC |
+                                                      COR_PRF_HIGH_MONITOR_GC_MOVED_OBJECTS |
+                                                      COR_PRF_HIGH_MONITOR_LARGEOBJECT_ALLOCATED |
+                                                      COR_PRF_HIGH_MONITOR_EVENT_PIPE,
+
+    COR_PRF_HIGH_ALLOWABLE_NOTIFICATION_PROFILER
+                                        = COR_PRF_HIGH_IN_MEMORY_SYMBOLS_UPDATED |
+                                              COR_PRF_HIGH_MONITOR_DYNAMIC_FUNCTION_UNLOADS |
+                                              COR_PRF_HIGH_DISABLE_TIERED_COMPILATION |
+                                              COR_PRF_HIGH_BASIC_GC |
+                                              COR_PRF_HIGH_MONITOR_GC_MOVED_OBJECTS |
+                                              COR_PRF_HIGH_MONITOR_LARGEOBJECT_ALLOCATED |
+                                              COR_PRF_HIGH_MONITOR_EVENT_PIPE,
+
+    // MONITOR_IMMUTABLE represents all flags that may only be set during initialization.
+    // Trying to change any of these flags elsewhere will result in a
+    // failed HRESULT.
+    COR_PRF_HIGH_MONITOR_IMMUTABLE = COR_PRF_HIGH_DISABLE_TIERED_COMPILATION,
+
+}
+
 public enum COR_PRF_JIT_CACHE
 {
     COR_PRF_CACHED_FUNCTION_FOUND,

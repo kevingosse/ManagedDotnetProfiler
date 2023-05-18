@@ -1,4 +1,7 @@
-﻿using System.Reflection;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
+using System.Net.Http.Headers;
+using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -42,6 +45,47 @@ TestCom();
 
 TestConditionalWeakTable();
 
+TestDynamicMethod();
+
+static void TestDynamicMethod()
+{
+    //var dynamicMethod = new DynamicMethod("test", null, null);
+    //var ilGenerator = dynamicMethod.GetILGenerator();
+    //ilGenerator.Emit(OpCodes.Ret);
+
+    //var handle = (RuntimeMethodHandle)typeof(DynamicMethod).GetMethod("GetMethodDescriptor", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(dynamicMethod, null);
+
+    //dynamicMethod.CreateDelegate<Action>().Invoke();
+
+    //dynamicMethod = null;
+
+    var handle = InnerScope();
+
+    GC.Collect(2, GCCollectionMode.Forced, true);
+    GC.WaitForPendingFinalizers();
+    GC.Collect(2, GCCollectionMode.Forced, true);
+    GC.WaitForPendingFinalizers();
+
+    var logs = FetchLogs().ToList();
+
+    AssertContains(logs, $"DynamicMethodJITCompilationStarted - {handle:x2}");
+    AssertContains(logs, $"DynamicMethodJITCompilationFinished - {handle:x2}");
+    AssertContains(logs, $"DynamicMethodUnloaded - {handle:x2}");
+}
+
+static string InnerScope()
+{
+    var dynamicMethod = new DynamicMethod("test", null, null);
+    var ilGenerator = dynamicMethod.GetILGenerator();
+    ilGenerator.Emit(OpCodes.Ret);
+
+    var handle = (RuntimeMethodHandle)typeof(DynamicMethod).GetMethod("GetMethodDescriptor", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(dynamicMethod, null);
+
+    dynamicMethod.CreateDelegate<Action>().Invoke();
+    
+    return handle.Value.ToString("x2");
+}
+
 static void TestConditionalWeakTable()
 {
     var cwt = new ConditionalWeakTable<string, string>();
@@ -49,7 +93,7 @@ static void TestConditionalWeakTable()
     GC.Collect(2, GCCollectionMode.Forced, true);
 
     var logs = FetchLogs().ToList();
-    AssertContains(logs, "ConditionalWeakTableElementReferences: hello -> world");
+    AssertContains(logs, "ConditionalWeakTableElementReferences - hello -> world");
 }
 
 static void TestCom()

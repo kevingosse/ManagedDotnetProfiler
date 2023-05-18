@@ -67,10 +67,12 @@ namespace ManagedDotnetProfiler
             Instance = this;
 
             var eventMask = CorPrfMonitor.COR_PRF_MONITOR_ALL;
+            var highEventMask = CorPrfHighMonitor.COR_PRF_HIGH_MONITOR_DYNAMIC_FUNCTION_UNLOADS;
 
             Log($"Setting event mask to {eventMask}");
+            Log($"Setting high event mask to {highEventMask}");
 
-            return ICorProfilerInfo11.SetEventMask(eventMask);
+            return ICorProfilerInfo11.SetEventMask2(eventMask, CorPrfHighMonitor.COR_PRF_HIGH_MONITOR_DYNAMIC_FUNCTION_UNLOADS);
         }
 
         protected override HResult JITCompilationStarted(FunctionId functionId, bool fIsSafeToBlock)
@@ -296,8 +298,26 @@ namespace ManagedDotnetProfiler
             var stringPtr2 = (byte*)(*valueRefIds).Value;
             var str2 = new ReadOnlySpan<char>(stringPtr2 + bufferOffset, Unsafe.Read<int>(stringPtr2 + stringLengthOffset));
 
-            Log($"ConditionalWeakTableElementReferences: {str1} -> {str2}");
+            Log($"ConditionalWeakTableElementReferences - {str1} -> {str2}");
 
+            return HResult.S_OK;
+        }
+
+        protected override unsafe HResult DynamicMethodJITCompilationStarted(FunctionId functionId, bool fIsSafeToBlock, byte* pILHeader, uint cbILHeader)
+        {
+            Log($"DynamicMethodJITCompilationStarted - {functionId.Value:x2}");
+            return HResult.S_OK;
+        }
+
+        protected override HResult DynamicMethodJITCompilationFinished(FunctionId functionId, HResult hrStatus, bool fIsSafeToBlock)
+        {
+            Log($"DynamicMethodJITCompilationFinished - {functionId.Value:x2}");
+            return HResult.S_OK;
+        }
+
+        protected override HResult DynamicMethodUnloaded(FunctionId functionId)
+        {
+            Log($"DynamicMethodUnloaded - {functionId.Value:x2}");
             return HResult.S_OK;
         }
 
