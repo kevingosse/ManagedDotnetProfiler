@@ -16,6 +16,7 @@ namespace ManagedDotnetProfiler
     {
         private ConcurrentDictionary<AssemblyId, bool> _assemblyLoads = new();
         private ConcurrentDictionary<ClassId, bool> _classLoads = new();
+        private ConcurrentDictionary<int, int> _nestedCatchBlocks = new ();
 
         public static CorProfiler Instance { get; private set; }
 
@@ -136,7 +137,7 @@ namespace ManagedDotnetProfiler
             var (_, metaDataImport) = ICorProfilerInfo2.GetModuleMetaData(moduleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport);
             var (_, methodProperties) = metaDataImport.GetMethodProps(new MdMethodDef(mdToken));
             var (_, typeName, _, _) = metaDataImport.GetTypeDefProps(methodProperties.Class);
-            
+
             Log($"Exception was caught in {typeName}.{methodProperties.Name}");
             return HResult.S_OK;
         }
@@ -236,11 +237,7 @@ namespace ManagedDotnetProfiler
 
         protected override HResult ClassLoadFinished(ClassId classId, HResult hrStatus)
         {
-            var (_, moduleId, typeDef) = ICorProfilerInfo.GetClassIdInfo(classId);
-            var (_, metaDataImport) = ICorProfilerInfo.GetModuleMetaData(moduleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport);
-            var (_, typeName, _, _) = metaDataImport.GetTypeDefProps(typeDef);
-
-            Log($"ClassLoadFinished - {typeName}");
+            Log($"ClassLoadFinished - {GetTypeNameFromClassId(classId)}");
 
             if (!_classLoads.TryRemove(classId, out _))
             {
@@ -252,39 +249,25 @@ namespace ManagedDotnetProfiler
 
         protected override HResult ClassUnloadStarted(ClassId classId)
         {
-            var (moduleId, typeDef) = ICorProfilerInfo.GetClassIdInfo(classId).ThrowIfFailed();
-            var metaDataImport = ICorProfilerInfo.GetModuleMetaData(moduleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport).ThrowIfFailed();
-            var (typeName, _, _) = metaDataImport.GetTypeDefProps(typeDef).ThrowIfFailed();
-
-            Log($"ClassUnloadStarted - {typeName}");
-
+            Log($"ClassUnloadStarted - {GetTypeNameFromClassId(classId)}");
             return HResult.S_OK;
         }
 
         protected override HResult ClassUnloadFinished(ClassId classId, HResult hrStatus)
         {
-            var (_, moduleId, typeDef) = ICorProfilerInfo.GetClassIdInfo(classId);
-            var (_, metaDataImport) = ICorProfilerInfo.GetModuleMetaData(moduleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport);
-            var (_, typeName, _, _) = metaDataImport.GetTypeDefProps(typeDef);
-
-            Log($"ClassUnloadFinished - {typeName}");
-
+            Log($"ClassUnloadFinished - {GetTypeNameFromClassId(classId)}");
             return HResult.S_OK;
         }
 
         protected override unsafe HResult COMClassicVTableCreated(ClassId wrappedClassId, in Guid implementedIID, void* pVTable, uint cSlots)
         {
-            var (moduleId, typeDef) = ICorProfilerInfo.GetClassIdInfo(wrappedClassId).ThrowIfFailed();
-            var metaDataImport = ICorProfilerInfo.GetModuleMetaData(moduleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport).ThrowIfFailed();
-            var (typeName, _, _) = metaDataImport.GetTypeDefProps(typeDef).ThrowIfFailed();
-
-            Log($"COMClassicVTableCreated - {typeName} - {implementedIID} - {cSlots}");
+            Log($"COMClassicVTableCreated - {GetTypeNameFromClassId(wrappedClassId)} - {implementedIID} - {cSlots}");
             return HResult.S_OK;
         }
 
         protected override unsafe HResult COMClassicVTableDestroyed(ClassId wrappedClassId, in Guid implementedIID, void* pVTable)
         {
-            Log("Error: the profiling API never raises this event");
+            Log("Error: the profiling API never raises the event COMClassicVTableDestroyed");
             return HResult.S_OK;
         }
 
@@ -321,6 +304,52 @@ namespace ManagedDotnetProfiler
             return HResult.S_OK;
         }
 
+        protected override HResult ExceptionCatcherEnter(FunctionId functionId, ObjectId objectId)
+        {
+            var typeName = GetTypeNameFromObjectId(objectId);
+
+            var (_, moduleId, mdToken) = ICorProfilerInfo2.GetFunctionInfo(functionId).ThrowIfFailed();
+            var metaDataImport = ICorProfilerInfo2.GetModuleMetaData(moduleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport).ThrowIfFailed();
+            var methodProperties = metaDataImport.GetMethodProps(new MdMethodDef(mdToken)).ThrowIfFailed();
+            var (functionTypeName, _, _) = metaDataImport.GetTypeDefProps(methodProperties.Class).ThrowIfFailed();
+
+            Log($"ExceptionCatcherEnter - catch {typeName} in {functionTypeName}.{methodProperties.Name}");
+
+            _nestedCatchBlocks.AddOrUpdate(Environment.CurrentManagedThreadId, 1, (_, old) => old + 1);
+
+            return HResult.S_OK;
+        }
+
+        protected override HResult ExceptionCatcherLeave()
+        {
+            if (!_nestedCatchBlocks.TryGetValue(Environment.CurrentManagedThreadId, out var count) || count <= 0)
+            {
+                Log($"Error: ExceptionCatcherLeave called without a matching ExceptionCatcherEnter");
+                return HResult.E_FAIL;
+            }
+
+            count -= 1;
+            _nestedCatchBlocks[Environment.CurrentManagedThreadId] = count;
+
+            var threadId = ICorProfilerInfo.GetCurrentThreadId().ThrowIfFailed();
+
+            Log($"ExceptionCatcherLeave - Thread {threadId} - Nested level {count}");
+
+            return HResult.S_OK;
+        }
+
+        protected override HResult ExceptionCLRCatcherExecute()
+        {
+            Log("Error: the profiling API never raises the event ExceptionCLRCatcherExecute");
+            return HResult.S_OK;
+        }
+
+        protected override HResult ExceptionCLRCatcherFound()
+        {
+            Log("Error: the profiling API never raises the event ExceptionCLRCatcherFound");
+            return HResult.S_OK;
+        }
+
         protected override HResult Shutdown()
         {
             Console.WriteLine("[Profiler] *** Shutting down, dumping remaining logs ***");
@@ -348,6 +377,21 @@ namespace ManagedDotnetProfiler
             Logs.Enqueue(line);
 
             // Console.WriteLine($"[Profiler] {line}");
+        }
+
+        private string GetTypeNameFromObjectId(ObjectId objectId)
+        {
+            var classId = ICorProfilerInfo.GetClassFromObject(objectId).ThrowIfFailed();
+            return GetTypeNameFromClassId(classId);
+        }
+
+        private string GetTypeNameFromClassId(ClassId classId)
+        {
+            var (moduleId, typeDef) = ICorProfilerInfo.GetClassIdInfo(classId).ThrowIfFailed();
+            var moduleMetadata = ICorProfilerInfo.GetModuleMetaData(moduleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport).ThrowIfFailed();
+            var (typeName, _, _) = moduleMetadata.GetTypeDefProps(typeDef).ThrowIfFailed();
+
+            return typeName;
         }
     }
 }

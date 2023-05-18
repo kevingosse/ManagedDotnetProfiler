@@ -43,6 +43,8 @@ public readonly struct ReJITId
 public readonly struct ThreadId
 {
     public readonly nuint Value;
+
+    public override string ToString() => Value.ToString("x2");
 }
 
 public readonly struct ProcessId

@@ -24,19 +24,25 @@
             return _impl.Release();
         }
 
-        public HResult GetClassFromObject(ObjectId ObjectId, out ClassId pClassId)
+        public HResult GetClassFromObject(ObjectId objectId, out ClassId classId)
         {
-            return _impl.GetClassFromObject(ObjectId, out pClassId);
+            return _impl.GetClassFromObject(objectId, out classId);
         }
 
-        public HResult GetClassFromToken(ModuleId ModuleId, MdTypeDef typeDef, out ClassId pClassId)
+        public (HResult result, ClassId classId) GetClassFromObject(ObjectId objectId)
         {
-            return _impl.GetClassFromToken(ModuleId, typeDef, out pClassId);
+            var result = _impl.GetClassFromObject(objectId, out var pClassId);
+            return (result, pClassId);
         }
 
-        public unsafe HResult GetCodeInfo(FunctionId FunctionId, out byte* pStart, out uint pcSize)
+        public HResult GetClassFromToken(ModuleId moduleId, MdTypeDef typeDef, out ClassId pClassId)
         {
-            return _impl.GetCodeInfo(FunctionId, out pStart, out pcSize);
+            return _impl.GetClassFromToken(moduleId, typeDef, out pClassId);
+        }
+
+        public unsafe HResult GetCodeInfo(FunctionId functionId, out byte* pStart, out uint pcSize)
+        {
+            return _impl.GetCodeInfo(functionId, out pStart, out pcSize);
         }
 
         public HResult GetEventMask(out int pdwEvents)

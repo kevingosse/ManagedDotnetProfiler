@@ -32,10 +32,8 @@ var osId = PInvokes.Win32.GetCurrentThreadId();
 Assert(PInvokes.GetThreadId((ulong)threadId, (int)osId));
 
 
-foreach (var log in FetchLogs())
-{
-    Console.WriteLine(log);
-}
+// Clear the logs before the next tests
+_ = FetchLogs();
 
 TestCreateAndUnloadAlc();
 
@@ -46,6 +44,39 @@ TestCom();
 TestConditionalWeakTable();
 
 TestDynamicMethod();
+
+TestException(threadId);
+
+static void TestException(nint threadId)
+{
+    try
+    {
+        throw new InvalidOperationException("Expected");
+    }
+    catch (Exception)
+    {
+        try
+        {
+            throw new TaskCanceledException("Expected");
+        }
+        catch (OperationCanceledException)
+        {
+        }
+    }
+
+    var logs = FetchLogs().ToList();
+
+    AssertContains(logs, "ExceptionCatcherEnter - catch System.InvalidOperationException in Program.<<Main>$>g__TestException|0_0");
+    AssertContains(logs, "ExceptionCatcherEnter - catch System.Threading.Tasks.TaskCanceledException in Program.<<Main>$>g__TestException|0_0");
+    AssertContains(logs, $"ExceptionCatcherLeave - Thread {threadId:x2} - Nested level 1");
+    AssertContains(logs, $"ExceptionCatcherLeave - Thread {threadId:x2} - Nested level 0");
+
+    foreach (var log in FetchLogs())
+    {
+        Console.WriteLine(log);
+    }
+
+}
 
 static void TestDynamicMethod()
 {
