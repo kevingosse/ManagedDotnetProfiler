@@ -88,49 +88,6 @@ namespace ManagedDotnetProfiler
             return HResult.S_OK;
         }
 
-        protected override HResult ExceptionThrown(ObjectId thrownObjectId)
-        {
-            Log("Enumerating modules");
-
-            ICorProfilerInfo3.EnumModules(out void* enumerator);
-
-            var moduleEnumerator = new ICorProfilerModuleEnumInvoker((IntPtr)enumerator);
-
-            moduleEnumerator.GetCount(out var modulesCount);
-
-            Log($"Fetching {modulesCount} modules");
-
-            var modules = new ModuleId[modulesCount];
-
-            fixed (ModuleId* p = modules)
-            {
-                moduleEnumerator.Next(modulesCount, p, out modulesCount);
-            }
-
-            Log($"Fetched {modulesCount} modules");
-
-            foreach (var module in modules)
-            {
-                var (_, moduleName, baseAddress, _) = ICorProfilerInfo.GetModuleInfo(module);
-
-                Log($"Module: {moduleName} loaded at address {baseAddress:x2}");
-            }
-
-            ICorProfilerInfo2.GetClassFromObject(thrownObjectId, out var classId);
-            var (_, moduleId, typeDef) = ICorProfilerInfo2.GetClassIdInfo(classId);
-            var (_, metaDataImport) = ICorProfilerInfo2.GetModuleMetaData(moduleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport);
-
-            metaDataImport.GetTypeDefProps(typeDef, null, out var nameCharCount, out _, out _);
-
-            Span<char> buffer = stackalloc char[(int)nameCharCount];
-
-            metaDataImport.GetTypeDefProps(typeDef, buffer, out _, out _, out _);
-
-            Log("An exception was thrown: " + new string(buffer));
-
-            return HResult.S_OK;
-        }
-
         protected override HResult ExceptionSearchCatcherFound(FunctionId functionId)
         {
             var (_, _, moduleId, mdToken) = ICorProfilerInfo2.GetFunctionInfo(functionId);
@@ -347,6 +304,18 @@ namespace ManagedDotnetProfiler
         protected override HResult ExceptionCLRCatcherFound()
         {
             Log("Error: the profiling API never raises the event ExceptionCLRCatcherFound");
+            return HResult.S_OK;
+        }
+
+        protected override unsafe HResult ExceptionOSHandlerEnter(nint* _)
+        {
+            Log("Error: the profiling API never raises the event ExceptionOSHandlerEnter");
+            return HResult.S_OK;
+        }
+
+        protected override unsafe HResult ExceptionOSHandlerLeave(nint* _)
+        {
+            Log("Error: the profiling API never raises the event ExceptionOSHandlerEnter");
             return HResult.S_OK;
         }
 
