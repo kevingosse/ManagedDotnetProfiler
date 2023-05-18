@@ -1,7 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Diagnostics;
-using System.Net.Http.Headers;
-using System.Reflection;
+﻿using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -9,19 +6,18 @@ using TestApp;
 
 Console.WriteLine($"PID: {Environment.ProcessId}");
 
-
-var logs = FetchLogs().ToList();
+var logs = Logs.Fetch().ToList();
 
 foreach (var log in logs)
 {
     Console.WriteLine(log);
 }
 
-AssertContains(logs, $"AssemblyLoadFinished - TestApp - AppDomain clrhost - Module {typeof(Program).Assembly.Location}");
-AssertContains(logs, $"AppDomainCreationStarted - System.Private.CoreLib.dll - Process Id {Environment.ProcessId}");
-AssertContains(logs, $"AppDomainCreationStarted - DefaultDomain - Process Id {Environment.ProcessId}");
-AssertContains(logs, "AppDomainCreationFinished - System.Private.CoreLib.dll - HResult S_OK");
-AssertContains(logs, "AppDomainCreationFinished - DefaultDomain - HResult S_OK");
+Logs.AssertContains(logs, $"AssemblyLoadFinished - TestApp - AppDomain clrhost - Module {typeof(Program).Assembly.Location}");
+Logs.AssertContains(logs, $"AppDomainCreationStarted - System.Private.CoreLib.dll - Process Id {Environment.ProcessId}");
+Logs.AssertContains(logs, $"AppDomainCreationStarted - DefaultDomain - Process Id {Environment.ProcessId}");
+Logs.AssertContains(logs, "AppDomainCreationFinished - System.Private.CoreLib.dll - HResult S_OK");
+Logs.AssertContains(logs, "AppDomainCreationFinished - DefaultDomain - HResult S_OK");
 
 
 var threadId = (IntPtr)typeof(Thread).GetField("_DONT_USE_InternalThread", BindingFlags.Instance | BindingFlags.NonPublic)
@@ -29,11 +25,11 @@ var threadId = (IntPtr)typeof(Thread).GetField("_DONT_USE_InternalThread", Bindi
 
 var osId = PInvokes.Win32.GetCurrentThreadId();
 
-Assert(PInvokes.GetThreadId((ulong)threadId, (int)osId));
+Logs.Assert(PInvokes.GetThreadId((ulong)threadId, (int)osId));
 
 
 // Clear the logs before the next tests
-_ = FetchLogs();
+Logs.Clear();
 
 TestCreateAndUnloadAlc();
 
@@ -45,38 +41,8 @@ TestConditionalWeakTable();
 
 TestDynamicMethod();
 
-TestException(threadId);
+ExceptionTests.Run(threadId);
 
-static void TestException(nint threadId)
-{
-    try
-    {
-        throw new InvalidOperationException("Expected");
-    }
-    catch (Exception)
-    {
-        try
-        {
-            throw new TaskCanceledException("Expected");
-        }
-        catch (OperationCanceledException)
-        {
-        }
-    }
-
-    var logs = FetchLogs().ToList();
-
-    AssertContains(logs, "ExceptionCatcherEnter - catch System.InvalidOperationException in Program.<<Main>$>g__TestException|0_0");
-    AssertContains(logs, "ExceptionCatcherEnter - catch System.Threading.Tasks.TaskCanceledException in Program.<<Main>$>g__TestException|0_0");
-    AssertContains(logs, $"ExceptionCatcherLeave - Thread {threadId:x2} - Nested level 1");
-    AssertContains(logs, $"ExceptionCatcherLeave - Thread {threadId:x2} - Nested level 0");
-
-    foreach (var log in FetchLogs())
-    {
-        Console.WriteLine(log);
-    }
-
-}
 
 static void TestDynamicMethod()
 {
@@ -97,11 +63,11 @@ static void TestDynamicMethod()
     GC.Collect(2, GCCollectionMode.Forced, true);
     GC.WaitForPendingFinalizers();
 
-    var logs = FetchLogs().ToList();
+    var logs = Logs.Fetch().ToList();
 
-    AssertContains(logs, $"DynamicMethodJITCompilationStarted - {handle:x2}");
-    AssertContains(logs, $"DynamicMethodJITCompilationFinished - {handle:x2}");
-    AssertContains(logs, $"DynamicMethodUnloaded - {handle:x2}");
+    Logs.AssertContains(logs, $"DynamicMethodJITCompilationStarted - {handle:x2}");
+    Logs.AssertContains(logs, $"DynamicMethodJITCompilationFinished - {handle:x2}");
+    Logs.AssertContains(logs, $"DynamicMethodUnloaded - {handle:x2}");
 }
 
 static string InnerScope()
@@ -123,16 +89,16 @@ static void TestConditionalWeakTable()
     cwt.Add("hello", "world");
     GC.Collect(2, GCCollectionMode.Forced, true);
 
-    var logs = FetchLogs().ToList();
-    AssertContains(logs, "ConditionalWeakTableElementReferences - hello -> world");
+    var logs = Logs.Fetch().ToList();
+    Logs.AssertContains(logs, "ConditionalWeakTableElementReferences - hello -> world");
 }
 
 static void TestCom()
 {
     _ = Marshal.GetIUnknownForObject(new object());
 
-    var logs = FetchLogs().ToList();
-    AssertContains(logs, "COMClassicVTableCreated - System.Object - fbec27f0-fc44-396c-8a8c-4c1993516f2d - 11");
+    var logs = Logs.Fetch().ToList();
+    Logs.AssertContains(logs, "COMClassicVTableCreated - System.Object - fbec27f0-fc44-396c-8a8c-4c1993516f2d - 11");
 }
 
 static void TestCreateAndUnloadType()
@@ -145,11 +111,11 @@ static void TestCreateAndUnloadType()
     GC.WaitForPendingFinalizers();
     GC.Collect(2, GCCollectionMode.Forced, true);
 
-    var logs = FetchLogs().ToList();
+    var logs = Logs.Fetch().ToList();
 
-    AssertContains(logs, "ClassLoadFinished - DynamicType");
-    AssertContains(logs, "ClassUnloadStarted - DynamicType");
-    AssertContains(logs, "ClassUnloadFinished - DynamicType");
+    Logs.AssertContains(logs, "ClassLoadFinished - DynamicType");
+    Logs.AssertContains(logs, "ClassUnloadStarted - DynamicType");
+    Logs.AssertContains(logs, "ClassUnloadFinished - DynamicType");
 }
 
 static void CreateAndUnloadType()
@@ -170,14 +136,14 @@ static void TestCreateAndUnloadAlc()
     GC.WaitForPendingFinalizers();
     GC.Collect(2, GCCollectionMode.Forced, true);
 
-    var logs = FetchLogs().ToList();
+    var logs = Logs.Fetch().ToList();
 
     foreach (var log in logs)
     {
         Console.WriteLine(log);
     }
 
-    AssertContains(logs, $"AssemblyUnloadFinished - TestApp - AppDomain clrhost - Module {typeof(Program).Assembly.Location}");
+    Logs.AssertContains(logs, $"AssemblyUnloadFinished - TestApp - AppDomain clrhost - Module {typeof(Program).Assembly.Location}");
 }
 
 [MethodImpl(MethodImplOptions.NoInlining)]
@@ -189,51 +155,9 @@ static void CreateAndUnloadAlc()
 }
 
 // Dump last logs before exiting
-foreach (var log in FetchLogs())
+foreach (var log in Logs.Fetch())
 {
     Console.WriteLine(log);
-}
-
-//Console.WriteLine("Press return to throw an exception");
-//Console.ReadLine();
-
-//try
-//{
-//    ThrowException();
-//}
-//catch
-//{
-//}
-
-static void AssertContains(List<string> logs, string expected)
-{
-    if (!logs.Contains(expected))
-    {
-        Console.WriteLine($"Could not find log: '{expected}'");
-        Console.WriteLine("********* Assertion failed, dumping logs *********");
-
-        foreach (var log in logs)
-        {
-            Console.WriteLine(log);
-        }
-
-        throw new Exception("Assertion failed");
-    }
-}
-
-static void Assert(bool value)
-{
-    if (!value)
-    {
-        Console.WriteLine("********* Assertion failed, dumping logs *********");
-
-        foreach (var log in FetchLogs())
-        {
-            Console.WriteLine(log);
-        }
-
-        throw new Exception("Assertion failed");
-    }
 }
 
 static void ThrowException()
@@ -241,38 +165,6 @@ static void ThrowException()
     throw new Exception("Test exception");
 }
 
-static IEnumerable<string> FetchLogs()
-{
-    while (true)
-    {
-        var log = FetchNextLog();
-
-        if (log == null)
-        {
-            yield break;
-        }
-
-        if (log.StartsWith("Error:"))
-        {
-            throw new Exception($"Found error log: {log}");
-        }
-
-        yield return log;
-    }
-}
-
-static unsafe string? FetchNextLog()
-{
-    const int bufferSize = 1024;
-    Span<char> buffer = stackalloc char[bufferSize];
-
-    fixed (char* c = buffer)
-    {
-        int length = PInvokes.FetchLastLog(c, buffer.Length);
-
-        return length >= 0 ? new string(buffer.Slice(0, length)) : null;
-    }
-}
 
 public class TestCom
 {

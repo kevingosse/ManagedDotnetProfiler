@@ -17,6 +17,7 @@ namespace ManagedDotnetProfiler
         private ConcurrentDictionary<AssemblyId, bool> _assemblyLoads = new();
         private ConcurrentDictionary<ClassId, bool> _classLoads = new();
         private ConcurrentDictionary<int, int> _nestedCatchBlocks = new ();
+        private ConcurrentDictionary<int, int> _nestedExceptionSearchFilters = new ();
 
         public static CorProfiler Instance { get; private set; }
 
@@ -316,6 +317,38 @@ namespace ManagedDotnetProfiler
         protected override unsafe HResult ExceptionOSHandlerLeave(nint* _)
         {
             Log("Error: the profiling API never raises the event ExceptionOSHandlerEnter");
+            return HResult.S_OK;
+        }
+
+        protected override HResult ExceptionSearchFilterEnter(FunctionId functionId)
+        {
+            var (_, moduleId, mdToken) = ICorProfilerInfo2.GetFunctionInfo(functionId).ThrowIfFailed();
+            var metaDataImport = ICorProfilerInfo2.GetModuleMetaData(moduleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport).ThrowIfFailed();
+            var methodProperties = metaDataImport.GetMethodProps(new MdMethodDef(mdToken)).ThrowIfFailed();
+            var (functionTypeName, _, _) = metaDataImport.GetTypeDefProps(methodProperties.Class).ThrowIfFailed();
+
+            Log($"ExceptionSearchFilterEnter - {functionTypeName}.{methodProperties.Name}");
+
+            _nestedExceptionSearchFilters.AddOrUpdate(Environment.CurrentManagedThreadId, 1, (_, old) => old + 1);
+
+            return HResult.S_OK;
+        }
+
+        protected override HResult ExceptionSearchFilterLeave()
+        {
+            if (!_nestedExceptionSearchFilters.TryGetValue(Environment.CurrentManagedThreadId, out var count) || count <= 0)
+            {
+                Log($"Error: ExceptionSearchFilterLeave called without a matching ExceptionSearchFilterEnter");
+                return HResult.E_FAIL;
+            }
+
+            count -= 1;
+            _nestedExceptionSearchFilters[Environment.CurrentManagedThreadId] = count;
+
+            var threadId = ICorProfilerInfo.GetCurrentThreadId().ThrowIfFailed();
+
+            Log($"ExceptionSearchFilterLeave - Thread {threadId} - Nested level {count}");
+
             return HResult.S_OK;
         }
 
