@@ -46,16 +46,6 @@ ExceptionTests.Run(threadId);
 
 static void TestDynamicMethod()
 {
-    //var dynamicMethod = new DynamicMethod("test", null, null);
-    //var ilGenerator = dynamicMethod.GetILGenerator();
-    //ilGenerator.Emit(OpCodes.Ret);
-
-    //var handle = (RuntimeMethodHandle)typeof(DynamicMethod).GetMethod("GetMethodDescriptor", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(dynamicMethod, null);
-
-    //dynamicMethod.CreateDelegate<Action>().Invoke();
-
-    //dynamicMethod = null;
-
     var handle = InnerScope();
 
     GC.Collect(2, GCCollectionMode.Forced, true);

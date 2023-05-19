@@ -34,6 +34,10 @@ internal static class ExceptionTests
         Logs.AssertContains(logs, "ExceptionSearchFilterEnter - TestApp.ExceptionTests.ExceptionFilter1");
         Logs.AssertContains(logs, $"ExceptionSearchFilterLeave - Thread {threadId:x2} - Nested level 1");
         Logs.AssertContains(logs, $"ExceptionSearchFilterLeave - Thread {threadId:x2} - Nested level 0");
+        Logs.AssertContains(logs, "ExceptionSearchFunctionEnter - TestApp.ExceptionTests.Run");
+        Logs.AssertContains(logs, "ExceptionSearchFunctionEnter - TestApp.ExceptionTests.ExceptionFilter1");
+        Logs.AssertContains(logs, $"ExceptionSearchFunctionLeave - Thread {threadId:x2} - Nested level 1");
+        Logs.AssertContains(logs, $"ExceptionSearchFunctionLeave - Thread {threadId:x2} - Nested level 0");
     }
     
     private static bool ExceptionFilter1()

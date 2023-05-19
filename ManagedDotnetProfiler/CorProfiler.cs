@@ -18,6 +18,7 @@ namespace ManagedDotnetProfiler
         private ConcurrentDictionary<ClassId, bool> _classLoads = new();
         private ConcurrentDictionary<int, int> _nestedCatchBlocks = new ();
         private ConcurrentDictionary<int, int> _nestedExceptionSearchFilters = new ();
+        private ConcurrentDictionary<int, int> _nestedExceptionSearchFunctions = new ();
 
         public static CorProfiler Instance { get; private set; }
 
@@ -348,6 +349,38 @@ namespace ManagedDotnetProfiler
             var threadId = ICorProfilerInfo.GetCurrentThreadId().ThrowIfFailed();
 
             Log($"ExceptionSearchFilterLeave - Thread {threadId} - Nested level {count}");
+
+            return HResult.S_OK;
+        }
+
+        protected override HResult ExceptionSearchFunctionEnter(FunctionId functionId)
+        {
+            var (_, moduleId, mdToken) = ICorProfilerInfo2.GetFunctionInfo(functionId).ThrowIfFailed();
+            var metaDataImport = ICorProfilerInfo2.GetModuleMetaData(moduleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport).ThrowIfFailed();
+            var methodProperties = metaDataImport.GetMethodProps(new MdMethodDef(mdToken)).ThrowIfFailed();
+            var (functionTypeName, _, _) = metaDataImport.GetTypeDefProps(methodProperties.Class).ThrowIfFailed();
+
+            Log($"ExceptionSearchFunctionEnter - {functionTypeName}.{methodProperties.Name}");
+
+            _nestedExceptionSearchFunctions.AddOrUpdate(Environment.CurrentManagedThreadId, 1, (_, old) => old + 1);
+
+            return HResult.S_OK;
+        }
+
+        protected override HResult ExceptionSearchFunctionLeave()
+        {
+            if (!_nestedExceptionSearchFunctions.TryGetValue(Environment.CurrentManagedThreadId, out var count) || count <= 0)
+            {
+                Log($"Error: ExceptionSearchFunctionLeave called without a matching ExceptionSearchFilterEnter");
+                return HResult.E_FAIL;
+            }
+
+            count -= 1;
+            _nestedExceptionSearchFunctions[Environment.CurrentManagedThreadId] = count;
+
+            var threadId = ICorProfilerInfo.GetCurrentThreadId().ThrowIfFailed();
+
+            Log($"ExceptionSearchFunctionLeave - Thread {threadId} - Nested level {count}");
 
             return HResult.S_OK;
         }
