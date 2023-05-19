@@ -17,8 +17,9 @@ namespace ManagedDotnetProfiler
         private ConcurrentDictionary<AssemblyId, bool> _assemblyLoads = new();
         private ConcurrentDictionary<ClassId, bool> _classLoads = new();
         private ConcurrentDictionary<int, int> _nestedCatchBlocks = new ();
-        private ConcurrentDictionary<int, int> _nestedExceptionSearchFilters = new ();
-        private ConcurrentDictionary<int, int> _nestedExceptionSearchFunctions = new ();
+        private ConcurrentDictionary<int, int> _nestedExceptionSearchFilter = new ();
+        private ConcurrentDictionary<int, int> _nestedExceptionSearchFunction = new ();
+        private ConcurrentDictionary<int, int> _nestedExceptionUnwindFinally = new ();
 
         public static CorProfiler Instance { get; private set; }
 
@@ -330,21 +331,21 @@ namespace ManagedDotnetProfiler
 
             Log($"ExceptionSearchFilterEnter - {functionTypeName}.{methodProperties.Name}");
 
-            _nestedExceptionSearchFilters.AddOrUpdate(Environment.CurrentManagedThreadId, 1, (_, old) => old + 1);
+            _nestedExceptionSearchFilter.AddOrUpdate(Environment.CurrentManagedThreadId, 1, (_, old) => old + 1);
 
             return HResult.S_OK;
         }
 
         protected override HResult ExceptionSearchFilterLeave()
         {
-            if (!_nestedExceptionSearchFilters.TryGetValue(Environment.CurrentManagedThreadId, out var count) || count <= 0)
+            if (!_nestedExceptionSearchFilter.TryGetValue(Environment.CurrentManagedThreadId, out var count) || count <= 0)
             {
                 Log($"Error: ExceptionSearchFilterLeave called without a matching ExceptionSearchFilterEnter");
                 return HResult.E_FAIL;
             }
 
             count -= 1;
-            _nestedExceptionSearchFilters[Environment.CurrentManagedThreadId] = count;
+            _nestedExceptionSearchFilter[Environment.CurrentManagedThreadId] = count;
 
             var threadId = ICorProfilerInfo.GetCurrentThreadId().ThrowIfFailed();
 
@@ -362,25 +363,56 @@ namespace ManagedDotnetProfiler
 
             Log($"ExceptionSearchFunctionEnter - {functionTypeName}.{methodProperties.Name}");
 
-            _nestedExceptionSearchFunctions.AddOrUpdate(Environment.CurrentManagedThreadId, 1, (_, old) => old + 1);
+            _nestedExceptionSearchFunction.AddOrUpdate(Environment.CurrentManagedThreadId, 1, (_, old) => old + 1);
 
             return HResult.S_OK;
         }
 
         protected override HResult ExceptionSearchFunctionLeave()
         {
-            if (!_nestedExceptionSearchFunctions.TryGetValue(Environment.CurrentManagedThreadId, out var count) || count <= 0)
+            if (!_nestedExceptionSearchFunction.TryGetValue(Environment.CurrentManagedThreadId, out var count) || count <= 0)
             {
                 Log($"Error: ExceptionSearchFunctionLeave called without a matching ExceptionSearchFilterEnter");
                 return HResult.E_FAIL;
             }
 
             count -= 1;
-            _nestedExceptionSearchFunctions[Environment.CurrentManagedThreadId] = count;
+            _nestedExceptionSearchFunction[Environment.CurrentManagedThreadId] = count;
 
             var threadId = ICorProfilerInfo.GetCurrentThreadId().ThrowIfFailed();
 
             Log($"ExceptionSearchFunctionLeave - Thread {threadId} - Nested level {count}");
+
+            return HResult.S_OK;
+        }
+        protected override HResult ExceptionUnwindFinallyEnter(FunctionId functionId)
+        {
+            var (_, moduleId, mdToken) = ICorProfilerInfo2.GetFunctionInfo(functionId).ThrowIfFailed();
+            var metaDataImport = ICorProfilerInfo2.GetModuleMetaData(moduleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport).ThrowIfFailed();
+            var methodProperties = metaDataImport.GetMethodProps(new MdMethodDef(mdToken)).ThrowIfFailed();
+            var (functionTypeName, _, _) = metaDataImport.GetTypeDefProps(methodProperties.Class).ThrowIfFailed();
+
+            Log($"ExceptionUnwindFinallyEnter - {functionTypeName}.{methodProperties.Name}");
+
+            _nestedExceptionUnwindFinally.AddOrUpdate(Environment.CurrentManagedThreadId, 1, (_, old) => old + 1);
+
+            return HResult.S_OK;
+        }
+
+        protected override HResult ExceptionUnwindFinallyLeave()
+        {
+            if (!_nestedExceptionUnwindFinally.TryGetValue(Environment.CurrentManagedThreadId, out var count) || count <= 0)
+            {
+                Log($"Error: ExceptionUnwindFinallyLeave called without a matching ExceptionSearchFilterEnter");
+                return HResult.E_FAIL;
+            }
+
+            count -= 1;
+            _nestedExceptionUnwindFinally[Environment.CurrentManagedThreadId] = count;
+
+            var threadId = ICorProfilerInfo.GetCurrentThreadId().ThrowIfFailed();
+
+            Log($"ExceptionUnwindFinallyLeave - Thread {threadId} - Nested level {count}");
 
             return HResult.S_OK;
         }

@@ -19,6 +19,14 @@ internal static class ExceptionTests
             }
         }
 
+        try
+        {
+            Finally1();
+        }
+        catch
+        {
+        }
+
         var logs = Logs.Fetch().ToList();
 
         foreach (var log in logs)
@@ -38,8 +46,12 @@ internal static class ExceptionTests
         Logs.AssertContains(logs, "ExceptionSearchFunctionEnter - TestApp.ExceptionTests.ExceptionFilter1");
         Logs.AssertContains(logs, $"ExceptionSearchFunctionLeave - Thread {threadId:x2} - Nested level 1");
         Logs.AssertContains(logs, $"ExceptionSearchFunctionLeave - Thread {threadId:x2} - Nested level 0");
+        Logs.AssertContains(logs, "ExceptionUnwindFinallyEnter - TestApp.ExceptionTests.Finally1");
+        Logs.AssertContains(logs, "ExceptionUnwindFinallyEnter - TestApp.ExceptionTests.Finally2");
+        Logs.AssertContains(logs, $"ExceptionUnwindFinallyLeave - Thread {threadId:x2} - Nested level 1");
+        Logs.AssertContains(logs, $"ExceptionUnwindFinallyLeave - Thread {threadId:x2} - Nested level 0");
     }
-    
+
     private static bool ExceptionFilter1()
     {
         try
@@ -49,12 +61,45 @@ internal static class ExceptionTests
         catch (Exception) when (ExceptionFilter2())
         {
         }
-        
+        finally
+        {
+        }
+
         return true;
     }
 
     private static bool ExceptionFilter2()
     {
         return true;
+    }
+
+    private static void Finally1()
+    {
+        try
+        {
+            throw new Exception("Finally");
+        }
+        finally
+        {
+            try
+            {
+                Finally2();
+            }
+            catch
+            {
+            }
+        }
+    }
+
+    private static void Finally2()
+    {
+        try
+        {
+            throw new Exception("Finally");
+        }
+        finally
+        {
+            Console.WriteLine("Doing stuff");
+        }
     }
 }
