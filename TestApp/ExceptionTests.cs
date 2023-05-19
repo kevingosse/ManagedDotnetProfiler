@@ -50,6 +50,20 @@ internal static class ExceptionTests
         Logs.AssertContains(logs, "ExceptionUnwindFinallyEnter - TestApp.ExceptionTests.Finally2");
         Logs.AssertContains(logs, $"ExceptionUnwindFinallyLeave - Thread {threadId:x2} - Nested level 1");
         Logs.AssertContains(logs, $"ExceptionUnwindFinallyLeave - Thread {threadId:x2} - Nested level 0");
+        Logs.AssertContains(logs, "ExceptionUnwindFunctionEnter - TestApp.ExceptionTests.Run");
+        Logs.AssertContains(logs, "ExceptionUnwindFunctionEnter - TestApp.ExceptionTests.ExceptionFilter1");
+        Logs.AssertContains(logs, "ExceptionUnwindFunctionEnter - TestApp.ExceptionTests.Finally1");
+        Logs.AssertContains(logs, "ExceptionUnwindFunctionEnter - TestApp.ExceptionTests.Finally2");
+        Logs.AssertContains(logs, $"ExceptionUnwindFunctionLeave - Thread {threadId:x2} - Nested level 1");
+        Logs.AssertContains(logs, $"ExceptionUnwindFunctionLeave - Thread {threadId:x2} - Nested level 0");
+        Logs.AssertContains(logs, "ExceptionSearchCatcherFound - TestApp.ExceptionTests.Run");
+        Logs.AssertContains(logs, "ExceptionSearchCatcherFound - TestApp.ExceptionTests.ExceptionFilter1");
+        Logs.AssertContains(logs, "ExceptionSearchCatcherFound - TestApp.ExceptionTests.Finally1");
+        Logs.AssertContains(logs, "ExceptionThrown - System.Exception");
+        Logs.AssertContains(logs, "ExceptionThrown - System.NotSupportedException");
+        Logs.AssertContains(logs, "ExceptionThrown - System.InvalidCastException");
+        Logs.AssertContains(logs, "ExceptionThrown - System.InvalidOperationException");
+        Logs.AssertContains(logs, "ExceptionThrown - System.Threading.Tasks.TaskCanceledException");
     }
 
     private static bool ExceptionFilter1()
@@ -77,7 +91,7 @@ internal static class ExceptionTests
     {
         try
         {
-            throw new Exception("Finally");
+            throw new NotSupportedException("Finally");
         }
         finally
         {
@@ -95,7 +109,7 @@ internal static class ExceptionTests
     {
         try
         {
-            throw new Exception("Finally");
+            throw new InvalidCastException("Finally");
         }
         finally
         {

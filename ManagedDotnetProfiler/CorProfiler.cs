@@ -14,12 +14,13 @@ namespace ManagedDotnetProfiler
 {
     internal unsafe partial class CorProfiler : CorProfilerCallback10Base
     {
-        private ConcurrentDictionary<AssemblyId, bool> _assemblyLoads = new();
-        private ConcurrentDictionary<ClassId, bool> _classLoads = new();
-        private ConcurrentDictionary<int, int> _nestedCatchBlocks = new ();
-        private ConcurrentDictionary<int, int> _nestedExceptionSearchFilter = new ();
-        private ConcurrentDictionary<int, int> _nestedExceptionSearchFunction = new ();
-        private ConcurrentDictionary<int, int> _nestedExceptionUnwindFinally = new ();
+        private readonly ConcurrentDictionary<AssemblyId, bool> _assemblyLoads = new();
+        private readonly ConcurrentDictionary<ClassId, bool> _classLoads = new();
+        private readonly ConcurrentDictionary<int, int> _nestedCatchBlocks = new ();
+        private readonly ConcurrentDictionary<int, int> _nestedExceptionSearchFilter = new ();
+        private readonly ConcurrentDictionary<int, int> _nestedExceptionSearchFunction = new ();
+        private readonly ConcurrentDictionary<int, int> _nestedExceptionUnwindFinally = new ();
+        private readonly ConcurrentDictionary<int, int> _nestedExceptionUnwindFunction = new ();
 
         public static CorProfiler Instance { get; private set; }
 
@@ -98,7 +99,7 @@ namespace ManagedDotnetProfiler
             var (_, methodProperties) = metaDataImport.GetMethodProps(new MdMethodDef(mdToken));
             var (_, typeName, _, _) = metaDataImport.GetTypeDefProps(methodProperties.Class);
 
-            Log($"Exception was caught in {typeName}.{methodProperties.Name}");
+            Log($"ExceptionSearchCatcherFound - {typeName}.{methodProperties.Name}");
             return HResult.S_OK;
         }
 
@@ -277,6 +278,17 @@ namespace ManagedDotnetProfiler
 
             _nestedCatchBlocks.AddOrUpdate(Environment.CurrentManagedThreadId, 1, (_, old) => old + 1);
 
+            // It's weird but ExceptionUnwindFunctionLeave is not called when ExceptionCatcherEnter is called:
+            // https://github.com/dotnet/runtime/issues/10871
+            if (!_nestedExceptionUnwindFunction.TryGetValue(Environment.CurrentManagedThreadId, out var count) || count <= 0)
+            {
+                Log($"Error: ExceptionCatcherEnter called without a matching ExceptionUnwindFunctionEnter");
+                return HResult.E_FAIL;
+            }
+
+            count -= 1;
+            _nestedExceptionUnwindFunction[Environment.CurrentManagedThreadId] = count;
+
             return HResult.S_OK;
         }
 
@@ -414,6 +426,44 @@ namespace ManagedDotnetProfiler
 
             Log($"ExceptionUnwindFinallyLeave - Thread {threadId} - Nested level {count}");
 
+            return HResult.S_OK;
+        }
+
+        protected override HResult ExceptionUnwindFunctionEnter(FunctionId functionId)
+        {
+            var (_, moduleId, mdToken) = ICorProfilerInfo2.GetFunctionInfo(functionId).ThrowIfFailed();
+            var metaDataImport = ICorProfilerInfo2.GetModuleMetaData(moduleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport).ThrowIfFailed();
+            var methodProperties = metaDataImport.GetMethodProps(new MdMethodDef(mdToken)).ThrowIfFailed();
+            var (functionTypeName, _, _) = metaDataImport.GetTypeDefProps(methodProperties.Class).ThrowIfFailed();
+
+            Log($"ExceptionUnwindFunctionEnter - {functionTypeName}.{methodProperties.Name}");
+
+            _nestedExceptionUnwindFunction.AddOrUpdate(Environment.CurrentManagedThreadId, 1, (_, old) => old + 1);
+
+            return HResult.S_OK;
+        }
+
+        protected override HResult ExceptionUnwindFunctionLeave()
+        {
+            if (!_nestedExceptionUnwindFunction.TryGetValue(Environment.CurrentManagedThreadId, out var count) || count <= 0)
+            {
+                Log($"Error: ExceptionUnwindFunctionLeave called without a matching ExceptionSearchFilterEnter");
+                return HResult.E_FAIL;
+            }
+
+            count -= 1;
+            _nestedExceptionUnwindFunction[Environment.CurrentManagedThreadId] = count;
+
+            var threadId = ICorProfilerInfo.GetCurrentThreadId().ThrowIfFailed();
+
+            Log($"ExceptionUnwindFunctionLeave - Thread {threadId} - Nested level {count}");
+
+            return HResult.S_OK;
+        }
+
+        protected override HResult ExceptionThrown(ObjectId thrownObjectId)
+        {
+            Log($"ExceptionThrown - {GetTypeNameFromObjectId(thrownObjectId)}");
             return HResult.S_OK;
         }
 
