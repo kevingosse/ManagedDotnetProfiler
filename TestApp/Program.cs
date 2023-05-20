@@ -32,19 +32,13 @@ Logs.Assert(PInvokes.GetThreadId((ulong)threadId, (int)osId));
 Logs.Clear();
 
 AssemblyLoadContextTests.Run();
-
 ClassLoadTests.Run();
-
 ComTests.Run();
-
 ConditionalWeakTableTests.Run();
-
 DynamicMethodTests.Run();
-
 ExceptionTests.Run(threadId);
-
 FinalizationTests.Run();
-
+HandleTests.Run();
 
 // Dump last logs before exiting
 foreach (var log in Logs.Fetch())

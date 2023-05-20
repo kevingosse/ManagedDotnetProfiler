@@ -9,6 +9,7 @@ using NativeObjects;
 using System.Threading;
 using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
+using System.ComponentModel;
 
 namespace ManagedDotnetProfiler
 {
@@ -470,6 +471,29 @@ namespace ManagedDotnetProfiler
         protected override HResult FinalizeableObjectQueued(COR_PRF_FINALIZER_FLAGS finalizerFlags, ObjectId objectID)
         {
             Log($"FinalizeableObjectQueued - {finalizerFlags} - {GetTypeNameFromObjectId(objectID)}");
+            return HResult.S_OK;
+        }
+        protected override HResult HandleCreated(GCHandleId handleId, ObjectId initialObjectId)
+        {
+            string name;
+
+            try
+            {
+                name = GetTypeNameFromObjectId(initialObjectId);
+            }
+            catch (Win32Exception)
+            {
+                return HResult.S_OK;
+            }
+            
+            Log($"HandleCreated - {handleId} - {name}");
+
+            return HResult.S_OK;
+        }
+
+        protected override HResult HandleDestroyed(GCHandleId handleId)
+        {
+            Log($"HandleDestroyed - {handleId}");
             return HResult.S_OK;
         }
 

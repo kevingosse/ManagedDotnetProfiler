@@ -1,4 +1,6 @@
-﻿namespace ProfilerLib
+﻿using System.ComponentModel;
+
+namespace ProfilerLib
 {
     public static class Extensions
     {
@@ -6,7 +8,7 @@
         {
             if (!value.Item1.IsOK)
             {
-                throw new InvalidOperationException($"The HResult is failed: {value.Item1}");
+                throw new Win32Exception(value.Item1, $"The HResult is failed: {value.Item1}");
             }
 
             return value.Item2;
@@ -16,7 +18,7 @@
         {
             if (!value.Item1.IsOK)
             {
-                throw new InvalidOperationException($"The HResult is failed: {value.Item1}");
+                throw new Win32Exception(value.Item1, $"The HResult is failed: {value.Item1}");
             }
 
             return (value.Item2, value.Item3);
@@ -26,7 +28,7 @@
         {
             if (!value.Item1.IsOK)
             {
-                throw new InvalidOperationException($"The HResult is failed: {value.Item1}");
+                throw new Win32Exception(value.Item1, $"The HResult is failed: {value.Item1}");
             }
 
             return (value.Item2, value.Item3, value.Item4);

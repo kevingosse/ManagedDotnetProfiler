@@ -13,6 +13,8 @@ public readonly struct ObjectId
 public readonly struct GCHandleId
 {
     public readonly nint Value;
+
+    public override string ToString() => Value.ToString("x2");
 }
 
 public readonly struct AppDomainId
@@ -28,6 +30,8 @@ public readonly struct AssemblyId
 public readonly struct ClassId
 {
     public readonly nint Value;
+
+    public override string ToString() => Value.ToString("x2");
 }
 
 public readonly struct FunctionId
