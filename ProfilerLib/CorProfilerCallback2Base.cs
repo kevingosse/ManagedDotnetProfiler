@@ -37,7 +37,7 @@
             return GarbageCollectionFinished();
         }
 
-        HResult Interfaces.ICorProfilerCallback2.FinalizeableObjectQueued(int finalizerFlags, ObjectId objectID)
+        HResult Interfaces.ICorProfilerCallback2.FinalizeableObjectQueued(COR_PRF_FINALIZER_FLAGS finalizerFlags, ObjectId objectID)
         {
             return FinalizeableObjectQueued(finalizerFlags, objectID);
         }
@@ -84,7 +84,7 @@
             return HResult.E_NOTIMPL;
         }
 
-        protected virtual HResult FinalizeableObjectQueued(int finalizerFlags, ObjectId objectID)
+        protected virtual HResult FinalizeableObjectQueued(COR_PRF_FINALIZER_FLAGS finalizerFlags, ObjectId objectID)
         {
             return HResult.E_NOTIMPL;
         }

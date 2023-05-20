@@ -114,8 +114,8 @@ internal unsafe interface ICorProfilerCallback2 : ICorProfilerCallback
      */
 
     HResult FinalizeableObjectQueued(
-                int finalizerFlags,
-                ObjectId objectID);
+        COR_PRF_FINALIZER_FLAGS finalizerFlags,
+        ObjectId objectID);
 
     /*
      * The CLR calls RootReferences2 with information about root

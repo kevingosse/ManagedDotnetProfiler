@@ -346,7 +346,12 @@ public enum CorPrfHighMonitor : uint
     // Trying to change any of these flags elsewhere will result in a
     // failed HRESULT.
     COR_PRF_HIGH_MONITOR_IMMUTABLE = COR_PRF_HIGH_DISABLE_TIERED_COMPILATION,
+}
 
+public enum COR_PRF_FINALIZER_FLAGS
+{
+    None = 0,
+    COR_PRF_FINALIZER_CRITICAL = 1
 }
 
 public enum COR_PRF_JIT_CACHE

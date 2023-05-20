@@ -29,11 +29,6 @@ internal static class ExceptionTests
 
         var logs = Logs.Fetch().ToList();
 
-        foreach (var log in logs)
-        {
-            Console.WriteLine(log);
-        }
-
         Logs.AssertContains(logs, "ExceptionCatcherEnter - catch System.InvalidOperationException in TestApp.ExceptionTests.Run");
         Logs.AssertContains(logs, "ExceptionCatcherEnter - catch System.Threading.Tasks.TaskCanceledException in TestApp.ExceptionTests.Run");
         Logs.AssertContains(logs, $"ExceptionCatcherLeave - Thread {threadId:x2} - Nested level 1");
@@ -113,7 +108,7 @@ internal static class ExceptionTests
         }
         finally
         {
-            Console.WriteLine("Doing stuff");
+            GC.KeepAlive(null);
         }
     }
 }

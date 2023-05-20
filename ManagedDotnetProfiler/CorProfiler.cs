@@ -467,6 +467,12 @@ namespace ManagedDotnetProfiler
             return HResult.S_OK;
         }
 
+        protected override HResult FinalizeableObjectQueued(COR_PRF_FINALIZER_FLAGS finalizerFlags, ObjectId objectID)
+        {
+            Log($"FinalizeableObjectQueued - {finalizerFlags} - {GetTypeNameFromObjectId(objectID)}");
+            return HResult.S_OK;
+        }
+
         protected override HResult Shutdown()
         {
             Console.WriteLine("[Profiler] *** Shutting down, dumping remaining logs ***");
