@@ -17,11 +17,12 @@ namespace ManagedDotnetProfiler
     {
         private readonly ConcurrentDictionary<AssemblyId, bool> _assemblyLoads = new();
         private readonly ConcurrentDictionary<ClassId, bool> _classLoads = new();
-        private readonly ConcurrentDictionary<int, int> _nestedCatchBlocks = new ();
-        private readonly ConcurrentDictionary<int, int> _nestedExceptionSearchFilter = new ();
-        private readonly ConcurrentDictionary<int, int> _nestedExceptionSearchFunction = new ();
-        private readonly ConcurrentDictionary<int, int> _nestedExceptionUnwindFinally = new ();
-        private readonly ConcurrentDictionary<int, int> _nestedExceptionUnwindFunction = new ();
+        private readonly ConcurrentDictionary<int, int> _nestedCatchBlocks = new();
+        private readonly ConcurrentDictionary<int, int> _nestedExceptionSearchFilter = new();
+        private readonly ConcurrentDictionary<int, int> _nestedExceptionSearchFunction = new();
+        private readonly ConcurrentDictionary<int, int> _nestedExceptionUnwindFinally = new();
+        private readonly ConcurrentDictionary<int, int> _nestedExceptionUnwindFunction = new();
+        private int _garbageCollectionsInProgress;
 
         public static CorProfiler Instance { get; private set; }
 
@@ -485,7 +486,7 @@ namespace ManagedDotnetProfiler
             {
                 return HResult.S_OK;
             }
-            
+
             Log($"HandleCreated - {handleId} - {name}");
 
             return HResult.S_OK;
@@ -494,6 +495,39 @@ namespace ManagedDotnetProfiler
         protected override HResult HandleDestroyed(GCHandleId handleId)
         {
             Log($"HandleDestroyed - {handleId}");
+            return HResult.S_OK;
+        }
+
+        protected override unsafe HResult GarbageCollectionStarted(Span<bool> generationCollected, COR_PRF_GC_REASON reason)
+        {
+            var generations = new List<int>();
+
+            for (int i = 0; i < generationCollected.Length; i++)
+            {
+                if (generationCollected[i])
+                {
+                    generations.Add(i);
+                }
+            }
+
+            var count = Interlocked.Increment(ref _garbageCollectionsInProgress);
+
+            Log($"GarbageCollectionStarted - {string.Join(", ", generations)} - {reason} - {count}");
+
+            return HResult.S_OK;
+        }
+
+        protected override HResult GarbageCollectionFinished()
+        {
+            var count = Interlocked.Decrement(ref _garbageCollectionsInProgress);
+
+            if (count < 0)
+            {
+                Log("Error: GarbageCollectionFinished called without a matching GarbageCollectionStarted");
+            }
+
+            Log($"GarbageCollectionFinished - {count}");
+
             return HResult.S_OK;
         }
 

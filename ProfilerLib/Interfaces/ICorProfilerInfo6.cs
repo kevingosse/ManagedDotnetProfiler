@@ -26,6 +26,6 @@ internal unsafe interface ICorProfilerInfo6 : ICorProfilerInfo5
         ModuleId inlinersModuleId,
         ModuleId inlineeModuleId,
         MdMethodDef inlineeMethodId,
-        out bool incompleteData,
+        out int incompleteData,
         out IntPtr ppEnum);
 }

@@ -6,10 +6,10 @@ internal unsafe interface ICorProfilerInfo10 : ICorProfilerInfo9
     public new static readonly Guid Guid = new("2F1B5152-C869-40C9-AA5F-3ABE026BD720");
 
     // Given an ObjectID, callback and clientData, enumerates each object reference (if any).
-    HResult EnumerateObjectReferences(ObjectId objectId, delegate* unmanaged<ObjectId, ObjectId*, void*, bool> callback, void* clientData);
+    HResult EnumerateObjectReferences(ObjectId objectId, delegate* unmanaged<ObjectId, ObjectId*, void*, int> callback, void* clientData);
 
     // Given an ObjectID, determines whether it is in a read only segment.
-    HResult IsFrozenObject(ObjectId objectId, out bool pbFrozen);
+    HResult IsFrozenObject(ObjectId objectId, out int pbFrozen);
 
     // Gets the value of the configured LOH Threshold.
     HResult GetLOHObjectSizeThreshold(out int pThreshold);

@@ -17,7 +17,7 @@ internal unsafe interface ICorProfilerInfo3 : ICorProfilerInfo2
     HResult RequestProfilerDetach(int dwExpectedCompletionMilliseconds);
 
     HResult SetFunctionIDMapper2(
-                delegate* unmanaged[Stdcall]<FunctionId, void*, bool*, nint> pFunc,
+                delegate* unmanaged[Stdcall]<FunctionId, void*, int*, nint> pFunc,
                 void* clientData);
 
     /*

@@ -9,7 +9,7 @@ public class ICorProfilerInfo8 : ICorProfilerInfo7
         _impl = new(ptr);
     }
 
-    public HResult IsFunctionDynamic(FunctionId functionId, out bool isDynamic)
+    public HResult IsFunctionDynamic(FunctionId functionId, out int isDynamic)
     {
         return _impl.IsFunctionDynamic(functionId, out isDynamic);
     }

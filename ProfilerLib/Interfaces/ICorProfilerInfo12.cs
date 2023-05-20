@@ -8,7 +8,7 @@ internal unsafe interface ICorProfilerInfo12 : ICorProfilerInfo11
     HResult EventPipeStartSession(
         uint cProviderConfigs,
         COR_PRF_EVENTPIPE_PROVIDER_CONFIG* pProviderConfigs,
-        bool requestRundown,
+        int requestRundown,
         out EVENTPIPE_SESSION pSession);
 
     HResult EventPipeAddProviderToSession(
@@ -36,7 +36,7 @@ internal unsafe interface ICorProfilerInfo12 : ICorProfilerInfo11
                 uint eventVersion,
                 uint level,
                 byte opcode,
-                bool needStack,
+                int needStack,
                 uint cParamDescs,
                 COR_PRF_EVENTPIPE_PARAM_DESC* pParamDescs,
                 out EVENTPIPE_EVENT pEvent);

@@ -22,9 +22,13 @@
 
         #region ICorProfilerCallback11
 
-        HResult Interfaces.ICorProfilerCallback11.LoadAsNotificationOnly(out bool pbNotificationOnly)
+        HResult Interfaces.ICorProfilerCallback11.LoadAsNotificationOnly(out int pbNotificationOnly)
         {
-            return LoadAsNotificationOnly(out pbNotificationOnly);
+            var result = LoadAsNotificationOnly(out var notificationOnly);
+
+            pbNotificationOnly = notificationOnly ? 1 : 0;
+
+            return result;
         }
 
         #endregion

@@ -27,9 +27,9 @@
             return GetReJITParameters(moduleId, methodId, pFunctionControl);
         }
 
-        HResult Interfaces.ICorProfilerCallback4.ReJITCompilationFinished(FunctionId functionId, ReJITId rejitId, HResult hrStatus, bool fIsSafeToBlock)
+        HResult Interfaces.ICorProfilerCallback4.ReJITCompilationFinished(FunctionId functionId, ReJITId rejitId, HResult hrStatus, int fIsSafeToBlock)
         {
-            return ReJITCompilationFinished(functionId, rejitId, hrStatus, fIsSafeToBlock);
+            return ReJITCompilationFinished(functionId, rejitId, hrStatus, fIsSafeToBlock != 0);
         }
 
         HResult Interfaces.ICorProfilerCallback4.ReJITError(ModuleId moduleId, MdMethodDef methodId, FunctionId functionId, HResult hrStatus)
@@ -47,9 +47,9 @@
             return SurvivingReferences2(cSurvivingObjectIDRanges, objectIDRangeStart, cObjectIDRangeLength);
         }
 
-        HResult Interfaces.ICorProfilerCallback4.ReJITCompilationStarted(FunctionId functionId, ReJITId rejitId, bool fIsSafeToBlock)
+        HResult Interfaces.ICorProfilerCallback4.ReJITCompilationStarted(FunctionId functionId, ReJITId rejitId, int fIsSafeToBlock)
         {
-            return ReJITCompilationStarted(functionId, rejitId, fIsSafeToBlock);
+            return ReJITCompilationStarted(functionId, rejitId, fIsSafeToBlock != 0);
         }
 
         #endregion

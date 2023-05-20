@@ -9,12 +9,12 @@ public class ICorProfilerInfo10 : ICorProfilerInfo9
         _impl = new(ptr);
     }
 
-    public unsafe HResult EnumerateObjectReferences(ObjectId objectId, delegate*unmanaged<ObjectId, ObjectId*, void*, bool> callback, void* clientData)
+    public unsafe HResult EnumerateObjectReferences(ObjectId objectId, delegate*unmanaged<ObjectId, ObjectId*, void*, int> callback, void* clientData)
     {
         return _impl.EnumerateObjectReferences(objectId, callback, clientData);
     }
 
-    public HResult IsFrozenObject(ObjectId objectId, out bool pbFrozen)
+    public HResult IsFrozenObject(ObjectId objectId, out int pbFrozen)
     {
         return _impl.IsFrozenObject(objectId, out pbFrozen);
     }

@@ -273,19 +273,23 @@
             return FunctionUnloadStarted(functionId);
         }
 
-        HResult Interfaces.ICorProfilerCallback.JITCompilationStarted(FunctionId functionId, bool fIsSafeToBlock)
+        HResult Interfaces.ICorProfilerCallback.JITCompilationStarted(FunctionId functionId, int fIsSafeToBlock)
         {
-            return JITCompilationStarted(functionId, fIsSafeToBlock);
+            return JITCompilationStarted(functionId, fIsSafeToBlock != 0);
         }
 
-        HResult Interfaces.ICorProfilerCallback.JITCompilationFinished(FunctionId functionId, HResult hrStatus, bool fIsSafeToBlock)
+        HResult Interfaces.ICorProfilerCallback.JITCompilationFinished(FunctionId functionId, HResult hrStatus, int fIsSafeToBlock)
         {
-            return JITCompilationFinished(functionId, hrStatus, fIsSafeToBlock);
+            return JITCompilationFinished(functionId, hrStatus, fIsSafeToBlock != 0);
         }
 
-        HResult Interfaces.ICorProfilerCallback.JITCachedFunctionSearchStarted(FunctionId functionId, out bool pbUseCachedFunction)
+        HResult Interfaces.ICorProfilerCallback.JITCachedFunctionSearchStarted(FunctionId functionId, out int pbUseCachedFunction)
         {
-            return JITCachedFunctionSearchStarted(functionId, out pbUseCachedFunction);
+            var result = JITCachedFunctionSearchStarted(functionId, out var useCachedFunction);
+
+            pbUseCachedFunction = useCachedFunction ? 1 : 0;
+
+            return result;
         }
 
         HResult Interfaces.ICorProfilerCallback.JITCachedFunctionSearchFinished(FunctionId functionId, COR_PRF_JIT_CACHE result)
@@ -298,9 +302,13 @@
             return JITFunctionPitched(functionId);
         }
 
-        HResult Interfaces.ICorProfilerCallback.JITInlining(FunctionId callerId, FunctionId calleeId, out bool pfShouldInline)
+        HResult Interfaces.ICorProfilerCallback.JITInlining(FunctionId callerId, FunctionId calleeId, out int pfShouldInline)
         {
-            return JITInlining(callerId, calleeId, out pfShouldInline);
+            var result = JITInlining(callerId, calleeId, out var shouldInline);
+
+            pfShouldInline = shouldInline ? 1 : 0;
+
+            return result;
         }
 
         HResult Interfaces.ICorProfilerCallback.ThreadCreated(ThreadId threadId)
@@ -323,14 +331,14 @@
             return RemotingClientInvocationStarted();
         }
 
-        HResult Interfaces.ICorProfilerCallback.RemotingClientSendingMessage(in Guid pCookie, bool fIsAsync)
+        HResult Interfaces.ICorProfilerCallback.RemotingClientSendingMessage(in Guid pCookie, int fIsAsync)
         {
-            return RemotingClientSendingMessage(in pCookie, fIsAsync);
+            return RemotingClientSendingMessage(in pCookie, fIsAsync != 0);
         }
 
-        HResult Interfaces.ICorProfilerCallback.RemotingClientReceivingReply(in Guid pCookie, bool fIsAsync)
+        HResult Interfaces.ICorProfilerCallback.RemotingClientReceivingReply(in Guid pCookie, int fIsAsync)
         {
-            return RemotingClientReceivingReply(in pCookie, fIsAsync);
+            return RemotingClientReceivingReply(in pCookie, fIsAsync != 0);
         }
 
         HResult Interfaces.ICorProfilerCallback.RemotingClientInvocationFinished()
@@ -338,9 +346,9 @@
             return RemotingClientInvocationFinished();
         }
 
-        HResult Interfaces.ICorProfilerCallback.RemotingServerReceivingMessage(in Guid pCookie, bool fIsAsync)
+        HResult Interfaces.ICorProfilerCallback.RemotingServerReceivingMessage(in Guid pCookie, int fIsAsync)
         {
-            return RemotingServerReceivingMessage(in pCookie, fIsAsync);
+            return RemotingServerReceivingMessage(in pCookie, fIsAsync != 0);
         }
 
         HResult Interfaces.ICorProfilerCallback.RemotingServerInvocationStarted()
@@ -353,9 +361,9 @@
             return RemotingServerInvocationReturned();
         }
 
-        HResult Interfaces.ICorProfilerCallback.RemotingServerSendingReply(in Guid pCookie, bool fIsAsync)
+        HResult Interfaces.ICorProfilerCallback.RemotingServerSendingReply(in Guid pCookie, int fIsAsync)
         {
-            return RemotingServerSendingReply(in pCookie, fIsAsync);
+            return RemotingServerSendingReply(in pCookie, fIsAsync != 0);
         }
 
         HResult Interfaces.ICorProfilerCallback.UnmanagedToManagedTransition(FunctionId functionId, COR_PRF_TRANSITION_REASON reason)

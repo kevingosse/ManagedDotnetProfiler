@@ -22,14 +22,14 @@
 
         #region ICorProfilerCallback8
 
-        HResult Interfaces.ICorProfilerCallback8.DynamicMethodJITCompilationFinished(FunctionId functionId, HResult hrStatus, bool fIsSafeToBlock)
+        HResult Interfaces.ICorProfilerCallback8.DynamicMethodJITCompilationFinished(FunctionId functionId, HResult hrStatus, int fIsSafeToBlock)
         {
-            return DynamicMethodJITCompilationFinished(functionId, hrStatus, fIsSafeToBlock);
+            return DynamicMethodJITCompilationFinished(functionId, hrStatus, fIsSafeToBlock != 0);
         }
 
-        unsafe HResult Interfaces.ICorProfilerCallback8.DynamicMethodJITCompilationStarted(FunctionId functionId, bool fIsSafeToBlock, byte* pILHeader, uint cbILHeader)
+        unsafe HResult Interfaces.ICorProfilerCallback8.DynamicMethodJITCompilationStarted(FunctionId functionId, int fIsSafeToBlock, byte* pILHeader, uint cbILHeader)
         {
-            return DynamicMethodJITCompilationStarted(functionId, fIsSafeToBlock, pILHeader, cbILHeader);
+            return DynamicMethodJITCompilationStarted(functionId, fIsSafeToBlock != 0, pILHeader, cbILHeader);
         }
 
         #endregion

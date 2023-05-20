@@ -53,7 +53,7 @@ internal unsafe interface ICorProfilerCallback2 : ICorProfilerCallback
      */
     HResult GarbageCollectionStarted(
                 int cGenerations,
-                bool* generationCollected,
+                int* generationCollected,
                 COR_PRF_GC_REASON reason);
 
     /*

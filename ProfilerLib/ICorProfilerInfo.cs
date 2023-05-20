@@ -238,7 +238,7 @@
             return _impl.ForceGC();
         }
 
-        public unsafe HResult SetILInstrumentedCodeMap(FunctionId functionId, bool fStartJit, uint cILMapEntries, CorIlMap* rgILMapEntries)
+        public unsafe HResult SetILInstrumentedCodeMap(FunctionId functionId, int fStartJit, uint cILMapEntries, CorIlMap* rgILMapEntries)
         {
             return _impl.SetILInstrumentedCodeMap(functionId, fStartJit, cILMapEntries, rgILMapEntries);
         }
@@ -258,7 +258,7 @@
             return _impl.GetThreadContext(threadId, out pContextId);
         }
 
-        public HResult BeginInprocDebugging(bool fThisThreadOnly, out int pdwProfilerContext)
+        public HResult BeginInprocDebugging(int fThisThreadOnly, out int pdwProfilerContext)
         {
             return _impl.BeginInprocDebugging(fThisThreadOnly, out pdwProfilerContext);
         }

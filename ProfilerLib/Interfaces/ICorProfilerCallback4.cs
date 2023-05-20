@@ -10,7 +10,7 @@ internal unsafe interface ICorProfilerCallback4 : ICorProfilerCallback3
     HResult ReJITCompilationStarted(
                 FunctionId functionId,
                 ReJITId rejitId,
-                bool fIsSafeToBlock);
+                int fIsSafeToBlock);
 
     /*
      * This is called exactly once per method (which may represent more than
@@ -29,7 +29,7 @@ internal unsafe interface ICorProfilerCallback4 : ICorProfilerCallback3
                 FunctionId functionId,
                 ReJITId rejitId,
                 HResult hrStatus,
-                bool fIsSafeToBlock);
+                int fIsSafeToBlock);
 
     /*
      * This is called to report an error encountered while processing a ReJIT request.

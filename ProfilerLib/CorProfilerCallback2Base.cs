@@ -22,9 +22,16 @@
 
         #region ICorProfilerCallback2
 
-        unsafe HResult Interfaces.ICorProfilerCallback2.GarbageCollectionStarted(int cGenerations, bool* generationCollected, COR_PRF_GC_REASON reason)
+        unsafe HResult Interfaces.ICorProfilerCallback2.GarbageCollectionStarted(int cGenerations, int* generationCollected, COR_PRF_GC_REASON reason)
         {
-            return GarbageCollectionStarted(cGenerations, generationCollected, reason);
+            Span<bool> generationCollectedAsBool = stackalloc bool[cGenerations];
+
+            for (int i = 0; i < cGenerations; i++)
+            {
+                generationCollectedAsBool[i] = generationCollected[i] != 0;
+            }
+
+            return GarbageCollectionStarted(generationCollectedAsBool, reason);
         }
 
         unsafe HResult Interfaces.ICorProfilerCallback2.SurvivingReferences(uint cSurvivingObjectIDRanges, ObjectId* objectIDRangeStart, uint* cObjectIDRangeLength)
@@ -69,7 +76,7 @@
             return HResult.E_NOTIMPL;
         }
 
-        protected virtual unsafe HResult GarbageCollectionStarted(int cGenerations, bool* generationCollected, COR_PRF_GC_REASON reason)
+        protected virtual unsafe HResult GarbageCollectionStarted(Span<bool> generationCollected, COR_PRF_GC_REASON reason)
         {
             return HResult.E_NOTIMPL;
         }

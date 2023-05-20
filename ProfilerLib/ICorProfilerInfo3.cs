@@ -19,7 +19,7 @@ public class ICorProfilerInfo3 : ICorProfilerInfo2
         return _impl.RequestProfilerDetach(dwExpectedCompletionMilliseconds);
     }
 
-    public unsafe HResult SetFunctionIDMapper2(delegate*unmanaged[Stdcall]<FunctionId, void*, bool*, nint> pFunc, void* clientData)
+    public unsafe HResult SetFunctionIDMapper2(delegate*unmanaged[Stdcall]<FunctionId, void*, int*, nint> pFunc, void* clientData)
     {
         return _impl.SetFunctionIDMapper2(pFunc, clientData);
     }

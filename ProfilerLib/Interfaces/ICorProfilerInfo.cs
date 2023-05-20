@@ -351,7 +351,7 @@ internal unsafe interface ICorProfilerInfo : IUnknown
      */
     HResult SetILInstrumentedCodeMap(
                 FunctionId FunctionId,
-                bool fStartJit,
+                int fStartJit,
                 uint cILMapEntries,
                 CorIlMap* rgILMapEntries);
 
@@ -380,8 +380,8 @@ internal unsafe interface ICorProfilerInfo : IUnknown
      * DEPRECATED.
      */
     HResult BeginInprocDebugging(
-                bool fThisThreadOnly,
-                out int pdwProfilerContext);
+        int fThisThreadOnly,
+        out int pdwProfilerContext);
 
     /*
      * DEPRECATED.

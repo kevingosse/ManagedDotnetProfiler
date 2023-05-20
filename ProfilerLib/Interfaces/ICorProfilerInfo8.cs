@@ -16,7 +16,7 @@ internal unsafe interface ICorProfilerInfo8 : ICorProfilerInfo7
     *
     * This API can be used to determine whether a FunctionID is dynamic.
     */
-    HResult IsFunctionDynamic(FunctionId functionId, out bool isDynamic);
+    HResult IsFunctionDynamic(FunctionId functionId, out int isDynamic);
 
     /*
     * Maps a managed code instruction pointer to a FunctionID.

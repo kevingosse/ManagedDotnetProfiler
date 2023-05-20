@@ -16,12 +16,12 @@ internal unsafe interface ICorProfilerCallback8 : ICorProfilerCallback7
 
     HResult DynamicMethodJITCompilationStarted(
         FunctionId functionId,
-        bool fIsSafeToBlock,
+        int fIsSafeToBlock,
         byte* pILHeader,
         uint cbILHeader);
 
     HResult DynamicMethodJITCompilationFinished(
         FunctionId functionId,
         HResult hrStatus,
-        bool fIsSafeToBlock);
+        int fIsSafeToBlock);
 }

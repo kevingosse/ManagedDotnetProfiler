@@ -37,29 +37,29 @@ internal unsafe interface ICorProfilerCallback : IUnknown
 
     HResult FunctionUnloadStarted(FunctionId functionId);
 
-    HResult JITCompilationStarted(FunctionId functionId, bool fIsSafeToBlock);
-    HResult JITCompilationFinished(FunctionId functionId, HResult hrStatus, bool fIsSafeToBlock);
+    HResult JITCompilationStarted(FunctionId functionId, int fIsSafeToBlock);
+    HResult JITCompilationFinished(FunctionId functionId, HResult hrStatus, int fIsSafeToBlock);
 
-    HResult JITCachedFunctionSearchStarted(FunctionId functionId, out bool pbUseCachedFunction);
+    HResult JITCachedFunctionSearchStarted(FunctionId functionId, out int pbUseCachedFunction);
     HResult JITCachedFunctionSearchFinished(FunctionId functionId, COR_PRF_JIT_CACHE result);
 
     HResult JITFunctionPitched(FunctionId functionId);
 
-    HResult JITInlining(FunctionId callerId, FunctionId calleeId, out bool pfShouldInline);
+    HResult JITInlining(FunctionId callerId, FunctionId calleeId, out int pfShouldInline);
 
     HResult ThreadCreated(ThreadId threadId);
     HResult ThreadDestroyed(ThreadId threadId);
     HResult ThreadAssignedToOSThread(ThreadId managedThreadId, int osThreadId);
 
     HResult RemotingClientInvocationStarted();
-    HResult RemotingClientSendingMessage(in Guid pCookie, bool fIsAsync);
-    HResult RemotingClientReceivingReply(in Guid pCookie, bool fIsAsync);
+    HResult RemotingClientSendingMessage(in Guid pCookie, int fIsAsync);
+    HResult RemotingClientReceivingReply(in Guid pCookie, int fIsAsync);
     HResult RemotingClientInvocationFinished();
 
-    HResult RemotingServerReceivingMessage(in Guid pCookie, bool fIsAsync);
+    HResult RemotingServerReceivingMessage(in Guid pCookie, int fIsAsync);
     HResult RemotingServerInvocationStarted();
     HResult RemotingServerInvocationReturned();
-    HResult RemotingServerSendingReply(in Guid pCookie, bool fIsAsync);
+    HResult RemotingServerSendingReply(in Guid pCookie, int fIsAsync);
 
     HResult UnmanagedToManagedTransition(FunctionId functionId, COR_PRF_TRANSITION_REASON reason);
     HResult ManagedToUnmanagedTransition(FunctionId functionId, COR_PRF_TRANSITION_REASON reason);
