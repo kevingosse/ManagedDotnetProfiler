@@ -40,6 +40,7 @@ ExceptionTests.Run(threadId);
 FinalizationTests.Run();
 HandleTests.Run();
 GarbageCollectionTests.Run();
+JitCompilationTests.Run();
 
 // Dump last logs before exiting
 foreach (var log in Logs.Fetch())

@@ -84,13 +84,20 @@ namespace ManagedDotnetProfiler
 
         protected override HResult JITCompilationStarted(FunctionId functionId, bool fIsSafeToBlock)
         {
-            var (_, _, moduleId, mdToken) = ICorProfilerInfo2.GetFunctionInfo(functionId);
-            var (_, metaDataImport) = ICorProfilerInfo2.GetModuleMetaData(moduleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport);
-            var (_, methodProperties) = metaDataImport.GetMethodProps(new MdMethodDef(mdToken));
-            var (_, typeName, _, _) = metaDataImport.GetTypeDefProps(methodProperties.Class);
+            Log($"JITCompilationStarted - {GetFunctionFullName(functionId)}");
+            return HResult.S_OK;
+        }
 
-            Log($"JITCompilationStarted: {typeName}.{methodProperties.Name}");
+        protected override HResult JITCompilationFinished(FunctionId functionId, HResult hrStatus, bool fIsSafeToBlock)
+        {
+            Log($"JITCompilationFinished - {GetFunctionFullName(functionId)}");
+            return HResult.S_OK;
+        }
 
+        protected override HResult JITInlining(FunctionId callerId, FunctionId calleeId, out bool pfShouldInline)
+        {
+            Log($"JITInlining - {GetFunctionFullName(calleeId)} -> {GetFunctionFullName(callerId)}");
+            pfShouldInline = true;
             return HResult.S_OK;
         }
 
@@ -573,6 +580,16 @@ namespace ManagedDotnetProfiler
             var (typeName, _, _) = moduleMetadata.GetTypeDefProps(typeDef).ThrowIfFailed();
 
             return typeName;
+        }
+
+        private string GetFunctionFullName(FunctionId functionId)
+        {
+            var (_, _, moduleId, mdToken) = ICorProfilerInfo2.GetFunctionInfo(functionId);
+            var (_, metaDataImport) = ICorProfilerInfo2.GetModuleMetaData(moduleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport);
+            var (_, methodProperties) = metaDataImport.GetMethodProps(new MdMethodDef(mdToken));
+            var (_, typeName, _, _) = metaDataImport.GetTypeDefProps(methodProperties.Class);
+
+            return $"{typeName}.{methodProperties.Name}";
         }
     }
 }
