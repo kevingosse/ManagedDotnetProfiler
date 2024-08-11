@@ -1,23 +1,22 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace TestApp
+namespace TestApp;
+
+internal class HandleTests
 {
-    internal class HandleTests
+    public static void Run()
     {
-        public static void Run()
-        {
-            var obj = new object();
+        var obj = new object();
 
-            var handle = GCHandle.Alloc(obj, GCHandleType.Normal);
+        var handle = GCHandle.Alloc(obj, GCHandleType.Normal);
 
-            var handleAddress = GCHandle.ToIntPtr(handle);
+        var handleAddress = GCHandle.ToIntPtr(handle);
 
-            handle.Free();
+        handle.Free();
 
-            var logs = Logs.Fetch().ToList();
+        var logs = Logs.Fetch().ToList();
 
-            Logs.AssertContains(logs, $"HandleCreated - {handleAddress:x2} - System.Object");
-            Logs.AssertContains(logs, $"HandleDestroyed - {handleAddress:x2}");
-        }
+        Logs.AssertContains(logs, $"HandleCreated - {handleAddress:x2} - System.Object");
+        Logs.AssertContains(logs, $"HandleDestroyed - {handleAddress:x2}");
     }
 }

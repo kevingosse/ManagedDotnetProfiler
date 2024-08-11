@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 
 namespace TestApp;
 
@@ -7,15 +6,7 @@ internal class JitCompilationTests
 {
     public static void Run()
     {
-        // var method = typeof(JitCompilationTests).GetMethod(nameof(PrivateMethod), BindingFlags.Static | BindingFlags.NonPublic);
-        // RuntimeHelpers.PrepareMethod(method!.MethodHandle);
-
-        var test = new JitCompilationTests();
-
-        for (int i = 0; i < 50; i++)
-        {
-            _ = test.PrivateMethod();
-        }
+        _ = PrivateMethod();
 
         var logs = Logs.Fetch().ToList();
 
@@ -25,7 +16,7 @@ internal class JitCompilationTests
     }
 
     [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.AggressiveOptimization)]
-    public int PrivateMethod()
+    public static int PrivateMethod()
     {
         if (InnerMethod() == 1)
         {
@@ -36,5 +27,5 @@ internal class JitCompilationTests
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-    private int InnerMethod() => 1;
+    private static int InnerMethod() => 1;
 }

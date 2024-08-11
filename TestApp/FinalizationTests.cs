@@ -1,37 +1,36 @@
 ﻿using System.Runtime.ConstrainedExecution;
 
-namespace TestApp
+namespace TestApp;
+
+internal class FinalizationTests
 {
-    internal class FinalizationTests
+    public static void Run()
     {
-        public static void Run()
+        InnerScope();
+
+        GC.Collect(2, GCCollectionMode.Forced, true);
+
+        var logs = Logs.Fetch().ToList();
+
+        Logs.AssertContains(logs, "FinalizeableObjectQueued - None - FinalizableType");
+        Logs.AssertContains(logs, "FinalizeableObjectQueued - COR_PRF_FINALIZER_CRITICAL - CriticalFinalizableType");
+    }
+
+    private static void InnerScope()
+    {
+        _ = new FinalizableType();
+        _ = new CriticalFinalizableType();
+    }
+
+    private class FinalizableType
+    {
+        ~FinalizableType()
         {
-            InnerScope();
-
-            GC.Collect(2, GCCollectionMode.Forced, true);
-
-            var logs = Logs.Fetch().ToList();
-
-            Logs.AssertContains(logs, "FinalizeableObjectQueued - None - FinalizableType");
-            Logs.AssertContains(logs, "FinalizeableObjectQueued - COR_PRF_FINALIZER_CRITICAL - CriticalFinalizableType");
+            GC.KeepAlive(null);
         }
+    }
 
-        private static void InnerScope()
-        {
-            _ = new FinalizableType();
-            _ = new CriticalFinalizableType();
-        }
-
-        private class FinalizableType
-        {
-            ~FinalizableType()
-            {
-                GC.KeepAlive(null);
-            }
-        }
-
-        private class CriticalFinalizableType : CriticalFinalizerObject
-        {
-        }
+    private class CriticalFinalizableType : CriticalFinalizerObject
+    {
     }
 }
