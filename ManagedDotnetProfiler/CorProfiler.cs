@@ -109,6 +109,19 @@ internal unsafe partial class CorProfiler : CorProfilerCallback10Base
         return HResult.S_OK;
     }
 
+    protected override HResult UnmanagedToManagedTransition(FunctionId functionId, COR_PRF_TRANSITION_REASON reason)
+    {
+        var functionName = GetFunctionFullName(functionId);
+
+        // Don't log FetchLastLog to avoid producing new logs while fetching logs
+        if (!functionName.Contains("FetchLastLog"))
+        {
+            Log($"UnmanagedToManagedTransition - {functionName} - {reason}");
+        }
+
+        return HResult.S_OK;
+    }
+
     protected override HResult JITInlining(FunctionId callerId, FunctionId calleeId, out bool pfShouldInline)
     {
         Log($"JITInlining - {GetFunctionFullName(calleeId)} -> {GetFunctionFullName(callerId)}");
