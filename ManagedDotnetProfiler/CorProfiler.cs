@@ -90,6 +90,25 @@ internal unsafe partial class CorProfiler : CorProfilerCallback10Base
         return HResult.S_OK;
     }
 
+    protected override HResult JITFunctionPitched(FunctionId functionId)
+    {
+        Environment.FailFast("Never called by the CLR");
+        return HResult.E_NOTIMPL;
+    }
+
+    protected override HResult ManagedToUnmanagedTransition(FunctionId functionId, COR_PRF_TRANSITION_REASON reason)
+    {
+        var functionName = GetFunctionFullName(functionId);
+
+        // Don't log FetchLastLog to avoid producing new logs while fetching logs
+        if (!functionName.Contains("FetchLastLog"))
+        {
+            Log($"ManagedToUnmanagedTransition - {functionName} - {reason}");
+        }
+
+        return HResult.S_OK;
+    }
+
     protected override HResult JITInlining(FunctionId callerId, FunctionId calleeId, out bool pfShouldInline)
     {
         Log($"JITInlining - {GetFunctionFullName(calleeId)} -> {GetFunctionFullName(callerId)}");
