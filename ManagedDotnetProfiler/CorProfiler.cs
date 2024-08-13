@@ -129,6 +129,71 @@ internal unsafe partial class CorProfiler : CorProfilerCallback10Base
         return HResult.S_OK;
     }
 
+    protected override HResult RuntimeSuspendStarted(COR_PRF_SUSPEND_REASON suspendReason)
+    {
+        Log($"RuntimeSuspendStarted - {suspendReason}");
+        return HResult.S_OK;
+    }
+
+    protected override HResult RuntimeSuspendFinished()
+    {
+        Log("RuntimeSuspendFinished");
+        return HResult.S_OK;
+    }
+
+    protected override HResult RuntimeResumeStarted()
+    {
+        Log("RuntimeResumeStarted");
+        return HResult.S_OK;
+    }
+
+    protected override HResult RuntimeResumeFinished()
+    {
+        Log("RuntimeResumeFinished");
+        return HResult.S_OK;
+    }
+
+    protected override HResult RuntimeThreadSuspended(ThreadId threadId)
+    {
+        var (_, osId) = ICorProfilerInfo.GetThreadInfo(threadId);
+        Logs.Enqueue($"RuntimeThreadSuspended - {osId}");
+        return HResult.S_OK;
+    }
+
+    protected override HResult RuntimeThreadResumed(ThreadId threadId)
+    {
+        var (_, osId) = ICorProfilerInfo.GetThreadInfo(threadId);
+        Logs.Enqueue($"RuntimeThreadResumed - {osId}");
+        return HResult.S_OK;
+    }
+
+    protected override HResult ThreadCreated(ThreadId threadId)
+    {
+        var (_, osId) = ICorProfilerInfo.GetThreadInfo(threadId);
+        Logs.Enqueue($"ThreadCreated - {osId}");
+        return HResult.S_OK;
+    }
+
+    protected override HResult ThreadDestroyed(ThreadId threadId)
+    {
+        var (_, osId) = ICorProfilerInfo.GetThreadInfo(threadId);
+        Logs.Enqueue($"ThreadDestroyed - {osId}");
+        return HResult.S_OK;
+    }
+
+    protected override HResult ThreadAssignedToOSThread(ThreadId managedThreadId, int osThreadId)
+    {
+        Logs.Enqueue($"ThreadAssignedToOSThread - {osThreadId}");
+        return HResult.S_OK;
+    }
+
+    protected override HResult ThreadNameChanged(ThreadId threadId, uint cchName, char* name)
+    {
+        var threadName = new Span<char>(name, (int)cchName);
+        Logs.Enqueue($"ThreadNameChanged - {threadName}");
+        return HResult.S_OK;
+    }
+
     protected override HResult ExceptionSearchCatcherFound(FunctionId functionId)
     {
         var (_, _, moduleId, mdToken) = ICorProfilerInfo2.GetFunctionInfo(functionId);

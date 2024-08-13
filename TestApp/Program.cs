@@ -39,6 +39,7 @@ HandleTests.Run();
 GarbageCollectionTests.Run();
 JitCompilationTests.Run();
 PInvokeTests.Run();
+ThreadTests.Run();
 
 // Dump last logs before exiting
 foreach (var log in Logs.Fetch())
