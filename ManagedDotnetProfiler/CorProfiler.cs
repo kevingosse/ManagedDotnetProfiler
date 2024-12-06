@@ -155,28 +155,28 @@ internal unsafe partial class CorProfiler : CorProfilerCallback10Base
 
     protected override HResult RuntimeThreadSuspended(ThreadId threadId)
     {
-        var (_, osId) = ICorProfilerInfo.GetThreadInfo(threadId);
+        var osId = ICorProfilerInfo.GetThreadInfo(threadId).ThrowIfFailed();
         Logs.Enqueue($"RuntimeThreadSuspended - {osId}");
         return HResult.S_OK;
     }
 
     protected override HResult RuntimeThreadResumed(ThreadId threadId)
     {
-        var (_, osId) = ICorProfilerInfo.GetThreadInfo(threadId);
+        var osId = ICorProfilerInfo.GetThreadInfo(threadId).ThrowIfFailed();
         Logs.Enqueue($"RuntimeThreadResumed - {osId}");
         return HResult.S_OK;
     }
 
     protected override HResult ThreadCreated(ThreadId threadId)
     {
-        var (_, osId) = ICorProfilerInfo.GetThreadInfo(threadId);
+        var osId = ICorProfilerInfo.GetThreadInfo(threadId).ThrowIfFailed();
         Logs.Enqueue($"ThreadCreated - {osId}");
         return HResult.S_OK;
     }
 
     protected override HResult ThreadDestroyed(ThreadId threadId)
     {
-        var (_, osId) = ICorProfilerInfo.GetThreadInfo(threadId);
+        var osId = ICorProfilerInfo.GetThreadInfo(threadId).ThrowIfFailed();
         Logs.Enqueue($"ThreadDestroyed - {osId}");
         return HResult.S_OK;
     }
@@ -196,18 +196,18 @@ internal unsafe partial class CorProfiler : CorProfilerCallback10Base
 
     protected override HResult ExceptionSearchCatcherFound(FunctionId functionId)
     {
-        var (_, _, moduleId, mdToken) = ICorProfilerInfo2.GetFunctionInfo(functionId);
-        var (_, metaDataImport) = ICorProfilerInfo2.GetModuleMetaData(moduleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport);
-        var (_, methodProperties) = metaDataImport.GetMethodProps(new MdMethodDef(mdToken));
-        var (_, typeName, _, _) = metaDataImport.GetTypeDefProps(methodProperties.Class);
+        var functionInfo = ICorProfilerInfo2.GetFunctionInfo(functionId).ThrowIfFailed();
+        var metaDataImport = ICorProfilerInfo2.GetModuleMetaData(functionInfo.ModuleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport).ThrowIfFailed();
+        var methodProperties = metaDataImport.GetMethodProps(new MdMethodDef(functionInfo.Token)).ThrowIfFailed();
+        var typeDefProps = metaDataImport.GetTypeDefProps(methodProperties.Class).ThrowIfFailed();
 
-        Log($"ExceptionSearchCatcherFound - {typeName}.{methodProperties.Name}");
+        Log($"ExceptionSearchCatcherFound - {typeDefProps.TypeName}.{methodProperties.Name}");
         return HResult.S_OK;
     }
 
     protected override HResult AppDomainCreationStarted(AppDomainId appDomainId)
     {
-        var (_, appDomainName, processId) = ICorProfilerInfo.GetAppDomainInfo(appDomainId);
+        var (appDomainName, processId) = ICorProfilerInfo.GetAppDomainInfo(appDomainId).ThrowIfFailed();
 
         Log($"AppDomainCreationStarted - {appDomainName} - Process Id {processId.Value}");
 
@@ -216,7 +216,7 @@ internal unsafe partial class CorProfiler : CorProfilerCallback10Base
 
     protected override HResult AppDomainCreationFinished(AppDomainId appDomainId, HResult hrStatus)
     {
-        var (_, appDomainName, _) = ICorProfilerInfo.GetAppDomainInfo(appDomainId);
+        var (appDomainName, _) = ICorProfilerInfo.GetAppDomainInfo(appDomainId).ThrowIfFailed();
 
         Log($"AppDomainCreationFinished - {appDomainName} - HResult {hrStatus}");
 
@@ -226,7 +226,7 @@ internal unsafe partial class CorProfiler : CorProfilerCallback10Base
     protected override HResult AppDomainShutdownStarted(AppDomainId appDomainId)
     {
         // TODO: Test on .NET Framework
-        var (_, appDomainName, _) = ICorProfilerInfo.GetAppDomainInfo(appDomainId);
+        var (appDomainName, _) = ICorProfilerInfo.GetAppDomainInfo(appDomainId).ThrowIfFailed();
 
         Log($"AppDomainShutdownStarted - {appDomainName}");
 
@@ -236,7 +236,7 @@ internal unsafe partial class CorProfiler : CorProfilerCallback10Base
     protected override HResult AppDomainShutdownFinished(AppDomainId appDomainId, HResult hrStatus)
     {
         // TODO: Test on .NET Framework
-        var (_, appDomainName, _) = ICorProfilerInfo.GetAppDomainInfo(appDomainId);
+        var (appDomainName, _) = ICorProfilerInfo.GetAppDomainInfo(appDomainId).ThrowIfFailed();
 
         Log($"AppDomainShutdownFinished - {appDomainName} - HResult {hrStatus}");
 
@@ -255,11 +255,11 @@ internal unsafe partial class CorProfiler : CorProfilerCallback10Base
 
     protected override HResult AssemblyLoadFinished(AssemblyId assemblyId, HResult hrStatus)
     {
-        var (_, assemblyName, appDomainId, moduleId) = ICorProfilerInfo.GetAssemblyInfo(assemblyId);
-        var (_, appDomainName, _) = ICorProfilerInfo.GetAppDomainInfo(appDomainId);
-        var (_, moduleName, _, _) = ICorProfilerInfo.GetModuleInfo(moduleId);
+        var assemblyInfo = ICorProfilerInfo.GetAssemblyInfo(assemblyId).ThrowIfFailed();
+        var (appDomainName, _) = ICorProfilerInfo.GetAppDomainInfo(assemblyInfo.AppDomainId).ThrowIfFailed();
+        var moduleInfo = ICorProfilerInfo.GetModuleInfo(assemblyInfo.ModuleId).ThrowIfFailed();
 
-        Log($"AssemblyLoadFinished - {assemblyName} - AppDomain {appDomainName} - Module {moduleName}");
+        Log($"AssemblyLoadFinished - {assemblyInfo.AssemblyName} - AppDomain {appDomainName} - Module {moduleInfo.ModuleName}");
 
         if (!_assemblyLoads.TryRemove(assemblyId, out _))
         {
@@ -279,11 +279,11 @@ internal unsafe partial class CorProfiler : CorProfilerCallback10Base
 
     protected override HResult AssemblyUnloadFinished(AssemblyId assemblyId, HResult hrStatus)
     {
-        var (_, assemblyName, appDomainId, moduleId) = ICorProfilerInfo.GetAssemblyInfo(assemblyId);
-        var (_, appDomainName, _) = ICorProfilerInfo.GetAppDomainInfo(appDomainId);
-        var (_, moduleName, _, _) = ICorProfilerInfo.GetModuleInfo(moduleId);
+        var assemblyInfo = ICorProfilerInfo.GetAssemblyInfo(assemblyId).ThrowIfFailed();
+        var (appDomainName, _) = ICorProfilerInfo.GetAppDomainInfo(assemblyInfo.AppDomainId).ThrowIfFailed();
+        var (moduleName, _, _) = ICorProfilerInfo.GetModuleInfo(assemblyInfo.ModuleId).ThrowIfFailed();
 
-        Log($"AssemblyUnloadFinished - {assemblyName} - AppDomain {appDomainName} - Module {moduleName}");
+        Log($"AssemblyUnloadFinished - {assemblyInfo.AssemblyName} - AppDomain {appDomainName} - Module {moduleName}");
 
         return HResult.S_OK;
     }
@@ -670,18 +670,18 @@ internal unsafe partial class CorProfiler : CorProfilerCallback10Base
     {
         var (moduleId, typeDef) = ICorProfilerInfo.GetClassIdInfo(classId).ThrowIfFailed();
         var moduleMetadata = ICorProfilerInfo.GetModuleMetaData(moduleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport).ThrowIfFailed();
-        var (typeName, _, _) = moduleMetadata.GetTypeDefProps(typeDef).ThrowIfFailed();
+        var typeDefProps = moduleMetadata.GetTypeDefProps(typeDef).ThrowIfFailed();
 
-        return typeName;
+        return typeDefProps.TypeName;
     }
 
     private string GetFunctionFullName(FunctionId functionId)
     {
-        var (_, _, moduleId, mdToken) = ICorProfilerInfo2.GetFunctionInfo(functionId);
-        var (_, metaDataImport) = ICorProfilerInfo2.GetModuleMetaData(moduleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport);
-        var (_, methodProperties) = metaDataImport.GetMethodProps(new MdMethodDef(mdToken));
-        var (_, typeName, _, _) = metaDataImport.GetTypeDefProps(methodProperties.Class);
+        var functionInfo = ICorProfilerInfo2.GetFunctionInfo(functionId).ThrowIfFailed();
+        var metaDataImport = ICorProfilerInfo2.GetModuleMetaData(functionInfo.ModuleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport).ThrowIfFailed();
+        var methodProperties = metaDataImport.GetMethodProps(new MdMethodDef(functionInfo.Token)).ThrowIfFailed();
+        var typeDefProps = metaDataImport.GetTypeDefProps(methodProperties.Class).ThrowIfFailed();
 
-        return $"{typeName}.{methodProperties.Name}";
+        return $"{typeDefProps.TypeName}.{methodProperties.Name}";
     }
 }

@@ -551,3 +551,36 @@ public readonly struct ObjectHandleId
 {
     public readonly nint Value;
 }
+
+public readonly record struct ClassIdInfo(ModuleId ModuleId, MdTypeDef TypeDef);
+public readonly record struct TypeDefProps(string TypeName, int TypeDefFlags, MdToken Extends);
+public readonly record struct FunctionInfo(ClassId ClassId, ModuleId ModuleId, MdToken Token);
+public readonly record struct ModuleInfo(string ModuleName, nint BaseLoadAddress, AssemblyId AssemblyId);
+public readonly record struct AppDomainInfo(string AppDomainName, ProcessId ProcessId);
+public readonly record struct AssemblyInfo(string AssemblyName, AppDomainId AppDomainId, ModuleId ModuleId);
+public readonly record struct StringLayout(uint BufferLengthOffset, uint StringLengthOffset, uint BufferOffset);
+
+public readonly record struct MethodProps
+{
+    private readonly IntPtr _signature;
+    private readonly int _signatureLength;
+
+    public readonly MdTypeDef Class;
+    public readonly string Name;
+    public readonly int Attributes;
+    public readonly uint RVA;
+    public readonly int ImplementationFlags;
+
+    public unsafe Span<byte> Signature => new((void*)_signature, _signatureLength);
+
+    public MethodProps(MdTypeDef @class, string name, int attributes, IntPtr signature, int signatureLength, uint rva, int implementationFlags)
+    {
+        Class = @class;
+        Name = name;
+        Attributes = attributes;
+        _signature = signature;
+        _signatureLength = signatureLength;
+        RVA = rva;
+        ImplementationFlags = implementationFlags;
+    }
+}

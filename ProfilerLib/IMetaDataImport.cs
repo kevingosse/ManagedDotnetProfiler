@@ -71,20 +71,20 @@ namespace ProfilerLib
             return _impl.GetModuleFromScope(out pmd);
         }
 
-        public unsafe (HResult result, string typeName, int typeDefFlags, MdToken extends) GetTypeDefProps(MdTypeDef typeDef)
+        public unsafe HResult<TypeDefProps> GetTypeDefProps(MdTypeDef typeDef)
         {
             var result = GetTypeDefProps(typeDef, Span<char>.Empty, out var length, out _, out _);
 
             if (!result.IsOK)
             {
-                return (result, default, default, default);
+                return result;
             }
 
             Span<char> buffer = stackalloc char[(int)length];
 
             result = GetTypeDefProps(typeDef, buffer, out _, out var typeDefFlags, out var extends);
 
-            return (result, buffer.WithoutNullTerminator(), typeDefFlags, extends);
+            return new(result, new (buffer.WithoutNullTerminator(), typeDefFlags, extends));
         }
 
         public unsafe HResult GetTypeDefProps(MdTypeDef typeDef, Span<char> typeName, out uint pchTypeDef, out int pdwTypeDefFlags, out MdToken ptkExtends)
@@ -180,20 +180,20 @@ namespace ProfilerLib
             return _impl.FindMemberRef(td, szName, pvSigBlob, cbSigBlob, out pmr);
         }
 
-        public unsafe (HResult result, MethodProperties properties) GetMethodProps(MdMethodDef methodDef)
+        public unsafe HResult<MethodProps> GetMethodProps(MdMethodDef methodDef)
         {
             var result = GetMethodProps(methodDef, out _, Span<char>.Empty, out var length, out _, out _, out _, out _, out _);
 
             if (!result)
             {
-                return (result, default);
+                return result;
             }
 
             Span<char> name = stackalloc char[(int)length];
 
             result = GetMethodProps(methodDef, out var @class, name, out _, out var attributes, out var signature, out var signatureLength, out var rva, out var implementationFlags);
 
-            return (result, new(@class, name.WithoutNullTerminator(), attributes, signature, (int)signatureLength, rva, implementationFlags));
+            return new(result, new(@class, name.WithoutNullTerminator(), attributes, (IntPtr)signature, (int)signatureLength, rva, implementationFlags));
         }
 
         public unsafe HResult GetMethodProps(MdMethodDef mb, out MdTypeDef pClass, Span<char> name, out uint pchMethod, out int pdwAttr, out byte* ppvSigBlob, out uint pcbSigBlob, out uint pulCodeRVA, out int pdwImplFlags)

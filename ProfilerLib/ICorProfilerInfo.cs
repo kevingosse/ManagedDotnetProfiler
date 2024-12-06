@@ -29,10 +29,10 @@
             return _impl.GetClassFromObject(objectId, out classId);
         }
 
-        public (HResult result, ClassId classId) GetClassFromObject(ObjectId objectId)
+        public HResult<ClassId> GetClassFromObject(ObjectId objectId)
         {
             var result = _impl.GetClassFromObject(objectId, out var pClassId);
-            return (result, pClassId);
+            return new(result, pClassId);
         }
 
         public HResult GetClassFromToken(ModuleId moduleId, MdTypeDef typeDef, out ClassId pClassId)
@@ -75,28 +75,28 @@
             return _impl.IsArrayClass(classId, out pBaseElemType, out pBaseClassId, out pcRank);
         }
 
-        public (HResult result, int win32ThreadId) GetThreadInfo(ThreadId threadId)
+        public HResult<int> GetThreadInfo(ThreadId threadId)
         {
             var result = _impl.GetThreadInfo(threadId, out var win32ThreadId);
-            return (result, win32ThreadId);
+            return new(result, win32ThreadId);
         }
 
-        public (HResult result, ThreadId threadId) GetCurrentThreadId()
+        public HResult<ThreadId> GetCurrentThreadId()
         {
             var code = _impl.GetCurrentThreadId(out var threadId);
             return new(code, threadId);
         }
 
-        public (HResult result, ModuleId moduleId, MdTypeDef typeDef) GetClassIdInfo(ClassId classId)
+        public HResult<ClassIdInfo> GetClassIdInfo(ClassId classId)
         {
             var result = _impl.GetClassIdInfo(classId, out var moduleId, out var typeDefToken);
-            return (result, moduleId, typeDefToken);
+            return new(result, new(moduleId, typeDefToken));
         }
 
-        public (HResult result, ClassId classId, ModuleId moduleId, MdToken token) GetFunctionInfo(FunctionId functionId)
+        public HResult<FunctionInfo> GetFunctionInfo(FunctionId functionId)
         {
             var result = _impl.GetFunctionInfo(functionId, out var classId, out var moduleId, out var token);
-            return (result, classId, moduleId, token);
+            return new(result, new(classId, moduleId, token));
         }
 
         public HResult SetEventMask(CorPrfMonitor dwEvents)
@@ -119,13 +119,13 @@
             return _impl.GetTokenAndMetaDataFromFunction(functionId, out riid, out ppImport, out pToken);
         }
 
-        public unsafe (HResult result, string moduleName, nint baseLoadAddress, AssemblyId assemblyId) GetModuleInfo(ModuleId moduleId)
+        public unsafe HResult<ModuleInfo> GetModuleInfo(ModuleId moduleId)
         {
             var result = GetModuleInfo(moduleId, Span<char>.Empty, out _, out var length, out _);
 
             if (!result.IsOK)
             {
-                return (result, default, default, default);
+                return result;
             }
 
             Span<char> buffer = stackalloc char[(int)length];
@@ -134,10 +134,10 @@
 
             if (!result.IsOK)
             {
-                return (result, default, default, default);
+                return result;
             }
 
-            return (result, buffer.WithoutNullTerminator(), baseLoadAddress, assemblyId);
+            return new(result, new(buffer.WithoutNullTerminator(), baseLoadAddress, assemblyId));
         }
 
 
@@ -149,10 +149,10 @@
             }
         }
 
-        public (HResult result, IMetaDataImport metaDataImport) GetModuleMetaData(ModuleId moduleId, CorOpenFlags dwOpenFlags, Guid riid)
+        public HResult<IMetaDataImport> GetModuleMetaData(ModuleId moduleId, CorOpenFlags dwOpenFlags, Guid riid)
         {
             var result = _impl.GetModuleMetaData(moduleId, dwOpenFlags, riid, out var ptr);
-            return (result, new(ptr));
+            return new(result, new(ptr));
         }
 
         public unsafe HResult GetILFunctionBody(ModuleId moduleId, MdMethodDef methodId, out byte* ppMethodHeader, out uint pcbMethodSize)
@@ -170,13 +170,13 @@
             return _impl.SetILFunctionBody(moduleId, methodid, pbNewILMethodHeader);
         }
 
-        public unsafe (HResult result, string appDomainName, ProcessId processId) GetAppDomainInfo(AppDomainId appDomainId)
+        public unsafe HResult<AppDomainInfo> GetAppDomainInfo(AppDomainId appDomainId)
         {
             var result = GetAppDomainInfo(appDomainId, Span<char>.Empty, out var length, out _);
 
             if (!result.IsOK)
             {
-                return (result, default, default);
+                return result;
             }
 
             Span<char> buffer = stackalloc char[(int)length];
@@ -185,10 +185,10 @@
 
             if (!result.IsOK)
             {
-                return (result, default, default);
+                return result;
             }
 
-            return (result, buffer.WithoutNullTerminator(), processId);
+            return new(result, new(buffer.WithoutNullTerminator(), processId));
         }
 
         public unsafe HResult GetAppDomainInfo(AppDomainId appDomainId, Span<char> appDomainName, out uint pcchName, out ProcessId pProcessId)
@@ -207,13 +207,13 @@
             }
         }
 
-        public unsafe (HResult result, string assemblyName, AppDomainId appDomainId, ModuleId moduleId) GetAssemblyInfo(AssemblyId assemblyId)
+        public unsafe HResult<AssemblyInfo> GetAssemblyInfo(AssemblyId assemblyId)
         {
             var result = GetAssemblyInfo(assemblyId, Span<char>.Empty, out var length, out _, out _);
 
             if (!result.IsOK)
             {
-                return (result, default, default, default);
+                return result;
             }
 
             Span<char> buffer = stackalloc char[(int)length];
@@ -222,10 +222,10 @@
 
             if (!result.IsOK)
             {
-                return (result, default, default, default);
+                return result;
             }
 
-            return (result, buffer.WithoutNullTerminator(), appDomainId, moduleId);
+            return new(result, new(buffer.WithoutNullTerminator(), appDomainId, moduleId));
         }
 
         public HResult SetFunctionReJIT(FunctionId functionId)

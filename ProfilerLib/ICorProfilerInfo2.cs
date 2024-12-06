@@ -29,10 +29,10 @@ public class ICorProfilerInfo2 : ICorProfilerInfo
         return _impl.GetStringLayout(out pBufferLengthOffset, out pStringLengthOffset, out pBufferOffset);
     }
 
-    public (HResult, uint bufferLengthOffset, uint stringLengthOffset, uint bufferOffset) GetStringLayout()
+    public HResult<StringLayout> GetStringLayout()
     {
         var result = _impl.GetStringLayout(out var pBufferLengthOffset, out var pStringLengthOffset, out var pBufferOffset);
-        return (result, pBufferLengthOffset, pStringLengthOffset, pBufferOffset);
+        return new(result, new(pBufferLengthOffset, pStringLengthOffset, pBufferOffset));
     }
 
     public unsafe HResult GetClassLayout(ClassId classID, out COR_FIELD_OFFSET* rFieldOffset, uint cFieldOffset, out uint pcFieldOffset, out uint pulClassSize)
