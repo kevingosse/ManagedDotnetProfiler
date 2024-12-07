@@ -159,5 +159,5 @@ internal unsafe interface ICorProfilerInfo3 : ICorProfilerInfo2
                 out uint pcchName,
                 char* szName,
                 out AssemblyId pAssemblyId,
-                out int pdwModuleFlags);
+                out uint pdwModuleFlags);
 }

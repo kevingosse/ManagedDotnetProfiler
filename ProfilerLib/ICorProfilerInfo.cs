@@ -144,12 +144,11 @@
             return new(result, new(buffer.WithoutNullTerminator(), moduleInfo.BaseLoadAddress, moduleInfo.AssemblyId));
         }
 
-
-        public unsafe HResult<ModuleInfo> GetModuleInfo(ModuleId moduleId, Span<char> moduleName, out uint pcchName)
+        public unsafe HResult<ModuleInfo> GetModuleInfo(ModuleId moduleId, Span<char> moduleName, out uint moduleNameLength)
         {
             fixed (char* c = moduleName)
             {
-                var result = _impl.GetModuleInfo(moduleId, out var pBaseLoadAddress, (uint)moduleName.Length, out pcchName, c, out var assemblyId);
+                var result = _impl.GetModuleInfo(moduleId, out var pBaseLoadAddress, (uint)moduleName.Length, out moduleNameLength, c, out var assemblyId);
                 return new(result, new(pBaseLoadAddress, assemblyId));
             }
         }

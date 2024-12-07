@@ -721,14 +721,19 @@ public readonly record struct TypeDefProps(string TypeName, int TypeDefFlags, Md
 public readonly record struct FunctionInfo(ClassId ClassId, ModuleId ModuleId, MdToken Token);
 public readonly record struct ModuleInfo(nint BaseLoadAddress, AssemblyId AssemblyId);
 public readonly record struct ModuleInfoWithName(string ModuleName, nint BaseLoadAddress, AssemblyId AssemblyId);
+public readonly record struct ModuleInfo2(nint BaseLoadAddress, AssemblyId AssemblyId, uint ModuleFlags);
+public readonly record struct ModuleInfoWithName2(string ModuleName, nint BaseLoadAddress, AssemblyId AssemblyId, uint ModuleFlags);
 public readonly record struct AppDomainInfo(string AppDomainName, ProcessId ProcessId);
 public readonly record struct AssemblyInfo(AppDomainId AppDomainId, ModuleId ModuleId);
 public readonly record struct AssemblyInfoWithName(string AssemblyName, AppDomainId AppDomainId, ModuleId ModuleId);
 public readonly record struct StringLayout(uint BufferLengthOffset, uint StringLengthOffset, uint BufferOffset);
-public readonly unsafe record struct CodeInfo(IntPtr Start, uint Size);
+public readonly record struct StringLayout2(uint StringLengthOffset, uint BufferOffset);
+public readonly record struct CodeInfo(IntPtr Start, uint Size);
 public readonly record struct ArrayClassInfo(CorElementType BaseElemType, ClassId BaseClassId, uint Rank);
-public readonly unsafe record struct TokenAndMetaData(Guid Riid, IntPtr Import, MdToken Token);
-public readonly unsafe record struct ILFunctionBody(IntPtr MethodHeader, uint MethodSize);
+public readonly record struct TokenAndMetaData(Guid Riid, IntPtr Import, MdToken Token);
+public readonly record struct ILFunctionBody(IntPtr MethodHeader, uint MethodSize);
+public readonly record struct FunctionLeave3Info(COR_PRF_FRAME_INFO FrameInfo, COR_PRF_FUNCTION_ARGUMENT_RANGE RetvalRange);
+public readonly record struct RuntimeInformation(ushort ClrInstanceId, COR_PRF_RUNTIME_TYPE RuntimeType, ushort MajorVersion, ushort MinorVersion, ushort BuildNumber, ushort QFEVersion);
 
 public readonly record struct MethodProps
 {

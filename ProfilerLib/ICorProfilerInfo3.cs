@@ -9,24 +9,26 @@ public class ICorProfilerInfo3 : ICorProfilerInfo2
         _impl = new(ptr);
     }
 
-    public unsafe HResult EnumJITedFunctions(out void* ppEnum)
+    public unsafe HResult<IntPtr> EnumJITedFunctions()
     {
-        return _impl.EnumJITedFunctions(out ppEnum);
+        var result = _impl.EnumJITedFunctions(out var pEnum);
+        return new(result, (IntPtr)pEnum);
     }
 
-    public HResult RequestProfilerDetach(int dwExpectedCompletionMilliseconds)
+    public HResult RequestProfilerDetach(int expectedCompletionMilliseconds)
     {
-        return _impl.RequestProfilerDetach(dwExpectedCompletionMilliseconds);
+        return _impl.RequestProfilerDetach(expectedCompletionMilliseconds);
     }
 
-    public unsafe HResult SetFunctionIDMapper2(delegate*unmanaged[Stdcall]<FunctionId, void*, int*, nint> pFunc, void* clientData)
+    public unsafe HResult SetFunctionIDMapper2(delegate* unmanaged[Stdcall]<FunctionId, void*, int*, nint> pFunc, void* clientData)
     {
         return _impl.SetFunctionIDMapper2(pFunc, clientData);
     }
 
-    public HResult GetStringLayout2(out uint pStringLengthOffset, out uint pBufferOffset)
+    public HResult<StringLayout2> GetStringLayout2()
     {
-        return _impl.GetStringLayout2(out pStringLengthOffset, out pBufferOffset);
+        var result = _impl.GetStringLayout2(out var stringLengthOffset, out var bufferOffset);
+        return new(result, new(stringLengthOffset, bufferOffset));
     }
 
     public unsafe HResult SetEnterLeaveFunctionHooks3(void* pFuncEnter3, void* pFuncLeave3, void* pFuncTailcall3)
@@ -44,38 +46,74 @@ public class ICorProfilerInfo3 : ICorProfilerInfo2
         return _impl.GetFunctionEnter3Info(functionId, eltInfo, out pFrameInfo, pcbArgumentInfo, pArgumentInfo);
     }
 
-    public HResult GetFunctionLeave3Info(FunctionId functionId, COR_PRF_ELT_INFO eltInfo, out COR_PRF_FRAME_INFO pFrameInfo, out COR_PRF_FUNCTION_ARGUMENT_RANGE pRetvalRange)
+    public HResult<FunctionLeave3Info> GetFunctionLeave3Info(FunctionId functionId, COR_PRF_ELT_INFO eltInfo)
     {
-        return _impl.GetFunctionLeave3Info(functionId, eltInfo, out pFrameInfo, out pRetvalRange);
+        var result = _impl.GetFunctionLeave3Info(functionId, eltInfo, out var frameInfo, out var retvalRange);
+        return new(result, new(frameInfo, retvalRange));
     }
 
-    public HResult GetFunctionTailcall3Info(FunctionId functionId, COR_PRF_ELT_INFO eltInfo, out COR_PRF_FRAME_INFO pFrameInfo)
+    public HResult<COR_PRF_FRAME_INFO> GetFunctionTailcall3Info(FunctionId functionId, COR_PRF_ELT_INFO eltInfo)
     {
-        return _impl.GetFunctionTailcall3Info(functionId, eltInfo, out pFrameInfo);
+        var result = _impl.GetFunctionTailcall3Info(functionId, eltInfo, out var pFrameInfo);
+        return new(result, pFrameInfo);
     }
 
-    public unsafe HResult EnumModules(out void* ppEnum)
+    public unsafe HResult<IntPtr> EnumModules()
     {
-        return _impl.EnumModules(out ppEnum);
+        var result = _impl.EnumModules(out var pEnum);
+        return new(result, (IntPtr)pEnum);
     }
 
-    public unsafe HResult GetRuntimeInformation(out ushort pClrInstanceId, out COR_PRF_RUNTIME_TYPE pRuntimeType, out ushort pMajorVersion, out ushort pMinorVersion, out ushort pBuildNumber, out ushort pQFEVersion, uint cchVersionString, out uint pcchVersionString, char* szVersionString)
+    public unsafe HResult<RuntimeInformation> GetRuntimeInformation(Span<char> versionString, out uint versionStringLength)
     {
-        return _impl.GetRuntimeInformation(out pClrInstanceId, out pRuntimeType, out pMajorVersion, out pMinorVersion, out pBuildNumber, out pQFEVersion, cchVersionString, out pcchVersionString, szVersionString);
+        fixed (char* szVersionString = versionString)
+        {
+            var result = _impl.GetRuntimeInformation(out var clrInstanceId, out var runtimeType, out var majorVersion, out var minorVersion, out var buildNumber, out var qfeVersion, (uint)versionString.Length, out versionStringLength, szVersionString);
+            return new(result, new(clrInstanceId, runtimeType, majorVersion, minorVersion, buildNumber, qfeVersion));
+        }
     }
 
-    public unsafe HResult GetThreadStaticAddress2(ClassId classId, MdFieldDef fieldToken, AppDomainId appDomainId, ThreadId threadId, out void* ppAddress)
+    public unsafe HResult<IntPtr> GetThreadStaticAddress2(ClassId classId, MdFieldDef fieldToken, AppDomainId appDomainId, ThreadId threadId)
     {
-        return _impl.GetThreadStaticAddress2(classId, fieldToken, appDomainId, threadId, out ppAddress);
+        var result = _impl.GetThreadStaticAddress2(classId, fieldToken, appDomainId, threadId, out var address);
+        return new(result, (IntPtr)address);
     }
 
-    public unsafe HResult GetAppDomainsContainingModule(ModuleId moduleId, uint cAppDomainIds, out uint pcAppDomainIds, AppDomainId* appDomainIds)
+    public unsafe HResult GetAppDomainsContainingModule(ModuleId moduleId, Span<AppDomainId> appDomainIds, out uint nbAppDomainIds)
     {
-        return _impl.GetAppDomainsContainingModule(moduleId, cAppDomainIds, out pcAppDomainIds, appDomainIds);
+        fixed (AppDomainId* cAppDomainIds = appDomainIds)
+        {
+            return _impl.GetAppDomainsContainingModule(moduleId, (uint)appDomainIds.Length, out nbAppDomainIds, cAppDomainIds);
+        }
     }
 
-    public unsafe HResult GetModuleInfo2(ModuleId moduleId, out byte* ppBaseLoadAddress, uint cchName, out uint pcchName, char* szName, out AssemblyId pAssemblyId, out int pdwModuleFlags)
+    public unsafe HResult<ModuleInfo2> GetModuleInfo2(ModuleId moduleId, Span<char> moduleName, out uint moduleNameLength)
     {
-        return _impl.GetModuleInfo2(moduleId, out ppBaseLoadAddress, cchName, out pcchName, szName, out pAssemblyId, out pdwModuleFlags);
+        fixed (char* szName = moduleName)
+        {
+            var result = _impl.GetModuleInfo2(moduleId, out var baseLoadAddress, (uint)moduleName.Length, out moduleNameLength, szName, out var assemblyId, out var moduleFlags);
+            return new(result, new((IntPtr)baseLoadAddress, assemblyId, moduleFlags));
+        }
+    }
+
+    public unsafe HResult<ModuleInfoWithName2> GetModuleInfo2(ModuleId moduleId)
+    {
+        var (result, _) = GetModuleInfo2(moduleId, Span<char>.Empty, out var length);
+
+        if (!result)
+        {
+            return result;
+        }
+
+        Span<char> buffer = stackalloc char[(int)length];
+
+        (result, var moduleInfo) = GetModuleInfo2(moduleId, buffer, out _);
+
+        if (!result)
+        {
+            return result;
+        }
+
+        return new(result, new(buffer.WithoutNullTerminator(), moduleInfo.BaseLoadAddress, moduleInfo.AssemblyId, moduleInfo.ModuleFlags));
     }
 }
