@@ -109,7 +109,7 @@ internal unsafe interface ICorProfilerInfo : IUnknown
      */
     HResult GetThreadInfo(
                 ThreadId ThreadId,
-                out int pdwWin32ThreadId);
+                out uint pdwWin32ThreadId);
 
     /*
      * The code profiler calls GetCurrentThreadId to get the managed thread ID
@@ -158,7 +158,7 @@ internal unsafe interface ICorProfilerInfo : IUnknown
      * The code profiler calls SetEventMask to set the event categories for
      * which it is set to receive notification from the CLR.
      */
-    HResult SetEventMask(CorPrfMonitor dwEvents);
+    HResult SetEventMask(COR_PRF_MONITOR dwEvents);
 
     /*
      * The code profiler calls SetFunctionHooks to specify handlers
@@ -275,7 +275,7 @@ internal unsafe interface ICorProfilerInfo : IUnknown
     HResult SetILFunctionBody(
                 ModuleId ModuleId,
                 MdMethodDef methodid,
-                byte pbNewILMethodHeader);
+                IntPtr newILMethodHeader);
 
     /*
      * Retrieve app domain information given its id.
@@ -380,14 +380,14 @@ internal unsafe interface ICorProfilerInfo : IUnknown
      * DEPRECATED.
      */
     HResult BeginInprocDebugging(
-        int fThisThreadOnly,
-        out int pdwProfilerContext);
+        int thisThreadOnly,
+        out uint pdwProfilerContext);
 
     /*
      * DEPRECATED.
      */
     HResult EndInprocDebugging(
-                int dwProfilerContext);
+                uint profilerContext);
 
     /*
      * GetILToNativeMapping returns a map from IL offsets to native

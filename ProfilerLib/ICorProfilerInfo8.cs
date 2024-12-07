@@ -14,9 +14,9 @@ public class ICorProfilerInfo8 : ICorProfilerInfo7
         return _impl.IsFunctionDynamic(functionId, out isDynamic);
     }
 
-    public unsafe HResult GetFunctionFromIP3(nint ip, FunctionId* functionId, out ReJITId pReJitId)
+    public unsafe HResult GetFunctionFromIP3(nint ip, out FunctionId functionId, out ReJITId pReJitId)
     {
-        return _impl.GetFunctionFromIP3(ip, functionId, out pReJitId);
+        return _impl.GetFunctionFromIP3(ip, out functionId, out pReJitId);
     }
 
     public unsafe HResult GetDynamicFunctionInfo(FunctionId functionId, out ModuleId moduleId, byte* ppvSig, out uint pbSig, uint cchName, out uint pcchName, char* wszName)

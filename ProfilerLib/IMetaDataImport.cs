@@ -2,7 +2,7 @@
 
 namespace ProfilerLib
 {
-    public struct IMetaDataImport
+    public struct IMetaDataImport : Interfaces.IUnknown
     {
         private IMetaDataImportInvoker _impl;
 

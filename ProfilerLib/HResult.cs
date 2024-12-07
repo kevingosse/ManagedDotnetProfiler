@@ -6,6 +6,7 @@ public readonly struct HResult
 {
     public const int S_OK = 0;
     public const int S_FALSE = 1;
+    public const int E_ABORT = unchecked((int)0x80004004);
     public const int E_FAIL = unchecked((int)0x80004005);
     public const int E_INVALIDARG = unchecked((int)0x80070057);
     public const int E_NOTIMPL = unchecked((int)0x80004001);
@@ -36,6 +37,7 @@ public readonly struct HResult
         {
             S_OK => "S_OK",
             S_FALSE => "S_FALSE",
+            E_ABORT => "E_ABORT",
             E_FAIL => "E_FAIL",
             E_INVALIDARG => "E_INVALIDARG",
             E_NOTIMPL => "E_NOTIMPL",

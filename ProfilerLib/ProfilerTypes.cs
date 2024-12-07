@@ -226,51 +226,172 @@ public readonly struct COR_PRF_FUNCTION_ARGUMENT_RANGE
     public readonly uint Length;                         // contiguous length of the range
 }
 
-
 [Flags]
-public enum CorPrfMonitor : uint
+public enum COR_PRF_MONITOR : uint
 {
+    // These flags represent classes of callback events
     COR_PRF_MONITOR_NONE = 0x00000000,
+
+    // MONITOR_FUNCTION_UNLOADS controls the
+    // FunctionUnloadStarted callback.
     COR_PRF_MONITOR_FUNCTION_UNLOADS = 0x00000001,
+
+    // MONITOR_CLASS_LOADS controls the ClassLoad*
+    // and ClassUnload* callbacks.
+    // See the comments on those callbacks for important
+    // behavior changes in V2.
     COR_PRF_MONITOR_CLASS_LOADS = 0x00000002,
+
+    // MONITOR_MODULE_LOADS controls the
+    // ModuleLoad*, ModuleUnload*, and ModuleAttachedToAssembly
+    // callbacks.
     COR_PRF_MONITOR_MODULE_LOADS = 0x00000004,
+
+    // MONITOR_ASSEMBLY_LOADS controls the
+    // AssemblyLoad* and AssemblyUnload* callbacks
     COR_PRF_MONITOR_ASSEMBLY_LOADS = 0x00000008,
+
+    // MONITOR_APPDOMAIN_LOADS controls the
+    // AppDomainCreation* and AppDomainShutdown* callbacks
     COR_PRF_MONITOR_APPDOMAIN_LOADS = 0x00000010,
+
+    // MONITOR_JIT_COMPILATION controls the
+    // JITCompilation*, JITFunctionPitched, and JITInlining
+    // callbacks.
     COR_PRF_MONITOR_JIT_COMPILATION = 0x00000020,
+
+
+    // MONITOR_EXCEPTIONS controls the ExceptionThrown,
+    // ExceptionSearch*, ExceptionOSHandler*, ExceptionUnwind*,
+    // and ExceptionCatcher* callbacks.
     COR_PRF_MONITOR_EXCEPTIONS = 0x00000040,
+
+    // MONITOR_GC controls the GarbageCollectionStarted/Finished,
+    // MovedReferences, SurvivingReferences,
+    // ObjectReferences, ObjectsAllocatedByClass,
+    // RootReferences*, HandleCreated/Destroyed, and FinalizeableObjectQueued
+    // callbacks.
     COR_PRF_MONITOR_GC = 0x00000080,
+
+    // MONITOR_OBJECT_ALLOCATED controls the
+    // ObjectAllocated callback.
     COR_PRF_MONITOR_OBJECT_ALLOCATED = 0x00000100,
+
+    // MONITOR_THREADS controls the ThreadCreated,
+    // ThreadDestroyed, ThreadAssignedToOSThread,
+    // and ThreadNameChanged callbacks.
     COR_PRF_MONITOR_THREADS = 0x00000200,
+
+    // CORECLR DEPRECATION WARNING: Remoting no longer exists in coreclr
+    // MONITOR_REMOTING controls the Remoting*
+    // callbacks.
     COR_PRF_MONITOR_REMOTING = 0x00000400,
+
+    // MONITOR_CODE_TRANSITIONS controls the
+    // UnmanagedToManagedTransition and
+    // ManagedToUnmanagedTransition callbacks.
     COR_PRF_MONITOR_CODE_TRANSITIONS = 0x00000800,
+
+    // MONITOR_ENTERLEAVE controls the
+    // FunctionEnter*/Leave*/Tailcall* callbacks
     COR_PRF_MONITOR_ENTERLEAVE = 0x00001000,
+
+    // MONITOR_CCW controls the COMClassicVTable*
+    // callbacks.
     COR_PRF_MONITOR_CCW = 0x00002000,
-    COR_PRF_MONITOR_REMOTING_COOKIE = 0x00004000 |
-                                          COR_PRF_MONITOR_REMOTING,
-    COR_PRF_MONITOR_REMOTING_ASYNC = 0x00008000 |
-                                          COR_PRF_MONITOR_REMOTING,
+
+    // CORECLR DEPRECATION WARNING: Remoting no longer exists in coreclr
+    // MONITOR_REMOTING_COOKIE controls whether
+    // a cookie will be passed to the Remoting* callbacks
+    COR_PRF_MONITOR_REMOTING_COOKIE = 0x00004000 | COR_PRF_MONITOR_REMOTING,
+
+    // CORECLR DEPRECATION WARNING: Remoting no longer exists in coreclr
+    // MONITOR_REMOTING_ASYNC controls whether
+    // the Remoting* callbacks will monitor async events
+    COR_PRF_MONITOR_REMOTING_ASYNC = 0x00008000 | COR_PRF_MONITOR_REMOTING,
+
+    // MONITOR_SUSPENDS controls the RuntimeSuspend*,
+    // RuntimeResume*, RuntimeThreadSuspended, and
+    // RuntimeThreadResumed callbacks.
     COR_PRF_MONITOR_SUSPENDS = 0x00010000,
+
+    // MONITOR_CACHE_SEARCHES controls the
+    // JITCachedFunctionSearch* callbacks.
+    // See the comments on those callbacks for important
+    // behavior changes in V2.
     COR_PRF_MONITOR_CACHE_SEARCHES = 0x00020000,
+
+    // NOTE: ReJIT is now supported again.  The profiler must set this flag on
+    // startup in order to use RequestReJIT or RequestRevert.  If the profiler specifies
+    // this flag, then the profiler must also specify COR_PRF_DISABLE_ALL_NGEN_IMAGES
     COR_PRF_ENABLE_REJIT = 0x00040000,
+
+    // V2 MIGRATION WARNING: DEPRECATED
+    // Inproc debugging is no longer supported. ENABLE_INPROC_DEBUGGING
+    // has no effect.
     COR_PRF_ENABLE_INPROC_DEBUGGING = 0x00080000,
+
+    // V2 MIGRATION NOTE: DEPRECATED
+    // The runtime now always tracks IL-native maps; this flag is thus always
+    // considered to be set.
     COR_PRF_ENABLE_JIT_MAPS = 0x00100000,
+
+    // DISABLE_INLINING tells the runtime to disable all inlining
     COR_PRF_DISABLE_INLINING = 0x00200000,
+
+    // DISABLE_OPTIMIZATIONS tells the runtime to disable all code optimizations
     COR_PRF_DISABLE_OPTIMIZATIONS = 0x00400000,
+
+    // ENABLE_OBJECT_ALLOCATED tells the runtime that the profiler may want
+    // object allocation notifications.  This must be set during initialization if the profiler
+    // ever wants object notifications (using COR_PRF_MONITOR_OBJECT_ALLOCATED)
     COR_PRF_ENABLE_OBJECT_ALLOCATED = 0x00800000,
+
+    // MONITOR_CLR_EXCEPTIONS controls the ExceptionCLRCatcher*
+    // callbacks.
     COR_PRF_MONITOR_CLR_EXCEPTIONS = 0x01000000,
+
+    // All callback events are enabled with this flag
     COR_PRF_MONITOR_ALL = 0x0107FFFF,
+
+    // ENABLE_FUNCTION_ARGS enables argument tracing through FunctionEnter2.
     COR_PRF_ENABLE_FUNCTION_ARGS = 0X02000000,
+
+    // ENABLE_FUNCTION_RETVAL enables retval tracing through FunctionLeave2.
     COR_PRF_ENABLE_FUNCTION_RETVAL = 0X04000000,
+
+    // ENABLE_FRAME_INFO enables retrieval of exact ClassIDs for generic functions using
+    // GetFunctionInfo2 with a COR_PRF_FRAME_INFO obtained from FunctionEnter2.
     COR_PRF_ENABLE_FRAME_INFO = 0X08000000,
+
+    // ENABLE_STACK_SNAPSHOT enables the used of DoStackSnapshot calls.
     COR_PRF_ENABLE_STACK_SNAPSHOT = 0X10000000,
+
+    // USE_PROFILE_IMAGES causes the native image search to look for profiler-enhanced
+    // images.  If no profiler-enhanced image is found for a given assembly the
+    // runtime will fallback to JIT for that assembly.
     COR_PRF_USE_PROFILE_IMAGES = 0x20000000,
+
+    // COR_PRF_DISABLE_TRANSPARENCY_CHECKS_UNDER_FULL_TRUST will disable security
+    // transparency checks normally done during JIT compilation and class loading for
+    // full trust assemblies. This can make some instrumentation easier to perform.
     COR_PRF_DISABLE_TRANSPARENCY_CHECKS_UNDER_FULL_TRUST
                                         = 0x40000000,
+
+    // Prevents all NGEN images (including profiler-enhanced images) from loading.  If
+    // this and COR_PRF_USE_PROFILE_IMAGES are both specified,
+    // COR_PRF_DISABLE_ALL_NGEN_IMAGES wins.
     COR_PRF_DISABLE_ALL_NGEN_IMAGES = 0x80000000,
+
+    // The mask for valid mask bits
     COR_PRF_ALL = 0x8FFFFFFF,
+
+    // COR_PRF_REQUIRE_PROFILE_IMAGE represents all flags that require profiler-enhanced
+    // images.
     COR_PRF_REQUIRE_PROFILE_IMAGE = COR_PRF_USE_PROFILE_IMAGES |
                                           COR_PRF_MONITOR_CODE_TRANSITIONS |
                                           COR_PRF_MONITOR_ENTERLEAVE,
+
     COR_PRF_ALLOWABLE_AFTER_ATTACH = COR_PRF_MONITOR_THREADS |
                                           COR_PRF_MONITOR_MODULE_LOADS |
                                           COR_PRF_MONITOR_ASSEMBLY_LOADS |
@@ -279,12 +400,39 @@ public enum CorPrfMonitor : uint
                                           COR_PRF_MONITOR_GC |
                                           COR_PRF_MONITOR_SUSPENDS |
                                           COR_PRF_MONITOR_CLASS_LOADS |
-                                          COR_PRF_MONITOR_JIT_COMPILATION,
+                                          COR_PRF_MONITOR_EXCEPTIONS |
+                                          COR_PRF_MONITOR_JIT_COMPILATION |
+                                          COR_PRF_ENABLE_REJIT,
+
+    COR_PRF_ALLOWABLE_NOTIFICATION_PROFILER
+                                        = COR_PRF_MONITOR_FUNCTION_UNLOADS |
+                                              COR_PRF_MONITOR_CLASS_LOADS |
+                                              COR_PRF_MONITOR_MODULE_LOADS |
+                                              COR_PRF_MONITOR_ASSEMBLY_LOADS |
+                                              COR_PRF_MONITOR_APPDOMAIN_LOADS |
+                                              COR_PRF_MONITOR_JIT_COMPILATION |
+                                              COR_PRF_MONITOR_EXCEPTIONS |
+                                              COR_PRF_MONITOR_OBJECT_ALLOCATED |
+                                              COR_PRF_MONITOR_THREADS |
+                                              COR_PRF_MONITOR_CODE_TRANSITIONS |
+                                              COR_PRF_MONITOR_CCW |
+                                              COR_PRF_MONITOR_SUSPENDS |
+                                              COR_PRF_MONITOR_CACHE_SEARCHES |
+                                              COR_PRF_DISABLE_INLINING |
+                                              COR_PRF_DISABLE_OPTIMIZATIONS |
+                                              COR_PRF_ENABLE_OBJECT_ALLOCATED |
+                                              COR_PRF_MONITOR_CLR_EXCEPTIONS |
+                                              COR_PRF_ENABLE_STACK_SNAPSHOT |
+                                              COR_PRF_USE_PROFILE_IMAGES |
+                                              COR_PRF_DISABLE_ALL_NGEN_IMAGES,
+
+    // MONITOR_IMMUTABLE represents all flags that may only be set during initialization.
+    // Trying to change any of these flags elsewhere will result in a
+    // failed HRESULT.
     COR_PRF_MONITOR_IMMUTABLE = COR_PRF_MONITOR_CODE_TRANSITIONS |
                                           COR_PRF_MONITOR_REMOTING |
                                           COR_PRF_MONITOR_REMOTING_COOKIE |
                                           COR_PRF_MONITOR_REMOTING_ASYNC |
-                                          COR_PRF_ENABLE_REJIT |
                                           COR_PRF_ENABLE_INPROC_DEBUGGING |
                                           COR_PRF_ENABLE_JIT_MAPS |
                                           COR_PRF_DISABLE_OPTIMIZATIONS |
@@ -294,7 +442,7 @@ public enum CorPrfMonitor : uint
                                           COR_PRF_ENABLE_FUNCTION_RETVAL |
                                           COR_PRF_ENABLE_FRAME_INFO |
                                           COR_PRF_USE_PROFILE_IMAGES |
-                     COR_PRF_DISABLE_TRANSPARENCY_CHECKS_UNDER_FULL_TRUST |
+                                          COR_PRF_DISABLE_TRANSPARENCY_CHECKS_UNDER_FULL_TRUST |
                                           COR_PRF_DISABLE_ALL_NGEN_IMAGES
 }
 
@@ -302,7 +450,7 @@ public enum CorPrfMonitor : uint
 /// Additional flags the profiler can specify via SetEventMask2 when loading
 /// </summary>
 [Flags]
-public enum CorPrfHighMonitor : uint
+public enum COR_PRF_HIGH_MONITOR : uint
 {
     COR_PRF_HIGH_MONITOR_NONE = 0x00000000,
 
@@ -491,6 +639,21 @@ public enum COR_PRF_GC_ROOT_FLAGS
                                       // COR_PRF_GC_ROOT_WEAKREF will be set also
 }
 
+/// <summary>
+/// Enum for specifying how much data to pass back with a stack snapshot
+/// </summary>
+public enum COR_PRF_SNAPSHOT_INFO : uint
+{
+    COR_PRF_SNAPSHOT_DEFAULT = 0x0,
+
+    // Return a register context for each frame
+    COR_PRF_SNAPSHOT_REGISTER_CONTEXT = 0x1,
+
+    // Use a quicker stack walk algorithm based on the EBP frame chain. This is available
+    // on x86 only.
+    COR_PRF_SNAPSHOT_X86_OPTIMIZED = 0x2,
+}
+
 public struct COR_DEBUG_IL_TO_NATIVE_MAP
 {
     public uint ilOffset;
@@ -553,12 +716,19 @@ public readonly struct ObjectHandleId
 }
 
 public readonly record struct ClassIdInfo(ModuleId ModuleId, MdTypeDef TypeDef);
+public readonly record struct ClassIdInfo2(ModuleId ModuleId, MdTypeDef TypeDef, ClassId ParentClassId);
 public readonly record struct TypeDefProps(string TypeName, int TypeDefFlags, MdToken Extends);
 public readonly record struct FunctionInfo(ClassId ClassId, ModuleId ModuleId, MdToken Token);
-public readonly record struct ModuleInfo(string ModuleName, nint BaseLoadAddress, AssemblyId AssemblyId);
+public readonly record struct ModuleInfo(nint BaseLoadAddress, AssemblyId AssemblyId);
+public readonly record struct ModuleInfoWithName(string ModuleName, nint BaseLoadAddress, AssemblyId AssemblyId);
 public readonly record struct AppDomainInfo(string AppDomainName, ProcessId ProcessId);
-public readonly record struct AssemblyInfo(string AssemblyName, AppDomainId AppDomainId, ModuleId ModuleId);
+public readonly record struct AssemblyInfo(AppDomainId AppDomainId, ModuleId ModuleId);
+public readonly record struct AssemblyInfoWithName(string AssemblyName, AppDomainId AppDomainId, ModuleId ModuleId);
 public readonly record struct StringLayout(uint BufferLengthOffset, uint StringLengthOffset, uint BufferOffset);
+public readonly unsafe record struct CodeInfo(IntPtr Start, uint Size);
+public readonly record struct ArrayClassInfo(CorElementType BaseElemType, ClassId BaseClassId, uint Rank);
+public readonly unsafe record struct TokenAndMetaData(Guid Riid, IntPtr Import, MdToken Token);
+public readonly unsafe record struct ILFunctionBody(IntPtr MethodHeader, uint MethodSize);
 
 public readonly record struct MethodProps
 {

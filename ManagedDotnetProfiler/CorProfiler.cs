@@ -42,7 +42,7 @@ internal unsafe partial class CorProfiler : CorProfilerCallback10Base
         }
 
         // Can't call GetThreadInfo in the CLR thread
-        int osId = 0;
+        uint osId = 0;
 
         Task.Run(() =>
         {
@@ -69,13 +69,13 @@ internal unsafe partial class CorProfiler : CorProfilerCallback10Base
 
         Instance = this;
 
-        var eventMask = CorPrfMonitor.COR_PRF_MONITOR_ALL;
-        var highEventMask = CorPrfHighMonitor.COR_PRF_HIGH_MONITOR_DYNAMIC_FUNCTION_UNLOADS;
+        var eventMask = COR_PRF_MONITOR.COR_PRF_MONITOR_ALL;
+        var highEventMask = COR_PRF_HIGH_MONITOR.COR_PRF_HIGH_MONITOR_DYNAMIC_FUNCTION_UNLOADS;
 
         Log($"Setting event mask to {eventMask}");
         Log($"Setting high event mask to {highEventMask}");
 
-        return ICorProfilerInfo11.SetEventMask2(eventMask, CorPrfHighMonitor.COR_PRF_HIGH_MONITOR_DYNAMIC_FUNCTION_UNLOADS);
+        return ICorProfilerInfo11.SetEventMask2(eventMask, COR_PRF_HIGH_MONITOR.COR_PRF_HIGH_MONITOR_DYNAMIC_FUNCTION_UNLOADS);
     }
 
     protected override HResult JITCompilationStarted(FunctionId functionId, bool fIsSafeToBlock)

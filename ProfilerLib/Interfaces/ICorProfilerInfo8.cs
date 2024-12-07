@@ -25,7 +25,7 @@ internal unsafe interface ICorProfilerInfo8 : ICorProfilerInfo7
     * both dynamic and non-dynamic methods. It is a superset of GetFunctionFromIP2
     */
     HResult GetFunctionFromIP3(nint ip,
-                               FunctionId* functionId,
+                               out FunctionId functionId,
                                out ReJITId pReJitId);
 
     /*

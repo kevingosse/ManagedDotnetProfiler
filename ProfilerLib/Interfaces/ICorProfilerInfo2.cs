@@ -107,7 +107,7 @@ internal unsafe interface ICorProfilerInfo2 : ICorProfilerInfo
      */
     HResult GetClassLayout(
                 ClassId classID,
-                out COR_FIELD_OFFSET* rFieldOffset,
+                COR_FIELD_OFFSET* rFieldOffset,
                 uint cFieldOffset,
                 out uint pcFieldOffset,
                 out uint pulClassSize);
@@ -128,7 +128,7 @@ internal unsafe interface ICorProfilerInfo2 : ICorProfilerInfo
                 out ClassId pParentClassId,
                 uint cNumTypeArgs,
                 out uint pcNumTypeArgs,
-                out ClassId* typeArgs);
+                ClassId* typeArgs);
 
     /*
      * GetCodeInfo2 returns the extents of native code associated with the
@@ -139,7 +139,7 @@ internal unsafe interface ICorProfilerInfo2 : ICorProfilerInfo
                 FunctionId functionID,
                 uint cCodeInfos,
                 out uint pcCodeInfos,
-                out COR_PRF_CODE_INFO* codeInfos);
+                COR_PRF_CODE_INFO* codeInfos);
 
     /*
      * GetClassFromTokenAndTypeArgs returns the ClassID of a type given its metadata
@@ -216,8 +216,8 @@ internal unsafe interface ICorProfilerInfo2 : ICorProfilerInfo
     HResult GetArrayObjectInfo(
                     ObjectId objectId,
                     uint cDimensions,
-                    out uint* pDimensionSizes,
-                    out int* pDimensionLowerBounds,
+                    uint* pDimensionSizes,
+                    int* pDimensionLowerBounds,
                     out byte* ppData);
 
     /*
@@ -338,7 +338,7 @@ internal unsafe interface ICorProfilerInfo2 : ICorProfilerInfo
     HResult GetGenerationBounds(
                     uint cObjectRanges,
                     out uint pcObjectRanges,
-                    out COR_PRF_GC_GENERATION_RANGE* ranges);
+                    COR_PRF_GC_GENERATION_RANGE* ranges);
 
     /*
      * GetObjectGeneration returns which generation the given object is currently in, along

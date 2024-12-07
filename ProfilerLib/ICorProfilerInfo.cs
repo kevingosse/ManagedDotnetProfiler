@@ -1,6 +1,6 @@
 ﻿namespace ProfilerLib
 {
-    public class ICorProfilerInfo
+    public class ICorProfilerInfo : Interfaces.IUnknown
     {
         private NativeObjects.ICorProfilerInfoInvoker _impl;
 
@@ -24,58 +24,61 @@
             return _impl.Release();
         }
 
-        public HResult GetClassFromObject(ObjectId objectId, out ClassId classId)
-        {
-            return _impl.GetClassFromObject(objectId, out classId);
-        }
-
         public HResult<ClassId> GetClassFromObject(ObjectId objectId)
         {
-            var result = _impl.GetClassFromObject(objectId, out var pClassId);
-            return new(result, pClassId);
+            var result = _impl.GetClassFromObject(objectId, out var classId);
+            return new(result, classId);
         }
 
-        public HResult GetClassFromToken(ModuleId moduleId, MdTypeDef typeDef, out ClassId pClassId)
+        public HResult<ClassId> GetClassFromToken(ModuleId moduleId, MdTypeDef typeDef)
         {
-            return _impl.GetClassFromToken(moduleId, typeDef, out pClassId);
+            var result = _impl.GetClassFromToken(moduleId, typeDef, out var classId);
+            return new(result, classId);
         }
 
-        public unsafe HResult GetCodeInfo(FunctionId functionId, out byte* pStart, out uint pcSize)
+        public unsafe HResult<CodeInfo> GetCodeInfo(FunctionId functionId)
         {
-            return _impl.GetCodeInfo(functionId, out pStart, out pcSize);
+            var result = _impl.GetCodeInfo(functionId, out var start, out var size);
+            return new(result, new((IntPtr)start, size));
         }
 
-        public HResult GetEventMask(out int pdwEvents)
+        public HResult<COR_PRF_MONITOR> GetEventMask()
         {
-            return _impl.GetEventMask(out pdwEvents);
+            var result = _impl.GetEventMask(out var pdwEvents);
+            return new(result, (COR_PRF_MONITOR)pdwEvents);
         }
 
-        public HResult GetFunctionFromIP(byte ip, out FunctionId pFunctionId)
+        public HResult<FunctionId> GetFunctionFromIP(nint ip)
         {
-            return _impl.GetFunctionFromIP(ip, out pFunctionId);
+            var result = _impl.GetFunctionFromIP(ip, out var functionId);
+            return new(result, functionId);
         }
 
-        public HResult GetFunctionFromToken(ModuleId moduleId, MdToken token, out FunctionId pFunctionId)
+        public HResult<FunctionId> GetFunctionFromToken(ModuleId moduleId, MdToken token)
         {
-            return _impl.GetFunctionFromToken(moduleId, token, out pFunctionId);
+            var result = _impl.GetFunctionFromToken(moduleId, token, out var functionId);
+            return new(result, functionId);
         }
 
-        public HResult GetHandleFromThread(ThreadId threadId, out nint phThread)
+        public HResult<nint> GetHandleFromThread(ThreadId threadId)
         {
-            return _impl.GetHandleFromThread(threadId, out phThread);
+            var result = _impl.GetHandleFromThread(threadId, out var handle);
+            return new(result, handle);
         }
 
-        public HResult GetObjectSize(ObjectId objectId, out uint pcSize)
+        public HResult<uint> GetObjectSize(ObjectId objectId)
         {
-            return _impl.GetObjectSize(objectId, out pcSize);
+            var result = _impl.GetObjectSize(objectId, out var size);
+            return new(result, size);
         }
 
-        public HResult IsArrayClass(ClassId classId, out CorElementType pBaseElemType, out ClassId pBaseClassId, out uint pcRank)
+        public HResult<ArrayClassInfo> IsArrayClass(ClassId classId)
         {
-            return _impl.IsArrayClass(classId, out pBaseElemType, out pBaseClassId, out pcRank);
+            var result = _impl.IsArrayClass(classId, out var baseElemType, out var baseClassId, out var rank);
+            return new(result, new(baseElemType, baseClassId, rank));
         }
 
-        public HResult<int> GetThreadInfo(ThreadId threadId)
+        public HResult<uint> GetThreadInfo(ThreadId threadId)
         {
             var result = _impl.GetThreadInfo(threadId, out var win32ThreadId);
             return new(result, win32ThreadId);
@@ -99,7 +102,7 @@
             return new(result, new(classId, moduleId, token));
         }
 
-        public HResult SetEventMask(CorPrfMonitor dwEvents)
+        public HResult SetEventMask(COR_PRF_MONITOR dwEvents)
         {
             return _impl.SetEventMask(dwEvents);
         }
@@ -114,38 +117,40 @@
             return _impl.SetFunctionIdMapper(pFunc);
         }
 
-        public unsafe HResult GetTokenAndMetaDataFromFunction(FunctionId functionId, out Guid riid, out void* ppImport, out MdToken pToken)
+        public unsafe HResult<TokenAndMetaData> GetTokenAndMetaDataFromFunction(FunctionId functionId)
         {
-            return _impl.GetTokenAndMetaDataFromFunction(functionId, out riid, out ppImport, out pToken);
+            var result = _impl.GetTokenAndMetaDataFromFunction(functionId, out var riid, out var ppImport, out var pToken);
+            return new(result, new(riid, (IntPtr)ppImport, pToken));
         }
 
-        public unsafe HResult<ModuleInfo> GetModuleInfo(ModuleId moduleId)
+        public unsafe HResult<ModuleInfoWithName> GetModuleInfo(ModuleId moduleId)
         {
-            var result = GetModuleInfo(moduleId, Span<char>.Empty, out _, out var length, out _);
+            var (result, _) = GetModuleInfo(moduleId, Span<char>.Empty, out var length);
 
-            if (!result.IsOK)
+            if (!result)
             {
                 return result;
             }
 
             Span<char> buffer = stackalloc char[(int)length];
 
-            result = GetModuleInfo(moduleId, buffer, out var baseLoadAddress, out _, out var assemblyId);
+            (result, var moduleInfo) = GetModuleInfo(moduleId, buffer, out _);
 
-            if (!result.IsOK)
+            if (!result)
             {
                 return result;
             }
 
-            return new(result, new(buffer.WithoutNullTerminator(), baseLoadAddress, assemblyId));
+            return new(result, new(buffer.WithoutNullTerminator(), moduleInfo.BaseLoadAddress, moduleInfo.AssemblyId));
         }
 
 
-        public unsafe HResult GetModuleInfo(ModuleId moduleId, Span<char> moduleName, out nint ppBaseLoadAddress, out uint pcchName, out AssemblyId pAssemblyId)
+        public unsafe HResult<ModuleInfo> GetModuleInfo(ModuleId moduleId, Span<char> moduleName, out uint pcchName)
         {
             fixed (char* c = moduleName)
             {
-                return _impl.GetModuleInfo(moduleId, out ppBaseLoadAddress, (uint)moduleName.Length, out pcchName, c, out pAssemblyId);
+                var result = _impl.GetModuleInfo(moduleId, out var pBaseLoadAddress, (uint)moduleName.Length, out pcchName, c, out var assemblyId);
+                return new(result, new(pBaseLoadAddress, assemblyId));
             }
         }
 
@@ -155,35 +160,37 @@
             return new(result, new(ptr));
         }
 
-        public unsafe HResult GetILFunctionBody(ModuleId moduleId, MdMethodDef methodId, out byte* ppMethodHeader, out uint pcbMethodSize)
+        public unsafe HResult<ILFunctionBody> GetILFunctionBody(ModuleId moduleId, MdMethodDef methodId)
         {
-            return _impl.GetILFunctionBody(moduleId, methodId, out ppMethodHeader, out pcbMethodSize);
+            var result = _impl.GetILFunctionBody(moduleId, methodId, out var pMethodHeader, out var methodSize);
+            return new(result, new((IntPtr)pMethodHeader, methodSize));
         }
 
-        public unsafe HResult GetILFunctionBodyAllocator(ModuleId moduleId, out void* ppMalloc)
+        public unsafe HResult<IntPtr> GetILFunctionBodyAllocator(ModuleId moduleId)
         {
-            return _impl.GetILFunctionBodyAllocator(moduleId, out ppMalloc);
+            var result = _impl.GetILFunctionBodyAllocator(moduleId, out var malloc);
+            return new(result, (IntPtr)malloc);
         }
 
-        public HResult SetILFunctionBody(ModuleId moduleId, MdMethodDef methodid, byte pbNewILMethodHeader)
+        public HResult SetILFunctionBody(ModuleId moduleId, MdMethodDef methodid, IntPtr pbNewILMethodHeader)
         {
             return _impl.SetILFunctionBody(moduleId, methodid, pbNewILMethodHeader);
         }
 
         public unsafe HResult<AppDomainInfo> GetAppDomainInfo(AppDomainId appDomainId)
         {
-            var result = GetAppDomainInfo(appDomainId, Span<char>.Empty, out var length, out _);
+            var (result, _) = GetAppDomainInfo(appDomainId, Span<char>.Empty, out var length);
 
-            if (!result.IsOK)
+            if (!result)
             {
                 return result;
             }
 
             Span<char> buffer = stackalloc char[(int)length];
 
-            result = GetAppDomainInfo(appDomainId, buffer, out _, out var processId);
+            (result, var processId) = GetAppDomainInfo(appDomainId, buffer, out _);
 
-            if (!result.IsOK)
+            if (!result)
             {
                 return result;
             }
@@ -191,41 +198,43 @@
             return new(result, new(buffer.WithoutNullTerminator(), processId));
         }
 
-        public unsafe HResult GetAppDomainInfo(AppDomainId appDomainId, Span<char> appDomainName, out uint pcchName, out ProcessId pProcessId)
+        public unsafe HResult<ProcessId> GetAppDomainInfo(AppDomainId appDomainId, Span<char> appDomainName, out uint pcchName)
         {
             fixed (char* c = appDomainName)
             {
-                return _impl.GetAppDomainInfo(appDomainId, (uint)appDomainName.Length, out pcchName, c, out pProcessId);
+                var result = _impl.GetAppDomainInfo(appDomainId, (uint)appDomainName.Length, out pcchName, c, out var processId);
+                return new(result, processId);
             }
         }
 
-        public unsafe HResult GetAssemblyInfo(AssemblyId assemblyId, Span<char> assemblyName, out uint pcchName, out AppDomainId pAppDomainId, out ModuleId pModuleId)
+        public unsafe HResult<AssemblyInfo> GetAssemblyInfo(AssemblyId assemblyId, Span<char> assemblyName, out uint cchName)
         {
             fixed (char* c = assemblyName)
             {
-                return _impl.GetAssemblyInfo(assemblyId, (uint)assemblyName.Length, out pcchName, c, out pAppDomainId, out pModuleId);
+                var result = _impl.GetAssemblyInfo(assemblyId, (uint)assemblyName.Length, out cchName, c, out var appDomainId, out var moduleId);
+                return new(result, new(appDomainId, moduleId));
             }
         }
 
-        public unsafe HResult<AssemblyInfo> GetAssemblyInfo(AssemblyId assemblyId)
+        public unsafe HResult<AssemblyInfoWithName> GetAssemblyInfo(AssemblyId assemblyId)
         {
-            var result = GetAssemblyInfo(assemblyId, Span<char>.Empty, out var length, out _, out _);
+            var (result, _) = GetAssemblyInfo(assemblyId, Span<char>.Empty, out var length);
 
-            if (!result.IsOK)
+            if (!result)
             {
                 return result;
             }
 
             Span<char> buffer = stackalloc char[(int)length];
 
-            result = GetAssemblyInfo(assemblyId, buffer, out _, out var appDomainId, out var moduleId);
+            (result, var assemblyInfo) = GetAssemblyInfo(assemblyId, buffer, out _);
 
-            if (!result.IsOK)
+            if (!result)
             {
                 return result;
             }
 
-            return new(result, new(buffer.WithoutNullTerminator(), appDomainId, moduleId));
+            return new(result, new(buffer.WithoutNullTerminator(), assemblyInfo.AppDomainId, assemblyInfo.ModuleId));
         }
 
         public HResult SetFunctionReJIT(FunctionId functionId)
@@ -243,34 +252,41 @@
             return _impl.SetILInstrumentedCodeMap(functionId, fStartJit, cILMapEntries, rgILMapEntries);
         }
 
-        public unsafe HResult GetInprocInspectionInterface(out void* ppicd)
+        public unsafe HResult<IntPtr> GetInprocInspectionInterface()
         {
-            return _impl.GetInprocInspectionInterface(out ppicd);
+            var result = _impl.GetInprocInspectionInterface(out var picd);
+            return new(result, (IntPtr)picd);
         }
 
-        public unsafe HResult GetInprocInspectionIThisThread(out void* ppicd)
+        public unsafe HResult<IntPtr> GetInprocInspectionIThisThread()
         {
-            return _impl.GetInprocInspectionIThisThread(out ppicd);
+            var result = _impl.GetInprocInspectionIThisThread(out var picd);
+            return new(result, (IntPtr)picd);
         }
 
-        public HResult GetThreadContext(ThreadId threadId, out ContextId pContextId)
+        public HResult<ContextId> GetThreadContext(ThreadId threadId)
         {
-            return _impl.GetThreadContext(threadId, out pContextId);
+            var result = _impl.GetThreadContext(threadId, out var contextId);
+            return new(result, contextId);
         }
 
-        public HResult BeginInprocDebugging(int fThisThreadOnly, out int pdwProfilerContext)
+        public HResult<uint> BeginInprocDebugging(int thisThreadOnly)
         {
-            return _impl.BeginInprocDebugging(fThisThreadOnly, out pdwProfilerContext);
+            var result = _impl.BeginInprocDebugging(thisThreadOnly, out var profilerContext);
+            return new(result, profilerContext);
         }
 
-        public HResult EndInprocDebugging(int dwProfilerContext)
+        public HResult EndInprocDebugging(uint profilerContext)
         {
-            return _impl.EndInprocDebugging(dwProfilerContext);
+            return _impl.EndInprocDebugging(profilerContext);
         }
 
-        public unsafe HResult GetILToNativeMapping(FunctionId functionId, uint cMap, out uint pcMap, CorDebugIlToNativeMap* map)
+        public unsafe HResult GetILToNativeMapping(FunctionId functionId, Span<CorDebugIlToNativeMap> map, out uint pcMap)
         {
-            return _impl.GetILToNativeMapping(functionId, cMap, out pcMap, map);
+            fixed (CorDebugIlToNativeMap* cMap = map)
+            {
+                return _impl.GetILToNativeMapping(functionId, (uint)map.Length, out pcMap, cMap);
+            }
         }
     }
 }

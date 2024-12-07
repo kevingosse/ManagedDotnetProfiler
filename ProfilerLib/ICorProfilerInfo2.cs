@@ -9,9 +9,9 @@ public class ICorProfilerInfo2 : ICorProfilerInfo
         _impl = new(ptr);
     }
 
-    public unsafe HResult DoStackSnapshot(ThreadId thread, delegate*unmanaged[Stdcall]<FunctionId, nint, COR_PRF_FRAME_INFO, uint, byte*, void*, HResult> callback, uint infoFlags, void* clientData, byte* context, uint contextSize)
+    public unsafe HResult DoStackSnapshot(ThreadId thread, delegate* unmanaged[Stdcall]<FunctionId, nint, COR_PRF_FRAME_INFO, uint, byte*, void*, HResult> callback, COR_PRF_SNAPSHOT_INFO infoFlags, void* clientData, byte* context, uint contextSize)
     {
-        return _impl.DoStackSnapshot(thread, callback, infoFlags, clientData, context, contextSize);
+        return _impl.DoStackSnapshot(thread, callback, (uint)infoFlags, clientData, context, contextSize);
     }
 
     public unsafe HResult SetEnterLeaveFunctionHooks2(void* pFuncEnter, void* pFuncLeave, void* pFuncTailcall)
@@ -24,99 +24,136 @@ public class ICorProfilerInfo2 : ICorProfilerInfo
         return _impl.GetFunctionInfo2(funcId, frameInfo, out pClassId, out pModuleId, out pToken, cTypeArgs, out pcTypeArgs, out typeArgs);
     }
 
-    public HResult GetStringLayout(out uint pBufferLengthOffset, out uint pStringLengthOffset, out uint pBufferOffset)
-    {
-        return _impl.GetStringLayout(out pBufferLengthOffset, out pStringLengthOffset, out pBufferOffset);
-    }
-
     public HResult<StringLayout> GetStringLayout()
     {
         var result = _impl.GetStringLayout(out var pBufferLengthOffset, out var pStringLengthOffset, out var pBufferOffset);
         return new(result, new(pBufferLengthOffset, pStringLengthOffset, pBufferOffset));
     }
 
-    public unsafe HResult GetClassLayout(ClassId classID, out COR_FIELD_OFFSET* rFieldOffset, uint cFieldOffset, out uint pcFieldOffset, out uint pulClassSize)
+    public unsafe HResult<uint> GetClassLayout(ClassId classID, Span<COR_FIELD_OFFSET> fieldOffsets, out uint nbFieldOffsets)
     {
-        return _impl.GetClassLayout(classID, out rFieldOffset, cFieldOffset, out pcFieldOffset, out pulClassSize);
+        fixed (COR_FIELD_OFFSET* pFieldOffsets = fieldOffsets)
+        {
+            var result = _impl.GetClassLayout(classID, pFieldOffsets, (uint)fieldOffsets.Length, out nbFieldOffsets, out var classSize);
+            return new(result, classSize);
+        }
     }
 
-    public unsafe HResult GetClassIDInfo2(ClassId classId, out ModuleId pModuleId, out MdTypeDef pTypeDefToken, out ClassId pParentClassId, uint cNumTypeArgs, out uint pcNumTypeArgs, out ClassId* typeArgs)
+    public unsafe HResult<ClassIdInfo2> GetClassIDInfo2(ClassId classId, Span<ClassId> typeArgs, out uint numTypeArgs)
     {
-        return _impl.GetClassIDInfo2(classId, out pModuleId, out pTypeDefToken, out pParentClassId, cNumTypeArgs, out pcNumTypeArgs, out typeArgs);
+        fixed (ClassId* pTypeArgs = typeArgs)
+        {
+            var result = _impl.GetClassIDInfo2(classId, out var moduleId, out var typeDefToken, out var parentClassId, (uint)typeArgs.Length, out numTypeArgs, pTypeArgs);
+            return new(result, new(moduleId, typeDefToken, parentClassId));
+        }
     }
 
-    public unsafe HResult GetCodeInfo2(FunctionId functionID, uint cCodeInfos, out uint pcCodeInfos, out COR_PRF_CODE_INFO* codeInfos)
+    public unsafe HResult GetCodeInfo2(FunctionId functionID, Span<COR_PRF_CODE_INFO> codeInfos, out uint nbCodeInfos)
     {
-        return _impl.GetCodeInfo2(functionID, cCodeInfos, out pcCodeInfos, out codeInfos);
+        fixed (COR_PRF_CODE_INFO* pCodeInfos = codeInfos)
+        {
+            return _impl.GetCodeInfo2(functionID, (uint)codeInfos.Length, out nbCodeInfos, pCodeInfos);
+        }
     }
 
-    public unsafe HResult GetClassFromTokenAndTypeArgs(ModuleId moduleID, MdTypeDef typeDef, uint cTypeArgs, ClassId* typeArgs, out ClassId pClassID)
+    public unsafe HResult<ClassId> GetClassFromTokenAndTypeArgs(ModuleId moduleID, MdTypeDef typeDef, Span<ClassId> typeArgs)
     {
-        return _impl.GetClassFromTokenAndTypeArgs(moduleID, typeDef, cTypeArgs, typeArgs, out pClassID);
+        fixed (ClassId* pTypeArgs = typeArgs)
+        {
+            var result = _impl.GetClassFromTokenAndTypeArgs(moduleID, typeDef, (uint)typeArgs.Length, pTypeArgs, out var classId);
+            return new(result, classId);
+        }
     }
 
-    public unsafe HResult GetFunctionFromTokenAndTypeArgs(ModuleId moduleID, MdMethodDef funcDef, ClassId classId, uint cTypeArgs, ClassId* typeArgs, out FunctionId pFunctionID)
-    {
-        return _impl.GetFunctionFromTokenAndTypeArgs(moduleID, funcDef, classId, cTypeArgs, typeArgs, out pFunctionID);
+    public unsafe HResult<FunctionId> GetFunctionFromTokenAndTypeArgs(ModuleId moduleID, MdMethodDef funcDef, ClassId classId, Span<ClassId> typeArgs)
+    {        
+        fixed (ClassId* pTypeArgs = typeArgs)
+        {
+            var result = _impl.GetFunctionFromTokenAndTypeArgs(moduleID, funcDef, classId, (uint)typeArgs.Length, pTypeArgs, out var functionId);
+            return new(result, functionId);
+        }
     }
 
-    public unsafe HResult EnumModuleFrozenObjects(ModuleId moduleID, out void* ppEnum)
+    public unsafe HResult<IntPtr> EnumModuleFrozenObjects(ModuleId moduleID)
     {
-        return _impl.EnumModuleFrozenObjects(moduleID, out ppEnum);
+        var result = _impl.EnumModuleFrozenObjects(moduleID, out var pEnum);
+        return new(result, (IntPtr)pEnum);
     }
 
-    public unsafe HResult GetArrayObjectInfo(ObjectId objectId, uint cDimensions, out uint* pDimensionSizes, out int* pDimensionLowerBounds, out byte* ppData)
+    public unsafe HResult<IntPtr> GetArrayObjectInfo(ObjectId objectId, Span<uint> dimensionSizes, Span<int> dimensionLowerBounds)
     {
-        return _impl.GetArrayObjectInfo(objectId, cDimensions, out pDimensionSizes, out pDimensionLowerBounds, out ppData);
+        if (dimensionSizes.Length != dimensionLowerBounds.Length)
+        {
+            throw new ArgumentException("The length of the dimension sizes and dimension lower bounds must be equal.");
+        }
+
+        fixed (uint* pDimensionSizes = dimensionSizes)
+        fixed (int* pDimensionLowerBounds = dimensionLowerBounds)
+        {
+            var result = _impl.GetArrayObjectInfo(objectId, (uint)dimensionSizes.Length, pDimensionSizes, pDimensionLowerBounds, out var ppData);
+            return new(result, (IntPtr)ppData);
+        }
     }
 
-    public HResult GetBoxClassLayout(ClassId classId, out uint pBufferOffset)
+    public HResult<uint> GetBoxClassLayout(ClassId classId)
     {
-        return _impl.GetBoxClassLayout(classId, out pBufferOffset);
+        var result = _impl.GetBoxClassLayout(classId, out var bufferOffset);
+        return new(result, bufferOffset);
     }
 
-    public HResult GetThreadAppDomain(ThreadId threadId, out AppDomainId pAppDomainId)
+    public HResult<AppDomainId> GetThreadAppDomain(ThreadId threadId)
     {
-        return _impl.GetThreadAppDomain(threadId, out pAppDomainId);
+        var result = _impl.GetThreadAppDomain(threadId, out var appDomainId);
+        return new(result, appDomainId);
     }
 
-    public unsafe HResult GetRVAStaticAddress(ClassId classId, MdFieldDef fieldToken, out void* ppAddress)
+    public unsafe HResult<IntPtr> GetRVAStaticAddress(ClassId classId, MdFieldDef fieldToken)
     {
-        return _impl.GetRVAStaticAddress(classId, fieldToken, out ppAddress);
+        var result = _impl.GetRVAStaticAddress(classId, fieldToken, out var address);
+        return new(result, (IntPtr)address);
     }
 
-    public unsafe HResult GetAppDomainStaticAddress(ClassId classId, MdFieldDef fieldToken, AppDomainId appDomainId, out void* ppAddress)
+    public unsafe HResult<IntPtr> GetAppDomainStaticAddress(ClassId classId, MdFieldDef fieldToken, AppDomainId appDomainId)
     {
-        return _impl.GetAppDomainStaticAddress(classId, fieldToken, appDomainId, out ppAddress);
+        var result = _impl.GetAppDomainStaticAddress(classId, fieldToken, appDomainId, out var address);
+        return new(result, (IntPtr)address);
     }
 
-    public unsafe HResult GetThreadStaticAddress(ClassId classId, MdFieldDef fieldToken, ThreadId threadId, out void* ppAddress)
+    public unsafe HResult<IntPtr> GetThreadStaticAddress(ClassId classId, MdFieldDef fieldToken, ThreadId threadId)
     {
-        return _impl.GetThreadStaticAddress(classId, fieldToken, threadId, out ppAddress);
+        var result = _impl.GetThreadStaticAddress(classId, fieldToken, threadId, out var address);
+        return new(result, (IntPtr)address);
     }
 
-    public unsafe HResult GetContextStaticAddress(ClassId classId, MdFieldDef fieldToken, ContextId contextId, out void* ppAddress)
+    public unsafe HResult<IntPtr> GetContextStaticAddress(ClassId classId, MdFieldDef fieldToken, ContextId contextId)
     {
-        return _impl.GetContextStaticAddress(classId, fieldToken, contextId, out ppAddress);
+        var result = _impl.GetContextStaticAddress(classId, fieldToken, contextId, out var address);
+        return new(result, (IntPtr)address);
     }
 
-    public HResult GetStaticFieldInfo(ClassId classId, MdFieldDef fieldToken, out COR_PRF_STATIC_TYPE pFieldInfo)
+    public HResult<COR_PRF_STATIC_TYPE> GetStaticFieldInfo(ClassId classId, MdFieldDef fieldToken)
     {
-        return _impl.GetStaticFieldInfo(classId, fieldToken, out pFieldInfo);
+        var result = _impl.GetStaticFieldInfo(classId, fieldToken, out var fieldInfo);
+        return new(result, fieldInfo);
     }
 
-    public unsafe HResult GetGenerationBounds(uint cObjectRanges, out uint pcObjectRanges, out COR_PRF_GC_GENERATION_RANGE* ranges)
+    public unsafe HResult GetGenerationBounds(Span<COR_PRF_GC_GENERATION_RANGE> ranges, out uint nbObjectRanges)
     {
-        return _impl.GetGenerationBounds(cObjectRanges, out pcObjectRanges, out ranges);
+        fixed (COR_PRF_GC_GENERATION_RANGE* pObjectRanges = ranges)
+        {
+            return _impl.GetGenerationBounds((uint)ranges.Length, out nbObjectRanges, pObjectRanges);
+        }
     }
 
-    public HResult GetObjectGeneration(ObjectId objectId, out COR_PRF_GC_GENERATION_RANGE range)
+    public HResult<COR_PRF_GC_GENERATION_RANGE> GetObjectGeneration(ObjectId objectId)
     {
-        return _impl.GetObjectGeneration(objectId, out range);
+        var result = _impl.GetObjectGeneration(objectId, out var range);
+        return new(result, range);
     }
 
-    public HResult GetNotifiedExceptionClauseInfo(out COR_PRF_EX_CLAUSE_INFO pinfo)
+    public HResult<COR_PRF_EX_CLAUSE_INFO> GetNotifiedExceptionClauseInfo()
     {
-        return _impl.GetNotifiedExceptionClauseInfo(out pinfo);
+        var result = _impl.GetNotifiedExceptionClauseInfo(out var info);
+        return new(result, info);
     }
 }

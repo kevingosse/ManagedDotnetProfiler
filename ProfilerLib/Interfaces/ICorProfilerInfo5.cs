@@ -13,8 +13,8 @@ internal unsafe interface ICorProfilerInfo5 : ICorProfilerInfo4
      * *pdwEventsHigh is a bitwise combination of values from COR_PRF_HIGH_MONITOR
      */
     HResult GetEventMask2(
-        out CorPrfMonitor pdwEventsLow,
-        out CorPrfHighMonitor pdwEventsHigh);
+        out COR_PRF_MONITOR pdwEventsLow,
+        out COR_PRF_HIGH_MONITOR pdwEventsHigh);
 
     /*
      * The code profiler calls SetEventMask2 to set the event categories for
@@ -24,6 +24,6 @@ internal unsafe interface ICorProfilerInfo5 : ICorProfilerInfo4
      * dwEventsHigh is a bitwise combination of values from COR_PRF_HIGH_MONITOR
      */
     HResult SetEventMask2(
-        CorPrfMonitor dwEventsLow,
-        CorPrfHighMonitor dwEventsHigh);
+        COR_PRF_MONITOR dwEventsLow,
+        COR_PRF_HIGH_MONITOR dwEventsHigh);
 }
