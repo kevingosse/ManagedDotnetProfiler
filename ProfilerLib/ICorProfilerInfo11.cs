@@ -36,7 +36,7 @@ public class ICorProfilerInfo11 : ICorProfilerInfo10
             return result;
         }
 
-        return new(result, new string(buffer));
+        return new(result, buffer.WithoutNullTerminator());
     }
 
     public unsafe HResult SetEnvironmentVariable(string name, string value)

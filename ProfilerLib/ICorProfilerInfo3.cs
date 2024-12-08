@@ -98,7 +98,7 @@ public class ICorProfilerInfo3 : ICorProfilerInfo2
 
     public unsafe HResult<ModuleInfoWithName2> GetModuleInfo2(ModuleId moduleId)
     {
-        var (result, _) = GetModuleInfo2(moduleId, Span<char>.Empty, out var length);
+        var (result, _) = GetModuleInfo2(moduleId, [], out var length);
 
         if (!result)
         {

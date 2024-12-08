@@ -26,13 +26,13 @@ public class ICorProfilerInfo8 : ICorProfilerInfo7
         fixed (char* pName = name)
         {
             var result = _impl.GetDynamicFunctionInfo(functionId, out var moduleId, out var sig, out var pbSig, (uint)name.Length, out nameLength, pName);
-            return new(result, new(moduleId, sig, pbSig));
+            return new(result, new(moduleId, new(sig, (int)pbSig)));
         }
     }
 
     public unsafe HResult<DynamicFunctionInfoWithName> GetDynamicFunctionInfo(FunctionId functionId)
     {
-        var (result, _) = GetDynamicFunctionInfo(functionId, Span<char>.Empty, out var length);
+        var (result, _) = GetDynamicFunctionInfo(functionId, [], out var length);
 
         if (!result)
         {
@@ -48,6 +48,6 @@ public class ICorProfilerInfo8 : ICorProfilerInfo7
             return result;
         }
 
-        return new(result, new(functionInfo.ModuleId, functionInfo.SignaturePtr, functionInfo.SignatureLength, buffer.ToString()));
+        return new(result, new(functionInfo.ModuleId, functionInfo.Signature, buffer.WithoutNullTerminator()));
     }
 }

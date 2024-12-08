@@ -125,7 +125,7 @@
 
         public unsafe HResult<ModuleInfoWithName> GetModuleInfo(ModuleId moduleId)
         {
-            var (result, _) = GetModuleInfo(moduleId, Span<char>.Empty, out var length);
+            var (result, _) = GetModuleInfo(moduleId, [], out var length);
 
             if (!result)
             {
@@ -178,7 +178,7 @@
 
         public unsafe HResult<AppDomainInfo> GetAppDomainInfo(AppDomainId appDomainId)
         {
-            var (result, _) = GetAppDomainInfo(appDomainId, Span<char>.Empty, out var length);
+            var (result, _) = GetAppDomainInfo(appDomainId, [], out var length);
 
             if (!result)
             {
@@ -217,7 +217,7 @@
 
         public unsafe HResult<AssemblyInfoWithName> GetAssemblyInfo(AssemblyId assemblyId)
         {
-            var (result, _) = GetAssemblyInfo(assemblyId, Span<char>.Empty, out var length);
+            var (result, _) = GetAssemblyInfo(assemblyId, [], out var length);
 
             if (!result)
             {

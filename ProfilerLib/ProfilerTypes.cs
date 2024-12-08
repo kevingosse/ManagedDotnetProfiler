@@ -728,6 +728,240 @@ public enum COR_PRF_REJIT_FLAGS : uint
     COR_PRF_REJIT_INLINING_CALLBACKS = 0x2
 }
 
+/// <summary>
+/// MethodSemantic attr bits, used by DefineProperty, DefineEvent.
+/// </summary>
+[Flags]
+public enum CorMethodSemanticsAttr : uint
+{
+    /// <summary>
+    /// Setter for property
+    /// </summary>
+    msSetter = 0x0001,
+    /// <summary>
+    /// Getter for property
+    /// </summary>
+    msGetter = 0x0002,
+    /// <summary>
+    /// Other method for property or event
+    /// </summary>
+    msOther = 0x0004,
+    /// <summary>
+    /// AddOn method for event
+    /// </summary>
+    msAddOn = 0x0008,
+    /// <summary>
+    /// RemoveOn method for event
+    /// </summary>
+    msRemoveOn = 0x0010,
+    /// <summary>
+    /// Fire method for event
+    /// </summary>
+    msFire = 0x0020
+}
+
+/// <summary>
+/// MethodImpl attr bits, used by DefineMethodImpl.
+/// </summary>
+public enum CorMethodImpl : uint
+{
+    /// <summary>
+    /// Flags about code type.
+    /// </summary>
+    miCodeTypeMask = 0x0003,
+    /// <summary>
+    /// Method impl is IL.
+    /// </summary>
+    miIL = 0x0000,
+    /// <summary>
+    /// Method impl is native.
+    /// </summary>
+    miNative = 0x0001,
+    /// <summary>
+    /// Method impl is OPTIL
+    /// </summary>
+    miOPTIL = 0x0002,
+    /// <summary>
+    /// Method impl is provided by the runtime.
+    /// </summary>
+    miRuntime = 0x0003,
+
+    /// <summary>
+    /// Flags specifying whether the code is managed or unmanaged.
+    /// </summary>
+    miManagedMask = 0x0004,
+    /// <summary>
+    /// Method impl is unmanaged, otherwise managed.
+    /// </summary>
+    miUnmanaged = 0x0004,
+    /// <summary>
+    /// Method impl is managed.
+    /// </summary>
+    miManaged = 0x0000,
+
+    /// <summary>
+    /// Indicates method is defined; used primarily in merge scenarios.
+    /// </summary>
+    miForwardRef = 0x0010,
+    /// <summary>
+    /// Indicates method sig is not to be mangled to do HRESULT conversion.
+    /// </summary>
+    miPreserveSig = 0x0080,
+    /// <summary>
+    /// Reserved for internal use.
+    /// </summary>
+    miInternalCall = 0x1000,
+
+    /// <summary>
+    /// Method is single threaded through the body.
+    /// </summary>
+    miSynchronized = 0x0020,
+    /// <summary>
+    /// Method may not be inlined.
+    /// </summary>
+    miNoInlining = 0x0008,
+    /// <summary>
+    /// Method should be inlined if possible.
+    /// </summary>
+    miAggressiveInlining = 0x0100,
+    /// <summary>
+    /// Method may not be optimized.
+    /// </summary>
+    miNoOptimization = 0x0040,
+    /// <summary>
+    /// Method may contain hot code and should be aggressively optimized.
+    /// </summary>
+    miAggressiveOptimization = 0x0200,
+
+    /// <summary>
+    /// These are the flags that are allowed in MethodImplAttribute's Value
+    /// property. This should include everything above except the code impl
+    /// flags (which are used for MethodImplAttribute's MethodCodeType field).
+    /// </summary>
+    miUserMask = miManagedMask | miForwardRef | miPreserveSig |
+                             miInternalCall | miSynchronized |
+                             miNoInlining | miAggressiveInlining |
+                             miNoOptimization | miAggressiveOptimization,
+
+    /// <summary>
+    /// Range check value
+    /// </summary>
+    miMaxMethodImplVal = 0xffff
+}
+
+/// <summary>
+/// PinvokeMap attr bits, used by DefinePinvokeMap.
+/// </summary>
+[Flags]
+public enum CorPinvokeMap : uint
+{
+    /// <summary>
+    /// Pinvoke is to use the member name as specified.
+    /// </summary>
+    pmNoMangle = 0x0001,
+
+    // Use this mask to retrieve the CharSet information.
+    pmCharSetMask = 0x0006,
+    pmCharSetNotSpec = 0x0000,
+    pmCharSetAnsi = 0x0002,
+    pmCharSetUnicode = 0x0004,
+    pmCharSetAuto = 0x0006,
+
+
+    pmBestFitUseAssem = 0x0000,
+    pmBestFitEnabled = 0x0010,
+    pmBestFitDisabled = 0x0020,
+    pmBestFitMask = 0x0030,
+
+    pmThrowOnUnmappableCharUseAssem = 0x0000,
+    pmThrowOnUnmappableCharEnabled = 0x1000,
+    pmThrowOnUnmappableCharDisabled = 0x2000,
+    pmThrowOnUnmappableCharMask = 0x3000,
+
+    pmSupportsLastError = 0x0040,   // Information about target function. Not relevant for fields.
+
+    // None of the calling convention flags is relevant for fields.
+    pmCallConvMask = 0x0700,
+    pmCallConvWinapi = 0x0100,   // Pinvoke will use native callconv appropriate to target windows platform.
+    pmCallConvCdecl = 0x0200,
+    pmCallConvStdcall = 0x0300,
+    pmCallConvThiscall = 0x0400,   // In M9, pinvoke will raise exception.
+    pmCallConvFastcall = 0x0500,
+
+    pmMaxValue = 0xFFFF,
+}
+
+public enum CorElementTypes : uint
+{
+    ELEMENT_TYPE_END = 0x00,
+    ELEMENT_TYPE_VOID = 0x01,
+    ELEMENT_TYPE_BOOLEAN = 0x02,
+    ELEMENT_TYPE_CHAR = 0x03,
+    ELEMENT_TYPE_I1 = 0x04,
+    ELEMENT_TYPE_U1 = 0x05,
+    ELEMENT_TYPE_I2 = 0x06,
+    ELEMENT_TYPE_U2 = 0x07,
+    ELEMENT_TYPE_I4 = 0x08,
+    ELEMENT_TYPE_U4 = 0x09,
+    ELEMENT_TYPE_I8 = 0x0a,
+    ELEMENT_TYPE_U8 = 0x0b,
+    ELEMENT_TYPE_R4 = 0x0c,
+    ELEMENT_TYPE_R8 = 0x0d,
+    ELEMENT_TYPE_STRING = 0x0e,
+
+    // every type above PTR will be simple type
+    ELEMENT_TYPE_PTR = 0x0f,     // PTR <type>
+    ELEMENT_TYPE_BYREF = 0x10,     // BYREF <type>
+
+    // Please use ELEMENT_TYPE_VALUETYPE. ELEMENT_TYPE_VALUECLASS is deprecated.
+    ELEMENT_TYPE_VALUETYPE = 0x11,     // VALUETYPE <class Token>
+    ELEMENT_TYPE_CLASS = 0x12,     // CLASS <class Token>
+    ELEMENT_TYPE_VAR = 0x13,     // a class type variable VAR <number>
+    ELEMENT_TYPE_ARRAY = 0x14,     // MDARRAY <type> <rank> <bcount> <bound1> ... <lbcount> <lb1> ...
+    ELEMENT_TYPE_GENERICINST = 0x15,     // GENERICINST <generic type> <argCnt> <arg1> ... <argn>
+    ELEMENT_TYPE_TYPEDBYREF = 0x16,     // TYPEDREF  (it takes no args) a typed reference to some other type
+
+    ELEMENT_TYPE_I = 0x18,     // native integer size
+    ELEMENT_TYPE_U = 0x19,     // native unsigned integer size
+    ELEMENT_TYPE_FNPTR = 0x1b,     // FNPTR <complete sig for the function including calling convention>
+    ELEMENT_TYPE_OBJECT = 0x1c,     // Shortcut for System.Object
+    ELEMENT_TYPE_SZARRAY = 0x1d,     // Shortcut for single dimension zero lower bound array
+                                     // SZARRAY <type>
+    ELEMENT_TYPE_MVAR = 0x1e,     // a method type variable MVAR <number>
+
+    // This is only for binding
+    ELEMENT_TYPE_CMOD_REQD = 0x1f,     // required C modifier : E_T_CMOD_REQD <mdTypeRef/mdTypeDef>
+    ELEMENT_TYPE_CMOD_OPT = 0x20,     // optional C modifier : E_T_CMOD_OPT <mdTypeRef/mdTypeDef>
+
+    // This is for signatures generated internally (which will not be persisted in any way).
+    ELEMENT_TYPE_INTERNAL = 0x21,     // INTERNAL <typehandle>
+
+    // Note that this is the max of base type excluding modifiers
+    ELEMENT_TYPE_MAX = 0x22,     // first invalid element type
+
+
+    ELEMENT_TYPE_MODIFIER = 0x40,
+    ELEMENT_TYPE_SENTINEL = 0x01 | ELEMENT_TYPE_MODIFIER, // sentinel for varargs
+    ELEMENT_TYPE_PINNED = 0x05 | ELEMENT_TYPE_MODIFIER
+}
+
+/// <summary>
+/// Param attr bits, used by DefineParam.
+/// </summary>
+public enum CorParamAttr
+{
+    pdIn = 0x0001,     // Param is [In]
+    pdOut = 0x0002,     // Param is [out]
+    pdOptional = 0x0010,     // Param is optional
+
+    // Reserved flags for Runtime use only.
+    pdReservedMask = 0xf000,
+    pdHasDefault = 0x1000,     // Param has default value.
+    pdHasFieldMarshal = 0x2000,     // Param has FieldMarshal.
+
+    pdUnused = 0xcfe0,
+}
+
 public readonly struct ObjectHandleId
 {
     public readonly nint Value;
@@ -735,7 +969,8 @@ public readonly struct ObjectHandleId
 
 public readonly record struct ClassIdInfo(ModuleId ModuleId, MdTypeDef TypeDef);
 public readonly record struct ClassIdInfo2(ModuleId ModuleId, MdTypeDef TypeDef, ClassId ParentClassId);
-public readonly record struct TypeDefProps(string TypeName, int TypeDefFlags, MdToken Extends);
+public readonly record struct TypeDefProps(int TypeDefFlags, MdToken Extends);
+public readonly record struct TypeDefPropsWithName(string TypeName, int TypeDefFlags, MdToken Extends);
 public readonly record struct FunctionInfo(ClassId ClassId, ModuleId ModuleId, MdToken Token);
 public readonly record struct ModuleInfo(nint BaseLoadAddress, AssemblyId AssemblyId);
 public readonly record struct ModuleInfoWithName(string ModuleName, nint BaseLoadAddress, AssemblyId AssemblyId);
@@ -755,65 +990,32 @@ public readonly record struct RuntimeInformation(ushort ClrInstanceId, COR_PRF_R
 public readonly record struct FunctionFromIP(FunctionId FunctionId, ReJITId ReJitId);
 public readonly record struct EventMask2(COR_PRF_MONITOR EventsLow, COR_PRF_HIGH_MONITOR EventsHigh);
 public readonly record struct NgenModuleMethodsInliningThisMethod(IntPtr Enumerator, bool IncompleteData);
+public readonly record struct ScopeProps(string Name, Guid Mvid);
+public readonly record struct InterfaceImplProps(MdTypeDef Class, MdToken Interface);
+public readonly record struct TypeRefProps(string TypeName, MdToken ResolutionScope);
+public readonly record struct ResolvedTypeRef(IntPtr IScope, MdTypeDef TypeDef);
+public readonly record struct EventProps(MdTypeDef Class, uint EventFlags, MdToken EventType, MdMethodDef AddOn, MdMethodDef RemoveOn, MdMethodDef Fire);
+public readonly record struct ClassLayout(uint PackSize, uint ClassSize);
+public readonly record struct DynamicFunctionInfo(ModuleId ModuleId, NativePointer<byte> Signature);
+public readonly record struct DynamicFunctionInfoWithName(ModuleId ModuleId, NativePointer<byte> Signature, string Name);
+public readonly record struct MethodProps(MdTypeDef Class, uint Attributes, NativePointer<byte> Signature, uint RVA, uint ImplementationFlags);
+public readonly record struct MethodPropsWithName(string Name, MdTypeDef Class, uint Attributes, NativePointer<byte> signature, uint Rva, uint ImplementationFlags);
+public readonly record struct MemberRefProps(MdToken Token, NativePointer<byte> Signature);
+public readonly record struct MemberRefPropsWithName(string Name, MdToken Token, NativePointer<byte> Signature);
+public readonly record struct MetadataRva(uint Rva, CorMethodImpl Flags);
+public readonly record struct PermissionSetProps(uint Action, NativePointer<byte> Permission);
+public readonly record struct PInvokeMap(CorPinvokeMap Flags, MdModuleRef ImportDll);
+public readonly record struct PInvokeMapWithName(string ImportName, CorPinvokeMap Flags, MdModuleRef ImportDll);
+public readonly record struct CustomAttributeProps(MdToken Object, MdToken Type, NativePointer<byte> Value);
+public readonly record struct MemberProps(MdTypeDef Class, uint Attributes, NativePointer<byte> Signature, uint CodeRva, uint ImplementationFlags, CorElementTypes CPlusTypeFlag, NativePointer<byte> Value);
+public readonly record struct MemberPropsWithName(string Name, MdTypeDef Class, uint Attributes, NativePointer<byte> Signature, uint CodeRva, uint ImplementationFlags, CorElementTypes CPlusTypeFlag, NativePointer<byte> Value);
+public readonly record struct FieldProps(MdTypeDef Class, uint Attributes, NativePointer<byte> Signature, CorElementTypes CPlusTypeFlag, NativePointer<byte> Value);
+public readonly record struct FieldPropsWithName(string Name, MdTypeDef Class, uint Attributes, NativePointer<byte> Signature, CorElementTypes CPlusTypeFlag, NativePointer<byte> Value);
+public readonly record struct PropertyProps(MdTypeDef Class, uint Flags, NativePointer<byte> Signature, CorElementTypes CPlusTypeFlag, NativePointer<byte> DefaultValue, MdMethodDef Setter, MdMethodDef Getter);
+public readonly record struct ParamProps(MdMethodDef Method, uint Index, CorParamAttr Attributes, CorElementTypes CPlusTypeFlag, NativePointer<byte> Value);
+public readonly record struct ParamPropsWithName(string Name, MdMethodDef Method, uint Index, CorParamAttr Attributes, CorElementTypes CPlusTypeFlag, NativePointer<byte> Value);
 
-public readonly record struct DynamicFunctionInfo
+public readonly record struct NativePointer<T>(IntPtr Ptr, int Length)
 {
-    internal readonly IntPtr SignaturePtr;
-    internal readonly uint SignatureLength;
-    public readonly ModuleId ModuleId;
-
-    public DynamicFunctionInfo(ModuleId moduleId, IntPtr signature, uint signatureLength)
-    {
-        ModuleId = moduleId;
-        SignaturePtr = signature;
-        SignatureLength = signatureLength;
-    }
-
-    public unsafe Span<byte> Signature => new((void*)SignaturePtr, (int)SignatureLength);
-
-}
-
-public readonly record struct DynamicFunctionInfoWithName
-{
-    private readonly IntPtr _signature;
-    private readonly uint _signatureLength;
-
-    public DynamicFunctionInfoWithName(ModuleId moduleId, IntPtr signature, uint signatureLength, string name)
-    {
-        ModuleId = moduleId;
-        _signature = signature;
-        _signatureLength = signatureLength;
-        Name = name;
-    }
-
-    public unsafe Span<byte> Signature => new((void*)_signature, (int)_signatureLength);
-
-    public readonly ModuleId ModuleId;
-    public readonly string Name;
-}
-
-
-public readonly record struct MethodProps
-{
-    private readonly IntPtr _signature;
-    private readonly int _signatureLength;
-
-    public readonly MdTypeDef Class;
-    public readonly string Name;
-    public readonly int Attributes;
-    public readonly uint RVA;
-    public readonly int ImplementationFlags;
-
-    public unsafe Span<byte> Signature => new((void*)_signature, _signatureLength);
-
-    public MethodProps(MdTypeDef @class, string name, int attributes, IntPtr signature, int signatureLength, uint rva, int implementationFlags)
-    {
-        Class = @class;
-        Name = name;
-        Attributes = attributes;
-        _signature = signature;
-        _signatureLength = signatureLength;
-        RVA = rva;
-        ImplementationFlags = implementationFlags;
-    }
+    public unsafe Span<T> AsSpan => new((void*)Ptr, Length);
 }

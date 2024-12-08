@@ -153,7 +153,7 @@ namespace NativeObjects
                         exports.Append(", ");
                     }
 
-                    if (method.Parameters[i].RefKind == RefKind.In)
+                    if (method.Parameters[i].RefKind is RefKind.In)
                     {
                         exports.Append($"*__arg{i}");
                     }
@@ -186,32 +186,6 @@ namespace NativeObjects
 
                 exports.AppendLine();
                 exports.AppendLine();
-
-                var sourceArgsList = new StringBuilder();
-                sourceArgsList.Append("IntPtr _");
-
-                for (int i = 0; i < method.Parameters.Length; i++)
-                {
-                    sourceArgsList.Append($", ");
-
-                    var refKind = method.Parameters[i].RefKind;
-
-                    switch (refKind)
-                    {
-                        case RefKind.In:
-                            sourceArgsList.Append("in ");
-                            break;
-                        case RefKind.Out:
-                            sourceArgsList.Append("out ");
-                            break;
-                        case RefKind.Ref:
-                            sourceArgsList.Append("ref ");
-                            break;
-                    }
-
-                    sourceArgsList.Append(method.Parameters[i].Type);
-                    sourceArgsList.Append($" a{i}");
-                }
 
                 functionPointers.Append($"            *(vtable + {delegateCount}) = (IntPtr)(delegate* unmanaged<IntPtr*");
 

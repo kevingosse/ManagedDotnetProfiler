@@ -4,11 +4,11 @@
 public unsafe interface IMetaDataImport : IUnknown
 {
     void CloseEnum(HCORENUM hEnum);
-    HResult CountEnum(HCORENUM hEnum, uint* pulCount);
+    HResult CountEnum(HCORENUM hEnum, out uint pulCount);
     HResult ResetEnum(HCORENUM hEnum, uint ulPos);
-    HResult EnumTypeDefs(HCORENUM* phEnum, MdTypeDef* rTypeDefs, uint cMax, uint* pcTypeDefs);
-    HResult EnumInterfaceImpls(HCORENUM* phEnum, MdTypeDef td, MdInterfaceImpl* rImpls, uint cMax, uint* pcImpls);
-    HResult EnumTypeRefs(HCORENUM* phEnum, MdTypeRef* rTypeRefs, uint cMax, uint* pcTypeRefs);
+    HResult EnumTypeDefs(HCORENUM* phEnum, MdTypeDef* rTypeDefs, uint cMax, out uint pcTypeDefs);
+    HResult EnumInterfaceImpls(HCORENUM* phEnum, MdTypeDef td, MdInterfaceImpl* rImpls, uint cMax, out uint pcImpls);
+    HResult EnumTypeRefs(HCORENUM* phEnum, MdTypeRef* rTypeRefs, uint cMax, out uint pcTypeRefs);
 
     HResult FindTypeDefByName(
         char* szTypeDef,              // [IN] Name of the Type.
@@ -39,12 +39,12 @@ public unsafe interface IMetaDataImport : IUnknown
 
     HResult GetTypeRefProps(
         MdTypeRef tr,                     // [IN] TypeRef token.
-        out MdToken* ptkResolutionScope,    // [OUT] Resolution scope, ModuleRef or AssemblyRef.
+        out MdToken ptkResolutionScope,    // [OUT] Resolution scope, ModuleRef or AssemblyRef.
         char* szName,                 // [OUT] Name of the TypeRef.
         uint cchName,                // [IN] Size of buffer.
         out uint pchName);         // [OUT] Size of Name.
 
-    HResult ResolveTypeRef(MdTypeRef tr, in Guid riid, void** ppIScope, out MdTypeDef ptd);
+    HResult ResolveTypeRef(MdTypeRef tr, in Guid riid, out IntPtr iScope, out MdTypeDef ptd);
 
     HResult EnumMembers(                 // S_OK, S_FALSE, or error.
         HCORENUM* phEnum,                // [IN|OUT] Pointer to the enum.
@@ -125,28 +125,28 @@ public unsafe interface IMetaDataImport : IUnknown
     HResult FindMember(
         MdTypeDef td,                     // [IN] given typedef
         char* szName,                 // [IN] member name
-        nint* pvSigBlob,          // [IN] point to a blob value of CLR signature
+        byte* pvSigBlob,          // [IN] point to a blob value of CLR signature
         uint cbSigBlob,              // [IN] count of bytes in the signature blob
         out MdToken pmb);             // [OUT] matching memberdef
 
     HResult FindMethod(
         MdTypeDef td,                     // [IN] given typedef
         char* szName,                 // [IN] member name
-        nint* pvSigBlob,          // [IN] point to a blob value of CLR signature
+        byte* pvSigBlob,          // [IN] point to a blob value of CLR signature
         uint cbSigBlob,              // [IN] count of bytes in the signature blob
         out MdMethodDef pmb);             // [OUT] matching memberdef
 
     HResult FindField(
         MdTypeDef td,                     // [IN] given typedef
         char* szName,                 // [IN] member name
-        nint* pvSigBlob,          // [IN] point to a blob value of CLR signature
+        byte* pvSigBlob,          // [IN] point to a blob value of CLR signature
         uint cbSigBlob,              // [IN] count of bytes in the signature blob
         out MdFieldDef pmb);             // [OUT] matching memberdef
 
     HResult FindMemberRef(
         MdTypeRef td,                     // [IN] given typeRef
         char* szName,                 // [IN] member name
-        nint* pvSigBlob,          // [IN] point to a blob value of CLR signature
+        byte* pvSigBlob,          // [IN] point to a blob value of CLR signature
         uint cbSigBlob,              // [IN] count of bytes in the signature blob
         out MdMemberRef pmr);             // [OUT] matching memberref
 
@@ -156,11 +156,11 @@ public unsafe interface IMetaDataImport : IUnknown
         char* szMethod,               // Put method's name here.
         uint cchMethod,              // Size of szMethod buffer in wide chars.
         out uint pchMethod,             // Put actual size here
-        out int pdwAttr,               // Put flags here.
+        out uint pdwAttr,               // Put flags here.
         out byte* ppvSigBlob,        // [OUT] point to the blob value of meta data
         out uint pcbSigBlob,            // [OUT] actual size of signature blob
         out uint pulCodeRVA,            // [OUT] codeRVA
-        out int pdwImplFlags);    // [OUT] Impl. Flags
+        out uint pdwImplFlags);    // [OUT] Impl. Flags
 
     HResult GetMemberRefProps(
         MdMemberRef mr,                     // [IN] given memberref
@@ -187,23 +187,23 @@ public unsafe interface IMetaDataImport : IUnknown
 
     HResult GetEventProps(               // S_OK, S_FALSE, or error.
         MdEvent ev,                     // [IN] event token
-        MdTypeDef* pClass,                // [OUT] typedef containing the event declarion.
+        out MdTypeDef pClass,                // [OUT] typedef containing the event declarion.
         char* szEvent,                // [OUT] Event name
         uint cchEvent,               // [IN] the count of wchar of szEvent
-        uint* pchEvent,              // [OUT] actual count of wchar for event's name
-        int* pdwEventFlags,         // [OUT] Event flags.
-        MdToken* ptkEventType,          // [OUT] EventType class
+        out uint pchEvent,              // [OUT] actual count of wchar for event's name
+        out uint pdwEventFlags,         // [OUT] Event flags.
+        out MdToken ptkEventType,          // [OUT] EventType class
         out MdMethodDef pmdAddOn,              // [OUT] AddOn method of the event
         out MdMethodDef pmdRemoveOn,           // [OUT] RemoveOn method of the event
         out MdMethodDef pmdFire,               // [OUT] Fire method of the event
-        out MdMethodDef* rmdOtherMethod,       // [OUT] other method of the event
+        MdMethodDef* rmdOtherMethod,       // [OUT] other method of the event
         uint cMax,                   // [IN] size of rmdOtherMethod
         out uint pcOtherMethod);   // [OUT] total number of other method of this event
 
     HResult EnumMethodSemantics(         // S_OK, S_FALSE, or error.
         HCORENUM* phEnum,                // [IN|OUT] Pointer to the enum.
         MdMethodDef mb,                     // [IN] MethodDef to scope the enumeration.
-        out MdToken* rEventProp,           // [OUT] Put Event/Property here.
+        MdToken* rEventProp,           // [OUT] Put Event/Property here.
         uint cMax,                   // [IN] Max properties to put.
         out uint pcEventProp);     // [OUT] Put # put here.
 
@@ -214,7 +214,7 @@ public unsafe interface IMetaDataImport : IUnknown
 
     HResult GetClassLayout(
         MdTypeDef td,                     // [IN] give typedef
-        out int pdwPackSize,           // [OUT] 1, 2, 4, 8, or 16
+        out uint packSize,           // [OUT] 1, 2, 4, 8, or 16
         COR_FIELD_OFFSET* rFieldOffset,    // [OUT] field offset array
         uint cMax,                   // [IN] size of the array
         out uint pcFieldOffset,         // [OUT] needed array size
@@ -222,23 +222,23 @@ public unsafe interface IMetaDataImport : IUnknown
 
     HResult GetFieldMarshal(
         MdToken tk,                     // [IN] given a field's memberdef
-        out nint* ppvNativeType,     // [OUT] native type of this field
+        out IntPtr ppvNativeType,     // [OUT] native type of this field
         out uint pcbNativeType);   // [OUT] the count of bytes of *ppvNativeType
 
     HResult GetRVA(
         MdToken tk,                     // Member for which to set offset
-        uint* pulCodeRVA,            // The offset
-        int* pdwImplFlags);    // the implementation flags
+        out uint pulCodeRVA,            // The offset
+        out uint pdwImplFlags);    // the implementation flags
 
     HResult GetPermissionSetProps(
         MdPermission pm,                    // [IN] the permission token.
-        out int pdwAction,             // [OUT] CorDeclSecurity.
-        out void* ppvPermission,        // [OUT] permission blob.
+        out uint pdwAction,             // [OUT] CorDeclSecurity.
+        out IntPtr ppvPermission,        // [OUT] permission blob.
         out uint pcbPermission);   // [OUT] count of bytes of pvPermission.
 
     HResult GetSigFromToken(
         MdSignature mdSig,                  // [IN] Signature token.
-        out nint* ppvSig,            // [OUT] return pointer to token.
+        out IntPtr ppvSig,            // [OUT] return pointer to token.
         out uint pcbSig);          // [OUT] return size of signature.
 
     HResult GetModuleRefProps(
@@ -255,12 +255,12 @@ public unsafe interface IMetaDataImport : IUnknown
 
     HResult GetTypeSpecFromToken(
         MdTypeSpec typespec,                // [IN] TypeSpec token.
-        out nint* ppvSig,            // [OUT] return pointer to TypeSpec signature
+        out IntPtr ppvSig,            // [OUT] return pointer to TypeSpec signature
         out uint pcbSig);          // [OUT] return size of signature.
 
     HResult GetNameFromToken(            // Not Recommended! May be removed!
         MdToken tk,                     // [IN] Token to get name from.  Must have a name.
-        out byte* pszUtf8NamePtr);  // [OUT] Return pointer to UTF8 name in heap.
+        out IntPtr pszUtf8NamePtr);  // [OUT] Return pointer to UTF8 name in heap.
 
     HResult EnumUnresolvedMethods(       // S_OK, S_FALSE, or error.
         HCORENUM* phEnum,                // [IN|OUT] Pointer to the enum.
@@ -276,7 +276,7 @@ public unsafe interface IMetaDataImport : IUnknown
 
     HResult GetPinvokeMap(
         MdToken tk,                     // [IN] FieldDef or MethodDef.
-        out int pdwMappingFlags,       // [OUT] Flags used for mapping.
+        out uint pdwMappingFlags,       // [OUT] Flags used for mapping.
         char* szImportName,           // [OUT] Import name.
         uint cchImportName,          // [IN] Size of the name buffer.
         out uint pchImportName,         // [OUT] Actual number of characters stored.
@@ -317,7 +317,7 @@ public unsafe interface IMetaDataImport : IUnknown
         MdCustomAttribute cv,               // [IN] CustomAttribute token.
         out MdToken ptkObj,                // [OUT, OPTIONAL] Put object token here.
         out MdToken ptkType,               // [OUT, OPTIONAL] Put AttrType token here.
-        out void* ppBlob,               // [OUT, OPTIONAL] Put pointer to data here.
+        out IntPtr ppBlob,               // [OUT, OPTIONAL] Put pointer to data here.
         out uint pcbSize);         // [OUT, OPTIONAL] Put size of date here.
 
     HResult FindTypeRef(
@@ -327,30 +327,30 @@ public unsafe interface IMetaDataImport : IUnknown
 
     HResult GetMemberProps(
         MdToken mb,                     // The member for which to get props.
-        MdTypeDef* pClass,                // Put member's class here.
+        out MdTypeDef pClass,                // Put member's class here.
         char* szMember,               // Put member's name here.
         uint cchMember,              // Size of szMember buffer in wide chars.
-        uint* pchMember,             // Put actual size here
-        int* pdwAttr,               // Put flags here.
-        out nint* ppvSigBlob,        // [OUT] point to the blob value of meta data
+        out uint pchMember,             // Put actual size here
+        out uint pdwAttr,               // Put flags here.
+        out IntPtr ppvSigBlob,        // [OUT] point to the blob value of meta data
         out uint pcbSigBlob,            // [OUT] actual size of signature blob
         out uint pulCodeRVA,            // [OUT] codeRVA
-        int* pdwImplFlags,          // [OUT] Impl. Flags
-        int* pdwCPlusTypeFlag,      // [OUT] flag for value type. selected ELEMENT_TYPE_*
-        out byte ppValue,             // [OUT] constant value
+        out uint pdwImplFlags,          // [OUT] Impl. Flags
+        out uint pdwCPlusTypeFlag,      // [OUT] flag for value type. selected ELEMENT_TYPE_*
+        out IntPtr ppValue,             // [OUT] constant value
         out uint pcchValue);       // [OUT] size of constant string in chars, 0 for non-strings.
 
     HResult GetFieldProps(
         MdFieldDef mb,                     // The field for which to get props.
-        MdTypeDef* pClass,                // Put field's class here.
+        out MdTypeDef pClass,                // Put field's class here.
         char* szField,                // Put field's name here.
         uint cchField,               // Size of szField buffer in wide chars.
-        uint* pchField,              // Put actual size here
-        int* pdwAttr,               // Put flags here.
-        out nint* ppvSigBlob,        // [OUT] point to the blob value of meta data
+        out uint pchField,              // Put actual size here
+        out uint pdwAttr,               // Put flags here.
+        out IntPtr ppvSigBlob,        // [OUT] point to the blob value of meta data
         out uint pcbSigBlob,            // [OUT] actual size of signature blob
-        out int pdwCPlusTypeFlag,      // [OUT] flag for value type. selected ELEMENT_TYPE_*
-        out byte ppValue,             // [OUT] constant value
+        out uint pdwCPlusTypeFlag,      // [OUT] flag for value type. selected ELEMENT_TYPE_*
+        out IntPtr ppValue,             // [OUT] constant value
         out uint pcchValue);       // [OUT] size of constant string in chars, 0 for non-strings.
 
     HResult GetPropertyProps(            // S_OK, S_FALSE, or error.
@@ -359,15 +359,15 @@ public unsafe interface IMetaDataImport : IUnknown
         char* szProperty,             // [OUT] Property name
         uint cchProperty,            // [IN] the count of wchar of szProperty
         out uint pchProperty,           // [OUT] actual count of wchar for property name
-        out int pdwPropFlags,          // [OUT] property flags.
-        out nint* ppvSig,            // [OUT] property type. pointing to meta data internal blob
+        out uint pdwPropFlags,          // [OUT] property flags.
+        out IntPtr ppvSig,            // [OUT] property type. pointing to meta data internal blob
         out uint pbSig,                 // [OUT] count of bytes in *ppvSig
-        out int pdwCPlusTypeFlag,      // [OUT] flag for value type. selected ELEMENT_TYPE_*
-        out byte ppDefaultValue,      // [OUT] constant value
+        out uint pdwCPlusTypeFlag,      // [OUT] flag for value type. selected ELEMENT_TYPE_*
+        out IntPtr ppDefaultValue,      // [OUT] constant value
         out uint pcchDefaultValue,      // [OUT] size of constant string in chars, 0 for non-strings.
         out MdMethodDef pmdSetter,             // [OUT] setter method of the property
         out MdMethodDef pmdGetter,             // [OUT] getter method of the property
-        out MdMethodDef rmdOtherMethod,       // [OUT] other method of the property
+        MdMethodDef* rmdOtherMethod,       // [OUT] other method of the property
         uint cMax,                   // [IN] size of rmdOtherMethod
         out uint pcOtherMethod);   // [OUT] total number of other method of this property
 
@@ -378,18 +378,18 @@ public unsafe interface IMetaDataImport : IUnknown
         char* szName,                 // [OUT] Put name here.
         uint cchName,                // [OUT] Size of name buffer.
         out uint pchName,               // [OUT] Put actual size of name here.
-        out int pdwAttr,               // [OUT] Put flags here.
-        out int pdwCPlusTypeFlag,      // [OUT] Flag for value type. selected ELEMENT_TYPE_*.
-        out byte ppValue,             // [OUT] Constant value.
+        out uint pdwAttr,               // [OUT] Put flags here.
+        out uint pdwCPlusTypeFlag,      // [OUT] Flag for value type. selected ELEMENT_TYPE_*.
+        out IntPtr ppValue,             // [OUT] Constant value.
         out uint pcchValue);       // [OUT] size of constant string in chars, 0 for non-strings.
 
     HResult GetCustomAttributeByName(
         MdToken tkObj,                  // [IN] Object with Custom Attribute.
         char* szName,                 // [IN] Name of desired Custom Attribute.
-        out void* ppData,               // [OUT] Put pointer to data here.
+        out IntPtr ppData,               // [OUT] Put pointer to data here.
         out uint pcbData);         // [OUT] Put size of data here.
 
-    bool IsValidToken(         // True or False.
+    int IsValidToken(         // True or False.
         MdToken tk);               // [IN] Given token.
 
     HResult GetNestedClassProps(
