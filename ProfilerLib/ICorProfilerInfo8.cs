@@ -9,18 +9,45 @@ public class ICorProfilerInfo8 : ICorProfilerInfo7
         _impl = new(ptr);
     }
 
-    public HResult IsFunctionDynamic(FunctionId functionId, out int isDynamic)
+    public HResult<bool> IsFunctionDynamic(FunctionId functionId)
     {
-        return _impl.IsFunctionDynamic(functionId, out isDynamic);
+        var result = _impl.IsFunctionDynamic(functionId, out var isDynamic);
+        return new(result, isDynamic != 0);
     }
 
-    public unsafe HResult GetFunctionFromIP3(nint ip, out FunctionId functionId, out ReJITId pReJitId)
+    public unsafe HResult<FunctionFromIP> GetFunctionFromIP3(nint ip)
     {
-        return _impl.GetFunctionFromIP3(ip, out functionId, out pReJitId);
+        var result = _impl.GetFunctionFromIP3(ip, out var functionId, out var reJitId);
+        return new(result, new(functionId, reJitId));
     }
 
-    public unsafe HResult GetDynamicFunctionInfo(FunctionId functionId, out ModuleId moduleId, byte* ppvSig, out uint pbSig, uint cchName, out uint pcchName, char* wszName)
+    public unsafe HResult<DynamicFunctionInfo> GetDynamicFunctionInfo(FunctionId functionId, Span<char> name, out uint nameLength)
     {
-        return _impl.GetDynamicFunctionInfo(functionId, out moduleId, ppvSig, out pbSig, cchName, out pcchName, wszName);
+        fixed (char* pName = name)
+        {
+            var result = _impl.GetDynamicFunctionInfo(functionId, out var moduleId, out var sig, out var pbSig, (uint)name.Length, out nameLength, pName);
+            return new(result, new(moduleId, sig, pbSig));
+        }
+    }
+
+    public unsafe HResult<DynamicFunctionInfoWithName> GetDynamicFunctionInfo(FunctionId functionId)
+    {
+        var (result, _) = GetDynamicFunctionInfo(functionId, Span<char>.Empty, out var length);
+
+        if (!result)
+        {
+            return result;
+        }
+
+        Span<char> buffer = stackalloc char[(int)length];
+
+        (result, var functionInfo) = GetDynamicFunctionInfo(functionId, buffer, out _);
+
+        if (!result)
+        {
+            return result;
+        }
+
+        return new(result, new(functionInfo.ModuleId, functionInfo.SignaturePtr, functionInfo.SignatureLength, buffer.ToString()));
     }
 }

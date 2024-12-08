@@ -57,7 +57,7 @@ public class ICorProfilerInfo4 : ICorProfilerInfo3
         }
     }
 
-    public unsafe HResult<FunctionFromIP2> GetFunctionFromIP2(IntPtr ip)
+    public unsafe HResult<FunctionFromIP> GetFunctionFromIP2(IntPtr ip)
     {
         var result = _impl.GetFunctionFromIP2(ip, out var functionId, out var reJitId);
         return new(result, new(functionId, reJitId));

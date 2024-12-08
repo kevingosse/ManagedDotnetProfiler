@@ -42,7 +42,7 @@ internal unsafe interface ICorProfilerInfo8 : ICorProfilerInfo7
     */
     HResult GetDynamicFunctionInfo(FunctionId functionId,
                                    out ModuleId moduleId,
-                                    byte* ppvSig,
+                                    out IntPtr pvSig,
                                     out uint pbSig,
                                     uint cchName,
                                     out uint pcchName,

@@ -734,9 +734,46 @@ public readonly record struct TokenAndMetaData(Guid Riid, IntPtr Import, MdToken
 public readonly record struct ILFunctionBody(IntPtr MethodHeader, uint MethodSize);
 public readonly record struct FunctionLeave3Info(COR_PRF_FRAME_INFO FrameInfo, COR_PRF_FUNCTION_ARGUMENT_RANGE RetvalRange);
 public readonly record struct RuntimeInformation(ushort ClrInstanceId, COR_PRF_RUNTIME_TYPE RuntimeType, ushort MajorVersion, ushort MinorVersion, ushort BuildNumber, ushort QFEVersion);
-public readonly record struct FunctionFromIP2(FunctionId FunctionId, ReJITId ReJitId);
+public readonly record struct FunctionFromIP(FunctionId FunctionId, ReJITId ReJitId);
 public readonly record struct EventMask2(COR_PRF_MONITOR EventsLow, COR_PRF_HIGH_MONITOR EventsHigh);
-public readonly record struct NgenModuleMethodsInliningThisMethod(IntPtr enumerator, bool incompleteData);
+public readonly record struct NgenModuleMethodsInliningThisMethod(IntPtr Enumerator, bool IncompleteData);
+
+public readonly record struct DynamicFunctionInfo
+{
+    internal readonly IntPtr SignaturePtr;
+    internal readonly uint SignatureLength;
+    public readonly ModuleId ModuleId;
+
+    public DynamicFunctionInfo(ModuleId moduleId, IntPtr signature, uint signatureLength)
+    {
+        ModuleId = moduleId;
+        SignaturePtr = signature;
+        SignatureLength = signatureLength;
+    }
+
+    public unsafe Span<byte> Signature => new((void*)SignaturePtr, (int)SignatureLength);
+
+}
+
+public readonly record struct DynamicFunctionInfoWithName
+{
+    private readonly IntPtr _signature;
+    private readonly uint _signatureLength;
+
+    public DynamicFunctionInfoWithName(ModuleId moduleId, IntPtr signature, uint signatureLength, string name)
+    {
+        ModuleId = moduleId;
+        _signature = signature;
+        _signatureLength = signatureLength;
+        Name = name;
+    }
+
+    public unsafe Span<byte> Signature => new((void*)_signature, (int)_signatureLength);
+
+    public readonly ModuleId ModuleId;
+    public readonly string Name;
+}
+
 
 public readonly record struct MethodProps
 {
