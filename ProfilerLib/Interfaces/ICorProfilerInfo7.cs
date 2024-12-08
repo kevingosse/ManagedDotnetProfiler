@@ -30,7 +30,7 @@ internal unsafe interface ICorProfilerInfo7 : ICorProfilerInfo6
     */
     HResult GetInMemorySymbolsLength(
         ModuleId moduleId,
-        out int pCountSymbolBytes);
+        out uint countSymbolBytes);
 
     /* Reads bytes from an in-memory symbol stream
     *
@@ -49,6 +49,6 @@ internal unsafe interface ICorProfilerInfo7 : ICorProfilerInfo6
         ModuleId moduleId,
         int symbolsReadOffset,
         byte* pSymbolBytes,
-        int countSymbolBytes,
-        out int pCountSymbolBytesRead);
+        uint countSymbolBytes,
+        out uint pCountSymbolBytesRead);
 }

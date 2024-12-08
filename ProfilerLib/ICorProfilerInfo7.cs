@@ -14,13 +14,18 @@ public class ICorProfilerInfo7 : ICorProfilerInfo6
         return _impl.ApplyMetaData(moduleId);
     }
 
-    public HResult GetInMemorySymbolsLength(ModuleId moduleId, out int pCountSymbolBytes)
+    public HResult<uint> GetInMemorySymbolsLength(ModuleId moduleId)
     {
-        return _impl.GetInMemorySymbolsLength(moduleId, out pCountSymbolBytes);
+        var result = _impl.GetInMemorySymbolsLength(moduleId, out var countSymbolBytes);
+        return new(result, countSymbolBytes);
     }
 
-    public unsafe HResult ReadInMemorySymbols(ModuleId moduleId, int symbolsReadOffset, byte* pSymbolBytes, int countSymbolBytes, out int pCountSymbolBytesRead)
+    public unsafe HResult<uint> ReadInMemorySymbols(ModuleId moduleId, int symbolsReadOffset, Span<byte> symbolBytes)
     {
-        return _impl.ReadInMemorySymbols(moduleId, symbolsReadOffset, pSymbolBytes, countSymbolBytes, out pCountSymbolBytesRead);
+        fixed (byte* pSymbolBytes = symbolBytes)
+        {
+            var result = _impl.ReadInMemorySymbols(moduleId, symbolsReadOffset, pSymbolBytes, (uint)symbolBytes.Length, out var countSymbolBytesRead);
+            return new(result, countSymbolBytesRead);
+        }
     }
 }
