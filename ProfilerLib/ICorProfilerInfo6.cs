@@ -9,8 +9,9 @@ public class ICorProfilerInfo6 : ICorProfilerInfo5
         _impl = new(ptr);
     }
 
-    public HResult EnumNgenModuleMethodsInliningThisMethod(ModuleId inlinersModuleId, ModuleId inlineeModuleId, MdMethodDef inlineeMethodId, out int incompleteData, out nint ppEnum)
+    public HResult<NgenModuleMethodsInliningThisMethod> EnumNgenModuleMethodsInliningThisMethod(ModuleId inlinersModuleId, ModuleId inlineeModuleId, MdMethodDef inlineeMethodId)
     {
-        return _impl.EnumNgenModuleMethodsInliningThisMethod(inlinersModuleId, inlineeModuleId, inlineeMethodId, out incompleteData, out ppEnum);
+        var result = _impl.EnumNgenModuleMethodsInliningThisMethod(inlinersModuleId, inlineeModuleId, inlineeMethodId, out var incompleteData, out var pEnum);
+        return new(result, new(pEnum, incompleteData != 0));
     }
 }

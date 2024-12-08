@@ -736,6 +736,7 @@ public readonly record struct FunctionLeave3Info(COR_PRF_FRAME_INFO FrameInfo, C
 public readonly record struct RuntimeInformation(ushort ClrInstanceId, COR_PRF_RUNTIME_TYPE RuntimeType, ushort MajorVersion, ushort MinorVersion, ushort BuildNumber, ushort QFEVersion);
 public readonly record struct FunctionFromIP2(FunctionId FunctionId, ReJITId ReJitId);
 public readonly record struct EventMask2(COR_PRF_MONITOR EventsLow, COR_PRF_HIGH_MONITOR EventsHigh);
+public readonly record struct NgenModuleMethodsInliningThisMethod(IntPtr enumerator, bool incompleteData);
 
 public readonly record struct MethodProps
 {
