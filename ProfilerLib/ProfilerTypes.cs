@@ -710,6 +710,24 @@ public enum COR_PRF_HANDLE_TYPE
     COR_PRF_HANDLE_TYPE_PINNED = 0x3,
 }
 
+/// <summary>
+/// COR_PRF_REJIT_FLAGS contains values used to control the behavior of RequestReJITWithInliners.
+/// </summary>
+public enum COR_PRF_REJIT_FLAGS : uint
+{
+    /// <summary>
+    /// ReJITted methods will be prevented from being inlined
+    /// </summary>
+    COR_PRF_REJIT_BLOCK_INLINING = 0x1,
+
+    /// <summary>
+    /// This flag controls whether the runtime will call GetReJITParameters
+    /// on methods that are ReJITted because they inline a method that was requested
+    /// for ReJIT
+    /// </summary>
+    COR_PRF_REJIT_INLINING_CALLBACKS = 0x2
+}
+
 public readonly struct ObjectHandleId
 {
     public readonly nint Value;

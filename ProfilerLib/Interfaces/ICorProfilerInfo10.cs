@@ -12,7 +12,7 @@ internal unsafe interface ICorProfilerInfo10 : ICorProfilerInfo9
     HResult IsFrozenObject(ObjectId objectId, out int pbFrozen);
 
     // Gets the value of the configured LOH Threshold.
-    HResult GetLOHObjectSizeThreshold(out int pThreshold);
+    HResult GetLOHObjectSizeThreshold(out uint pThreshold);
 
     /*
      * This method will ReJIT the methods requested, as well as any inliners
@@ -26,7 +26,7 @@ internal unsafe interface ICorProfilerInfo10 : ICorProfilerInfo9
      * that the full set of inliners will be ReJITted as well.
      */
     HResult RequestReJITWithInliners(
-        int dwRejitFlags,
+        uint dwRejitFlags,
         uint cFunctions,
         ModuleId* moduleIds,
         MdMethodDef* methodIds);

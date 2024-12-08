@@ -14,19 +14,30 @@ public class ICorProfilerInfo10 : ICorProfilerInfo9
         return _impl.EnumerateObjectReferences(objectId, callback, clientData);
     }
 
-    public HResult IsFrozenObject(ObjectId objectId, out int pbFrozen)
+    public HResult<bool> IsFrozenObject(ObjectId objectId)
     {
-        return _impl.IsFrozenObject(objectId, out pbFrozen);
+        var result = _impl.IsFrozenObject(objectId, out var frozen);
+        return new(result, frozen != 0);
     }
 
-    public HResult GetLOHObjectSizeThreshold(out int pThreshold)
+    public HResult<uint> GetLOHObjectSizeThreshold()
     {
-        return _impl.GetLOHObjectSizeThreshold(out pThreshold);
+        var result = _impl.GetLOHObjectSizeThreshold(out var threshold);
+        return new(result, threshold);
     }
 
-    public unsafe HResult RequestReJITWithInliners(int dwRejitFlags, uint cFunctions, ModuleId* moduleIds, MdMethodDef* methodIds)
+    public unsafe HResult RequestReJITWithInliners(COR_PRF_REJIT_FLAGS rejitFlags, Span<ModuleId> moduleIds, Span<MdMethodDef> methodIds)
     {
-        return _impl.RequestReJITWithInliners(dwRejitFlags, cFunctions, moduleIds, methodIds);
+        if (moduleIds.Length != methodIds.Length)
+        {
+            throw new ArgumentException("moduleIds and methodIds must have the same length.");
+        }
+
+        fixed (ModuleId* pModuleIds = moduleIds)
+        fixed (MdMethodDef* pMethodIds = methodIds)
+        {
+            return _impl.RequestReJITWithInliners((uint)rejitFlags, (uint)moduleIds.Length, pModuleIds, pMethodIds);
+        }
     }
 
     public HResult SuspendRuntime()
