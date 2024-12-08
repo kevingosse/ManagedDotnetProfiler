@@ -9,13 +9,42 @@ public class ICorProfilerInfo11 : ICorProfilerInfo10
         _impl = new(ptr);
     }
 
-    public unsafe HResult GetEnvironmentVariable(char* szName, uint cchValue, out uint pcchValue, char* szValue)
+    public unsafe HResult GetEnvironmentVariable(string name, Span<char> value, out uint valueLength)
     {
-        return _impl.GetEnvironmentVariable(szName, cchValue, out pcchValue, szValue);
+        fixed (char* pValue = value)
+        fixed (char* pName = name)
+        {
+            return _impl.GetEnvironmentVariable(pName, (uint)value.Length, out valueLength, pValue);
+        }
     }
 
-    public unsafe HResult SetEnvironmentVariable(char* szName, char* szValue)
+    public unsafe HResult<string> GetEnvironmentVariable(string name)
     {
-        return _impl.SetEnvironmentVariable(szName, szValue);
+        var result = GetEnvironmentVariable(name, Span<char>.Empty, out var length);
+
+        if (!result)
+        {
+            return result;
+        }
+
+        Span<char> buffer = stackalloc char[(int)length];
+
+        result = GetEnvironmentVariable(name, buffer, out _);
+
+        if (!result)
+        {
+            return result;
+        }
+
+        return new(result, new string(buffer));
+    }
+
+    public unsafe HResult SetEnvironmentVariable(string name, string value)
+    {
+        fixed (char* pName = name)
+        fixed (char* pValue = value)
+        {
+            return _impl.SetEnvironmentVariable(pName, pValue);
+        }
     }
 }
