@@ -9,18 +9,27 @@ public class ICorProfilerInfo9 : ICorProfilerInfo8
         _impl = new(ptr);
     }
 
-    public unsafe HResult GetNativeCodeStartAddresses(FunctionId functionID, ReJITId reJitId, uint cCodeStartAddresses, uint* pcCodeStartAddresses, uint* codeStartAddresses)
+    public unsafe HResult GetNativeCodeStartAddresses(FunctionId functionID, ReJITId reJitId, Span<uint> codeStartAddresses, out uint nbCodeStartAddresses)
     {
-        return _impl.GetNativeCodeStartAddresses(functionID, reJitId, cCodeStartAddresses, pcCodeStartAddresses, codeStartAddresses);
+        fixed (uint* pCodeStartAddresses = codeStartAddresses)
+        {
+            return _impl.GetNativeCodeStartAddresses(functionID, reJitId, (uint)codeStartAddresses.Length, out nbCodeStartAddresses, pCodeStartAddresses);
+        }
     }
 
-    public unsafe HResult GetILToNativeMapping3(uint* pNativeCodeStartAddress, uint cMap, uint* pcMap, COR_DEBUG_IL_TO_NATIVE_MAP* map)
+    public unsafe HResult GetILToNativeMapping3(IntPtr pNativeCodeStartAddress, Span<COR_DEBUG_IL_TO_NATIVE_MAP> map, out uint mapLength)
     {
-        return _impl.GetILToNativeMapping3(pNativeCodeStartAddress, cMap, pcMap, map);
+        fixed (COR_DEBUG_IL_TO_NATIVE_MAP* pMap = map)
+        {
+            return _impl.GetILToNativeMapping3(pNativeCodeStartAddress, (uint)map.Length, out mapLength, pMap);
+        }
     }
 
-    public unsafe HResult GetCodeInfo4(uint* pNativeCodeStartAddress, uint cCodeInfos, uint* pcCodeInfos, COR_PRF_CODE_INFO* codeInfos)
+    public unsafe HResult GetCodeInfo4(IntPtr nativeCodeStartAddress, Span<COR_PRF_CODE_INFO> codeInfos, out uint nbCodeInfos)
     {
-        return _impl.GetCodeInfo4(pNativeCodeStartAddress, cCodeInfos, pcCodeInfos, codeInfos);
+        fixed (COR_PRF_CODE_INFO* pCodeInfos = codeInfos)
+        {
+            return _impl.GetCodeInfo4(nativeCodeStartAddress, (uint)codeInfos.Length, out nbCodeInfos, pCodeInfos);
+        }
     }
 }
