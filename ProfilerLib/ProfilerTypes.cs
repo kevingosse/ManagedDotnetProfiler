@@ -734,6 +734,7 @@ public readonly record struct TokenAndMetaData(Guid Riid, IntPtr Import, MdToken
 public readonly record struct ILFunctionBody(IntPtr MethodHeader, uint MethodSize);
 public readonly record struct FunctionLeave3Info(COR_PRF_FRAME_INFO FrameInfo, COR_PRF_FUNCTION_ARGUMENT_RANGE RetvalRange);
 public readonly record struct RuntimeInformation(ushort ClrInstanceId, COR_PRF_RUNTIME_TYPE RuntimeType, ushort MajorVersion, ushort MinorVersion, ushort BuildNumber, ushort QFEVersion);
+public readonly record struct FunctionFromIP2(FunctionId FunctionId, ReJITId ReJitId);
 
 public readonly record struct MethodProps
 {

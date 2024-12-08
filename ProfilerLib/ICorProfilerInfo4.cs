@@ -9,9 +9,10 @@ public class ICorProfilerInfo4 : ICorProfilerInfo3
         _impl = new(ptr);
     }
 
-    public HResult EnumThreads(out nint ppEnum)
+    public HResult<IntPtr> EnumThreads()
     {
-        return _impl.EnumThreads(out ppEnum);
+        var result = _impl.EnumThreads(out var pEnum);
+        return new(result, pEnum);
     }
 
     public HResult InitializeCurrentThread()
@@ -19,43 +20,74 @@ public class ICorProfilerInfo4 : ICorProfilerInfo3
         return _impl.InitializeCurrentThread();
     }
 
-    public unsafe HResult RequestReJIT(uint cFunctions, ModuleId* moduleIds, MdMethodDef* methodIds)
+    public unsafe HResult RequestReJIT(Span<ModuleId> moduleIds, Span<MdMethodDef> methodIds)
     {
-        return _impl.RequestReJIT(cFunctions, moduleIds, methodIds);
+        if (moduleIds.Length != methodIds.Length)
+        {
+            throw new ArgumentException("moduleIds and methodIds must have the same length.");
+        }
+
+        fixed (ModuleId* pModuleIds = moduleIds)
+        fixed (MdMethodDef* pMethodIds = methodIds)
+        {
+            return _impl.RequestReJIT((uint)moduleIds.Length, pModuleIds, pMethodIds);
+        }
     }
 
-    public unsafe HResult RequestRevert(uint cFunctions, ModuleId* moduleIds, MdMethodDef* methodIds, HResult* status)
+    public unsafe HResult RequestRevert(Span<ModuleId> moduleIds, Span<MdMethodDef> methodIds, Span<HResult> status)
     {
-        return _impl.RequestRevert(cFunctions, moduleIds, methodIds, status);
+        if (moduleIds.Length != methodIds.Length || moduleIds.Length != status.Length)
+        {
+            throw new ArgumentException("moduleIds, methodIds, and status must have the same length.");
+        }
+
+        fixed (ModuleId* moduleIdsPtr = moduleIds)
+        fixed (MdMethodDef* methodIdsPtr = methodIds)
+        fixed (HResult* statusPtr = status)
+        {
+            return _impl.RequestRevert((uint)moduleIds.Length, moduleIdsPtr, methodIdsPtr, statusPtr);
+        }
     }
 
-    public unsafe HResult GetCodeInfo3(FunctionId functionID, ReJITId reJitId, uint cCodeInfos, out uint pcCodeInfos, COR_PRF_CODE_INFO* codeInfos)
+    public unsafe HResult GetCodeInfo3(FunctionId functionID, ReJITId reJitId, Span<COR_PRF_CODE_INFO> codeInfos, out uint nbCodeInfos)
     {
-        return _impl.GetCodeInfo3(functionID, reJitId, cCodeInfos, out pcCodeInfos, codeInfos);
+        fixed (COR_PRF_CODE_INFO* pCodeInfos = codeInfos)
+        {
+            return _impl.GetCodeInfo3(functionID, reJitId, (uint)codeInfos.Length, out nbCodeInfos, pCodeInfos);
+        }
     }
 
-    public unsafe HResult GetFunctionFromIP2(byte* ip, out FunctionId pFunctionId, out ReJITId pReJitId)
+    public unsafe HResult<FunctionFromIP2> GetFunctionFromIP2(IntPtr ip)
     {
-        return _impl.GetFunctionFromIP2(ip, out pFunctionId, out pReJitId);
+        var result = _impl.GetFunctionFromIP2(ip, out var functionId, out var reJitId);
+        return new(result, new(functionId, reJitId));
     }
 
-    public unsafe HResult GetReJITIDs(FunctionId functionId, uint cReJitIds, uint* pcReJitIds, ReJITId* reJitIds)
+    public unsafe HResult GetReJITIDs(FunctionId functionId, Span<ReJITId> reJitIds, out uint nbReJitIds)
     {
-        return _impl.GetReJITIDs(functionId, cReJitIds, pcReJitIds, reJitIds);
+        fixed (ReJITId* pReJitIds = reJitIds)
+        {
+            return _impl.GetReJITIDs(functionId, (uint)reJitIds.Length, out nbReJitIds, pReJitIds);
+        }
     }
 
-    public unsafe HResult GetILToNativeMapping2(FunctionId functionId, ReJITId reJitId, uint cMap, uint* pcMap, COR_DEBUG_IL_TO_NATIVE_MAP* map)
+    public unsafe HResult GetILToNativeMapping2(FunctionId functionId, ReJITId reJitId, Span<COR_DEBUG_IL_TO_NATIVE_MAP> map, out uint mapLength)
     {
-        return _impl.GetILToNativeMapping2(functionId, reJitId, cMap, pcMap, map);
+        fixed (COR_DEBUG_IL_TO_NATIVE_MAP* pMap = map)
+        {
+            return _impl.GetILToNativeMapping2(functionId, reJitId, (uint)map.Length, out mapLength, pMap);
+        }
     }
 
-    public HResult EnumJITedFunctions2(out nint ppEnum)
+    public HResult<IntPtr> EnumJITedFunctions2()
     {
-        return _impl.EnumJITedFunctions2(out ppEnum);
+        var result = _impl.EnumJITedFunctions2(out var pEnum);
+        return new(result, pEnum);
     }
 
-    public HResult GetObjectSize2(ObjectId objectId, out nint pcSize)
+    public HResult<nint> GetObjectSize2(ObjectId objectId)
     {
-        return _impl.GetObjectSize2(objectId, out pcSize);
+        var result = _impl.GetObjectSize2(objectId, out var pcSize);
+        return new(result, pcSize);
     }
 }

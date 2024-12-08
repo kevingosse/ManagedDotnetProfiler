@@ -57,9 +57,9 @@ internal unsafe interface ICorProfilerInfo4 : ICorProfilerInfo3
      * associated with the IP address.
      */
     HResult GetFunctionFromIP2(
-                byte* ip,
-                out FunctionId pFunctionId,
-                out ReJITId pReJitId);
+                IntPtr ip,
+                out FunctionId functionId,
+                out ReJITId reJitId);
 
     /*
      * GetReJITIDs can be used to find all of the re-JITed versions of the
@@ -68,7 +68,7 @@ internal unsafe interface ICorProfilerInfo4 : ICorProfilerInfo3
     HResult GetReJITIDs(
                 FunctionId functionId,
                 uint cReJitIds,
-                uint* pcReJitIds,
+                out uint pcReJitIds,
                 ReJITId* reJitIds);
 
     /*
@@ -79,7 +79,7 @@ internal unsafe interface ICorProfilerInfo4 : ICorProfilerInfo3
                 FunctionId functionId,
                 ReJITId reJitId,
                 uint cMap,
-                uint* pcMap,
+                out uint pcMap,
                 COR_DEBUG_IL_TO_NATIVE_MAP* map);
 
     /*
