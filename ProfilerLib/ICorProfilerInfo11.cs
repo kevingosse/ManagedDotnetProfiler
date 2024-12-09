@@ -9,7 +9,7 @@ public class ICorProfilerInfo11 : ICorProfilerInfo10
         _impl = new(ptr);
     }
 
-    public unsafe HResult GetEnvironmentVariable(string name, Span<char> value, out uint valueLength)
+    public unsafe HResult GetEnvironmentVariable(string name, ReadOnlySpan<char> value, out uint valueLength)
     {
         fixed (char* pValue = value)
         fixed (char* pName = name)
@@ -20,7 +20,7 @@ public class ICorProfilerInfo11 : ICorProfilerInfo10
 
     public unsafe HResult<string> GetEnvironmentVariable(string name)
     {
-        var result = GetEnvironmentVariable(name, Span<char>.Empty, out var length);
+        var result = GetEnvironmentVariable(name, [], out var length);
 
         if (!result)
         {

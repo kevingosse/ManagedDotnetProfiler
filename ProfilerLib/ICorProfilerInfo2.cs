@@ -56,7 +56,7 @@ public class ICorProfilerInfo2 : ICorProfilerInfo
         }
     }
 
-    public unsafe HResult<ClassId> GetClassFromTokenAndTypeArgs(ModuleId moduleID, MdTypeDef typeDef, Span<ClassId> typeArgs)
+    public unsafe HResult<ClassId> GetClassFromTokenAndTypeArgs(ModuleId moduleID, MdTypeDef typeDef, ReadOnlySpan<ClassId> typeArgs)
     {
         fixed (ClassId* pTypeArgs = typeArgs)
         {
@@ -65,7 +65,7 @@ public class ICorProfilerInfo2 : ICorProfilerInfo
         }
     }
 
-    public unsafe HResult<FunctionId> GetFunctionFromTokenAndTypeArgs(ModuleId moduleID, MdMethodDef funcDef, ClassId classId, Span<ClassId> typeArgs)
+    public unsafe HResult<FunctionId> GetFunctionFromTokenAndTypeArgs(ModuleId moduleID, MdMethodDef funcDef, ClassId classId, ReadOnlySpan<ClassId> typeArgs)
     {        
         fixed (ClassId* pTypeArgs = typeArgs)
         {

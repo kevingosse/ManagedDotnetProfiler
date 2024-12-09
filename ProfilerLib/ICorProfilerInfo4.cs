@@ -20,7 +20,7 @@ public class ICorProfilerInfo4 : ICorProfilerInfo3
         return _impl.InitializeCurrentThread();
     }
 
-    public unsafe HResult RequestReJIT(Span<ModuleId> moduleIds, Span<MdMethodDef> methodIds)
+    public unsafe HResult RequestReJIT(ReadOnlySpan<ModuleId> moduleIds, ReadOnlySpan<MdMethodDef> methodIds)
     {
         if (moduleIds.Length != methodIds.Length)
         {
@@ -34,7 +34,7 @@ public class ICorProfilerInfo4 : ICorProfilerInfo3
         }
     }
 
-    public unsafe HResult RequestRevert(Span<ModuleId> moduleIds, Span<MdMethodDef> methodIds, Span<HResult> status)
+    public unsafe HResult RequestRevert(ReadOnlySpan<ModuleId> moduleIds, ReadOnlySpan<MdMethodDef> methodIds, Span<HResult> status)
     {
         if (moduleIds.Length != methodIds.Length || moduleIds.Length != status.Length)
         {

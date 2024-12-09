@@ -26,7 +26,7 @@ public class ICorProfilerInfo10 : ICorProfilerInfo9
         return new(result, threshold);
     }
 
-    public unsafe HResult RequestReJITWithInliners(COR_PRF_REJIT_FLAGS rejitFlags, Span<ModuleId> moduleIds, Span<MdMethodDef> methodIds)
+    public unsafe HResult RequestReJITWithInliners(COR_PRF_REJIT_FLAGS rejitFlags, ReadOnlySpan<ModuleId> moduleIds, ReadOnlySpan<MdMethodDef> methodIds)
     {
         if (moduleIds.Length != methodIds.Length)
         {
