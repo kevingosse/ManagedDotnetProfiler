@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <PublishAot>true</PublishAot>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageId>Silhouette</PackageId>
+    <PackageVersion>1.0.0.0</PackageVersion>
+    <Title>Silhouette</Title>
+    <Authors>Kevin Gosse</Authors>
+    <PackageProjectUrl>https://github.com/kevingosse/Silhouette</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/kevingosse/Silhouette</RepositoryUrl>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Description>
+      A library to build .NET profilers in .NET. No need for C++ anymore, just C#.
+    </Description>
+    <Copyright>Copyright 2024-$([System.DateTime]::UtcNow.ToString(yyyy))</Copyright>
+    <PackageTags>profiler profiling diagnostics native interop</PackageTags>
+    <PackageOutputPath>..\..\nugets</PackageOutputPath>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Link="README.md" Pack="true" PackagePath="/" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NativeObjects" Version="1.1.0" />
+  </ItemGroup>
+</Project>
