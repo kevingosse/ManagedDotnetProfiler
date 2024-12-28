@@ -1,5 +1,5 @@
 ﻿using System.Runtime.InteropServices;
-using ProfilerLib;
+using Silhouette;
 
 namespace ManagedDotnetProfiler;
 

@@ -8,6 +8,6 @@
   </PropertyGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\ProfilerLib\ProfilerLib.csproj" />
+	  <ProjectReference Include="..\Silhouette\Silhouette.csproj" />
 	</ItemGroup>
 </Project>
