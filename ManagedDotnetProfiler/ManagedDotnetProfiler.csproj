@@ -8,7 +8,6 @@
   </PropertyGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\NativeStubSourceGenerator\NativeStubSourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
 	  <ProjectReference Include="..\ProfilerLib\ProfilerLib.csproj" />
 	</ItemGroup>
 </Project>

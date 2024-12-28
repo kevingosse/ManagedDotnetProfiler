@@ -7,8 +7,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ManagedDotnetProfiler", "Ma
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApp", "TestApp\TestApp.csproj", "{5BE2C0CF-A101-4FB5-9C2A-13E97E728778}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NativeStubSourceGenerator", "NativeStubSourceGenerator\NativeStubSourceGenerator.csproj", "{5D588D0D-A230-4A8D-AD5B-A4ADB48A57F7}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProfilerLib", "ProfilerLib\ProfilerLib.csproj", "{4440A205-D718-47C8-B6C0-B413B2D96A4F}"
 EndProject
 Global
@@ -25,10 +23,6 @@ Global
 		{5BE2C0CF-A101-4FB5-9C2A-13E97E728778}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5BE2C0CF-A101-4FB5-9C2A-13E97E728778}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5BE2C0CF-A101-4FB5-9C2A-13E97E728778}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5D588D0D-A230-4A8D-AD5B-A4ADB48A57F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5D588D0D-A230-4A8D-AD5B-A4ADB48A57F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5D588D0D-A230-4A8D-AD5B-A4ADB48A57F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5D588D0D-A230-4A8D-AD5B-A4ADB48A57F7}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4440A205-D718-47C8-B6C0-B413B2D96A4F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4440A205-D718-47C8-B6C0-B413B2D96A4F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4440A205-D718-47C8-B6C0-B413B2D96A4F}.Release|Any CPU.ActiveCfg = Release|Any CPU
