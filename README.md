@@ -1,4 +1,2 @@
-Managed .NET Profiler
+Silhouette - A library to build .NET profilers in .NET
 =======================
-
-Implementation of a .NET profiler in C# with NativeAOT
