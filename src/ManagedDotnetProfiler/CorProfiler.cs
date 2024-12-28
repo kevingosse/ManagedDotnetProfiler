@@ -677,7 +677,13 @@ internal unsafe partial class CorProfiler : CorProfilerCallback10Base
 
     private string GetFunctionFullName(FunctionId functionId)
     {
-        var functionInfo = ICorProfilerInfo2.GetFunctionInfo(functionId).ThrowIfFailed();
+        var (result, functionInfo) = ICorProfilerInfo2.GetFunctionInfo(functionId);
+
+        if (!result)
+        {
+            return $"Failed ({result})";
+        }
+
         var metaDataImport = ICorProfilerInfo2.GetModuleMetaData(functionInfo.ModuleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport).ThrowIfFailed();
         var methodProperties = metaDataImport.GetMethodProps(new MdMethodDef(functionInfo.Token)).ThrowIfFailed();
         var typeDefProps = metaDataImport.GetTypeDefProps(methodProperties.Class).ThrowIfFailed();
