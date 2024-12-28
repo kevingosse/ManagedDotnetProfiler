@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.2.32408.312
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ManagedDotnetProfiler", "src\ManagedDotnetProfiler\ManagedDotnetProfiler.csproj", "{CA964F90-61C5-407D-AA4D-055F0CFC62B2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ManagedDotnetProfiler", "ManagedDotnetProfiler\ManagedDotnetProfiler.csproj", "{CA964F90-61C5-407D-AA4D-055F0CFC62B2}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApp", "src\TestApp\TestApp.csproj", "{5BE2C0CF-A101-4FB5-9C2A-13E97E728778}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApp", "TestApp\TestApp.csproj", "{5BE2C0CF-A101-4FB5-9C2A-13E97E728778}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Silhouette", "src\Silhouette\Silhouette.csproj", "{4440A205-D718-47C8-B6C0-B413B2D96A4F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Silhouette", "Silhouette\Silhouette.csproj", "{4440A205-D718-47C8-B6C0-B413B2D96A4F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
